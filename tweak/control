@@ -1,0 +1,10 @@
+Package: com.chou.googlemaps.vietmap
+Name: MapSpeed
+Version: 0.1.8
+Architecture: iphoneos-arm64
+Description: Experimental fresh VietMap speed data in Google Maps native CarPlay controls.
+Maintainer: bechou0410
+Author: Codex (AI assistant)
+Section: Tweaks
+Depends: mobilesubstrate
+Conflicts: com.chou.vietmapbridge.truedash, com.chou.vietmapbridge.probe, com.chou.googlemaps.vietmap-probe

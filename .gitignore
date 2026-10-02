@@ -1,0 +1,13 @@
+packages/
+.theos/
+obj/
+*.deb
+*.dylib
+*.dSYM/
+.DS_Store
+.env
+.env.*
+*.log
+*.jsonl
+*.ipa
+*.gpx
