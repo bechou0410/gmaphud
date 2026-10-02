@@ -1,0 +1,20 @@
+Package: com.chou.googlemaps.vietmap
+Name: MapSpeed
+Description: Experimental fresh VietMap speed data in Google Maps native CarPlay controls.
+Maintainer: bechou0410
+Author: Codex (AI assistant)
+Section: Tweaks
+Depends: mobilesubstrate
+Conflicts: com.chou.vietmapbridge.truedash, com.chou.vietmapbridge.probe, com.chou.googlemaps.vietmap-probe
+Architecture: iphoneos-arm64
+Version: 0.1.8
+Installed-Size: 556
+Filename: pool/com.chou.googlemaps.vietmap_0.1.8_iphoneos-arm64.deb
+Size: 31894
+MD5sum: 27833ba3d6782d3de98e3dba8bd09158
+SHA1: a954fcd327fc59fdf9639d8f9f38ea7b5494d5c8
+SHA256: b6723c1cb9ce33e818c8f35cd8df43e7787833a94a62a5bc9d9d2c02fc590a31
+SHA512: 6d21d89598f7819741a708fbb014bf047a0c58a74513327f6276966e12ca311dddab3f9cf310ff9c04c3b4297423fe09403c2a0e0e5a3d7e5d84aead911c2ffb
+Depiction: https://bechou0410.github.io/mapspeed/
+Homepage: https://github.com/bechou0410/mapspeed
+Bugs: https://github.com/bechou0410/mapspeed/issues

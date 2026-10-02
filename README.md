@@ -33,8 +33,8 @@ UI states were checked using a real phone connected to Apple's CarPlay Simulator
 ## Install and remove
 
 1. Use a compatible rootless jailbreak and legitimately installed apps with any required VietMap entitlement/subscription. These are not supplied here.
-2. Download the `.deb` from [Releases](https://github.com/bechou0410/mapspeed/releases), and verify its SHA-256 against `SHA256SUMS`.
-3. Install through your jailbreak's package manager. Review removal prompts for old bridge/probe packages listed in [tweak/control](tweak/control). This package does not uninstall vendor TrueDash.
+2. In **Sileo → Sources → +**, add **https://bechou0410.github.io/mapspeed/**, refresh, then search for **MapSpeed**. The [source page](https://bechou0410.github.io/mapspeed/) also has an Add to Sileo button. Alternatively, download the `.deb` from [Releases](https://github.com/bechou0410/mapspeed/releases), and verify its SHA-256 against `SHA256SUMS`.
+3. Install through your jailbreak's package manager. Review removal prompts for old bridge/probe packages listed in [tweak/control](tweak/control). This package does not uninstall vendor TrueDash. The source supports `iphoneos-arm64` rootless packages only.
 4. Close and reopen VietMap and Google Maps, then open Google Maps in CarPlay. Keep VietMap's background alerts running. A Live Activity alone does not prove fresh speed samples.
 
 No default SSH password is provided or required. A respring is not normally required if both app processes are reopened.
@@ -53,6 +53,14 @@ THEOS="$HOME/theos" sh build-tweak.sh
 ```
 
 Packages appear in `packages/`. Both scripts use disposable directories and support spaces in the checkout path. The tested toolchain emits a pre-existing `-multiply_defined is obsolete` linker warning.
+
+## Maintain the Sileo source
+
+The [static source](https://bechou0410.github.io/mapspeed/) is published by GitHub Pages from `main` → `/docs`. [build-repo.py](build-repo.py) owns package/index/site generation; [repo-template.html](repo-template.html) owns the landing page. GitHub repository Settings → Pages owns this publishing configuration. Check deployment logs in the repository's Actions tab or `gh api repos/bechou0410/mapspeed/pages/builds/latest`.
+
+To publish an audited package, run `python3 build-repo.py packages/<package>.deb` with Python 3 and `dpkg-deb` installed, review the resulting `docs/` changes, then commit and push. The index advertises the supplied version; previous package files remain available for existing downloads. Published filenames are immutable: bump the version before changing package bytes. Only audited production MapSpeed packages belong in this source. Never put logs, keys, app dumps or other local files in `docs/`; the entire directory becomes public.
+
+This is a flat HTTPS APT source (`deb https://bechou0410.github.io/mapspeed/ ./`) with package/index checksums. Release metadata is not PGP-signed; checksums alone do not authenticate the publisher. No global APT trust/security overrides are supplied. To roll back a source publication, revert its commit and push, retaining any already published package files. Confirm that the Pages build succeeded and public indexes match the intended package before announcing an update.
 
 ## Stationary display test
 

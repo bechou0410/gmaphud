@@ -2,6 +2,7 @@ packages/
 .theos/
 obj/
 *.deb
+!docs/pool/*.deb
 *.dylib
 *.dSYM/
 .DS_Store
