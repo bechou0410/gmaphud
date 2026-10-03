@@ -8,6 +8,14 @@ Tweak thử nghiệm cho iOS jailbreak rootless, hiển thị **tốc độ hi�
 
 > Phần mềm thử nghiệm dành cho nghiên cứu và kiểm thử khi xe đã đỗ an toàn; chưa được chứng nhận là thiết bị hỗ trợ lái xe. Dữ liệu có thể sai, thiếu hoặc trễ. Tuân thủ biển báo thực tế, điều kiện đường và pháp luật áp dụng. Đọc [thông báo trách nhiệm và quyền bên thứ ba](DISCLAIMER.vi.md) trước khi sử dụng; disclaimer không bảo đảm loại bỏ mọi rủi ro pháp lý.
 
+## Ảnh xem trước CarPlay
+
+Ảnh chụp từ CarPlay Simulator, giới thiệu giao diện bản đồ đầy đủ và Dashboard. Nhãn `TEST` đang bật để kiểm thử giao diện khi xe đứng yên; số liệu không khẳng định hiệu năng khi lái xe thực tế.
+
+| Bản đồ đầy đủ | Dashboard |
+| --- | --- |
+| ![Giao diện bản đồ đầy đủ GMapHUD trên CarPlay Simulator](docs/screenshots/gmaphud-full-map.png) | ![Giao diện Dashboard GMapHUD trên CarPlay Simulator](docs/screenshots/gmaphud-dashboard.png) |
+
 ## Tính năng
 
 - Bảng tốc độ trên bản đồ đầy đủ và thẻ dọc nhỏ gọn trong Dashboard; hỗ trợ màu bản đồ sáng/tối.
@@ -35,7 +43,7 @@ Giao diện đã được kiểm tra bằng iPhone thật kết nối với CarP
 ## Cài đặt và gỡ bỏ
 
 1. Dùng jailbreak rootless tương thích và ứng dụng được cài hợp lệ, có quyền sử dụng/thuê bao VietMap cần thiết. Dự án không cung cấp các thành phần này.
-2. Vào **Sileo → Sources (Nguồn) → +**, thêm **https://bechou0410.github.io/gmaphud/**, làm mới rồi tìm **GMapHUD**. [Trang nguồn](https://bechou0410.github.io/gmaphud/) có nút Thêm vào Sileo. Hoặc tải `.deb` tại [Releases](https://github.com/bechou0410/gmaphud/releases) và đối chiếu SHA-256 với `SHA256SUMS`.
+2. Sao chép **https://bechou0410.github.io/gmaphud/** vào **Sileo → Sources (Nguồn) → +** hoặc **Zebra → Sources → +**, làm mới rồi tìm **GMapHUD**. [Trang nguồn](https://bechou0410.github.io/gmaphud/) có nút thêm nhanh cho cả hai. Hoặc tải `.deb` tại [Releases](https://github.com/bechou0410/gmaphud/releases) và đối chiếu SHA-256 với `SHA256SUMS`.
 3. Cài bằng trình quản lý gói của jailbreak. Kiểm tra thông báo gỡ các gói bridge/probe cũ được liệt kê trong [tweak/control](tweak/control). Gói này không gỡ TrueDash của nhà phát triển. Nguồn chỉ hỗ trợ gói rootless `iphoneos-arm64`.
 4. Đóng và mở lại VietMap cùng Google Maps, rồi mở Google Maps trên CarPlay. Duy trì chế độ cảnh báo nền của VietMap. Chỉ có Live Activity chưa chứng minh dữ liệu tốc độ vẫn được cập nhật.
 

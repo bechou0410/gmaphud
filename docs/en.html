@@ -14,7 +14,7 @@
     body{margin:0;min-height:100vh;color:var(--ink);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(ellipse at 15% 8%,rgba(41,120,79,.32),transparent 38%),radial-gradient(ellipse at 90% 28%,rgba(27,102,91,.22),transparent 36%),radial-gradient(ellipse at 55% 100%,rgba(67,104,47,.14),transparent 44%),var(--bg)}
     a{color:var(--mint);text-underline-offset:4px}
     a:hover{color:#e1ffec}
-    a:focus-visible{outline:2px solid var(--mint);outline-offset:4px;border-radius:5px}
+    a:focus-visible,button:focus-visible{outline:2px solid var(--mint);outline-offset:4px;border-radius:5px}
     .shell{width:min(1080px,calc(100% - 48px));margin-inline:auto;padding:28px 0 30px;position:relative}
     .glass{background:var(--glass);border:1px solid var(--line);box-shadow:0 24px 80px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.08);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px)}
     .topbar{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:42px}
@@ -48,10 +48,22 @@
     .install{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:28px;margin-top:19px;padding:24px 28px;border-radius:22px}
     .install h2,.panel h2{margin:0;color:var(--ink);font-size:17px;letter-spacing:-.02em}
     .install p{max-width:620px;margin:5px 0 10px;color:var(--muted);font-size:14px}
-    .repo-url{display:inline-block;padding:4px 9px;border:1px solid rgba(210,244,222,.11);border-radius:8px;background:rgba(4,18,11,.36);color:#d7f1df;font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;overflow-wrap:anywhere}
+    .repo-url{max-width:100%;display:inline-flex;align-items:center;gap:10px;padding:7px 10px;border:1px solid rgba(210,244,222,.16);border-radius:9px;background:rgba(4,18,11,.36);color:#d7f1df;font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;text-align:left;overflow-wrap:anywhere;cursor:pointer}
+    .repo-url:hover{border-color:rgba(185,244,208,.55);background:rgba(8,31,20,.72)}
+    .repo-url span:first-child{overflow-wrap:anywhere}
+    .repo-url svg{width:15px;height:15px;flex:none;color:var(--mint)}
+    .copy-status{min-height:20px;margin:5px 0 0;color:var(--mint);font-size:12px}
+    .button-secondary{color:var(--ink);background:rgba(6,28,19,.52);box-shadow:inset 0 1px rgba(255,255,255,.08)}
+    .button-secondary:hover{color:var(--ink)}
     .section-head{display:flex;align-items:end;justify-content:space-between;gap:18px;margin:46px 2px 16px}
     .section-head h2{margin:0;font-size:clamp(22px,3vw,28px);letter-spacing:-.045em}
     .section-head p{margin:0;color:var(--muted);font-size:13px}
+    .previews{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+    .preview-card{min-width:0;padding:13px;border-radius:22px;overflow:hidden}
+    .preview-card img{display:block;width:100%;aspect-ratio:1582/950;object-fit:cover;border:1px solid rgba(226,255,237,.11);border-radius:15px;background:#091811}
+    .preview-caption{display:flex;justify-content:space-between;gap:14px;align-items:baseline;padding:11px 5px 1px}
+    .preview-caption h3{margin:0;font-size:14px;letter-spacing:-.015em}
+    .preview-caption p{margin:0;color:var(--muted);font-size:11px;text-align:right}
     .details{display:grid;grid-template-columns:1.12fr .88fr;gap:16px}
     .panel{padding:26px;border-radius:22px}
     .panel p{margin:10px 0;color:#b5c9bc;font-size:14px}
@@ -59,6 +71,7 @@
     .spec-list li{display:grid;grid-template-columns:10px 1fr;gap:10px;align-items:start;color:#ccded1;font-size:13px;line-height:1.55}
     .spec-list li:before{content:"";width:6px;height:6px;margin-top:7px;border-radius:50%;background:#a9ebbd;box-shadow:0 0 10px rgba(169,235,189,.35)}
     .compat .spec-list{gap:13px}
+    .readme-link{white-space:nowrap}
     .author{margin-top:20px!important;padding-top:15px;border-top:1px solid var(--line);color:#9db3a4!important;font-size:12px!important}
     .notice{display:grid;grid-template-columns:36px 1fr;gap:14px;align-items:start;margin-top:16px;padding:22px 25px;border:1px solid rgba(239,202,132,.2);border-radius:20px;background:linear-gradient(110deg,rgba(87,67,34,.28),rgba(31,40,27,.49));box-shadow:inset 0 1px rgba(255,255,255,.045);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
     .notice-icon{width:34px;height:34px;display:grid;place-items:center;border:1px solid rgba(239,202,132,.22);border-radius:12px;color:var(--gold);background:rgba(239,202,132,.08)}
@@ -69,8 +82,8 @@
     footer{display:flex;justify-content:space-between;gap:20px;padding:24px 3px 8px;color:#81978a;font-size:12px}
     footer a{color:#abcdb7;text-decoration:none}
     @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.glass{background:rgba(13,34,25,.96)}}
-    @media(max-width:880px){.shell{width:min(100% - 32px,600px);padding-top:17px}.topbar{margin-bottom:23px}.hero{grid-template-columns:1fr;gap:30px;padding:clamp(26px,7vw,42px);border-radius:27px}.hero-copy{max-width:580px}.flow{max-width:520px}.details{grid-template-columns:1fr}.section-head{align-items:start;flex-direction:column;margin-top:37px}.install{grid-template-columns:1fr;gap:17px;padding:22px}.install .button{justify-self:start}}
-    @media(max-width:480px){.shell{width:calc(100% - 24px);padding-top:12px}.brand{font-size:15px}.brand-mark{width:35px;height:35px;border-radius:12px}.language a{min-height:34px;padding:0 10px;font-size:12px}.hero{gap:25px;padding:25px 20px;border-radius:23px}h1{font-size:58px}.intro{font-size:17px}.actions{gap:15px;margin-top:23px}.button{min-height:46px;padding-inline:15px}.flow{padding:16px;border-radius:19px}.flow-row{padding:11px}.install,.panel{padding:20px}.section-head p{line-height:1.5}.notice{padding:18px;grid-template-columns:32px 1fr}.notice-icon{width:31px;height:31px}footer{flex-direction:column;gap:7px;padding-inline:3px}}
+    @media(max-width:880px){.shell{width:min(100% - 32px,600px);padding-top:17px}.topbar{margin-bottom:23px}.hero{grid-template-columns:1fr;gap:30px;padding:clamp(26px,7vw,42px);border-radius:27px}.hero-copy{max-width:580px}.flow{max-width:520px}.details,.previews{grid-template-columns:1fr}.section-head{align-items:start;flex-direction:column;margin-top:37px}.install{grid-template-columns:1fr;gap:17px;padding:22px}.install .button{justify-self:start}}
+    @media(max-width:480px){.shell{width:calc(100% - 24px);padding-top:12px}.brand{font-size:15px}.brand-mark{width:35px;height:35px;border-radius:12px}.language a{min-height:34px;padding:0 10px;font-size:12px}.hero{gap:25px;padding:25px 20px;border-radius:23px}h1{font-size:58px}.intro{font-size:17px}.actions{gap:15px;margin-top:23px}.button{min-height:46px;padding-inline:15px}.flow{padding:16px;border-radius:19px}.flow-row{padding:11px}.install,.panel{padding:20px}.preview-card{padding:9px;border-radius:18px}.preview-caption{align-items:flex-start;flex-direction:column;gap:2px}.preview-caption p{text-align:left}.section-head p{line-height:1.5}.notice{padding:18px;grid-template-columns:32px 1fr}.notice-icon{width:31px;height:31px}footer{flex-direction:column;gap:7px;padding-inline:3px}}
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important}}
   </style>
 </head>
@@ -92,6 +105,7 @@
         <p class="inspiration">Inspired by the traffic bubble feature in DuoDash and TrueDash.</p>
         <div class="actions">
           <a class="button" href="sileo://source/https://bechou0410.github.io/gmaphud/"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4v11m0 0 4-4m-4 4-4-4M5 16v3h14v-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Add to Sileo</a>
+          <a class="button button-secondary" href="zbra://sources/add/https://bechou0410.github.io/gmaphud/">Add to Zebra</a>
           <a class="text-link" href="https://github.com/bechou0410/gmaphud">Source code ↗</a>
         </div>
       </div>
@@ -105,15 +119,21 @@
       </div>
     </section>
 
+    <div class="section-head"><h2>GMapHUD on CarPlay</h2><p>CarPlay Simulator captures · test interface</p></div>
+    <section class="previews" aria-label="GMapHUD on CarPlay">
+      <article class="preview-card glass"><img src="screenshots/gmaphud-full-map.png" alt="Full map — Speed display on the map · TEST mode enabled" loading="lazy" width="1582" height="950"><div class="preview-caption"><h3>Full map</h3><p>Speed display on the map · TEST mode enabled</p></div></article>
+      <article class="preview-card glass"><img src="screenshots/gmaphud-dashboard.png" alt="Dashboard — Compact speed card in Dashboard · TEST mode enabled" loading="lazy" width="1582" height="950"><div class="preview-caption"><h3>Dashboard</h3><p>Compact speed card in Dashboard · TEST mode enabled</p></div></article>
+    </section>
+
     <section class="install glass" aria-labelledby="install-title">
-      <div><h2 id="install-title">Add the source · GMapHUD 0.1.10</h2><p>Open this page on your jailbroken iPhone, or paste this URL into Sileo → Sources → +.</p><code class="repo-url">https://bechou0410.github.io/gmaphud/</code></div>
+      <div><h2 id="install-title">Add the source · GMapHUD 0.1.10</h2><p>Copy the URL below, then add it in Sileo or Zebra.</p><button class="repo-url" id="copy-repo" type="button" aria-label="Copy source URL" title="Copy source URL"><span>https://bechou0410.github.io/gmaphud/</span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" stroke="currentColor" stroke-width="1.7"/></svg></button><p class="copy-status" id="copy-status" role="status" aria-live="polite"></p></div>
       <a class="button" href="pool/com.chou.googlemaps.vietmap_0.1.10_iphoneos-arm64.deb">Download .deb</a>
     </section>
 
     <div class="section-head"><h2>Simple at a glance</h2><p>What it shows and where it has been tested</p></div>
     <section class="details" aria-label="Simple at a glance">
       <article class="panel glass"><h2>The display</h2><p>A speed pill on the full map and a compact vertical card in Dashboard. Near-limit and overspeed colors; fresh fields only.</p><ul class="spec-list"><li>Keep VietMap background alerts running. After installation, close and reopen both apps.</li><li>Includes speed and limits only. No other signs, audible alerts, GPS simulation or subscription/DRM bypass.</li></ul><p class="author">Author: Codex (AI development assistant). Published independently by bechou0410. Project source: MIT.</p></article>
-      <article class="panel glass compat"><h2>Tested setup</h2><p>Tested: iPhone 11, iOS 18.6.2 rootless, Google Maps 26.39.0 and VietMap Live 3.4.2. The Google executable must match the guard in the README.</p><ul class="spec-list"><li>Other Google Maps builds are not promised to work; both version and supported executable must match.</li><li>English guide · <a href="https://github.com/bechou0410/gmaphud/blob/main/README.md">README ↗</a></li></ul></article>
+      <article class="panel glass compat"><h2>Tested setup</h2><p>Tested: iPhone 11, iOS 18.6.2 rootless, Google Maps 26.39.0 and VietMap Live 3.4.2. The Google executable must match the guard in the README.</p><ul class="spec-list"><li>Other Google Maps builds are not promised to work; both version and supported executable must match.</li><li><a class="readme-link" href="https://github.com/bechou0410/gmaphud/blob/main/README.md">README ↗</a></li></ul></article>
     </section>
 
     <aside class="notice" aria-labelledby="safety-title">
@@ -123,5 +143,30 @@
 
     <footer><span>This source is served over HTTPS with package/index checksums; Release metadata is not PGP-signed. Installation does not certify accuracy or legal compliance.</span><a href="https://github.com/bechou0410/gmaphud">GMapHUD · MIT</a></footer>
   </main>
+  <script>
+    const copyButton = document.getElementById('copy-repo');
+    const copyStatus = document.getElementById('copy-status');
+    const repoUrl = 'https://bechou0410.github.io/gmaphud/';
+    copyButton.addEventListener('click', async () => {
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(repoUrl);
+        } else {
+          const field = document.createElement('textarea');
+          field.value = repoUrl;
+          field.style.position = 'fixed';
+          field.style.opacity = '0';
+          document.body.append(field);
+          field.select();
+          const copied = document.execCommand('copy');
+          field.remove();
+          if (!copied) throw new Error('Clipboard unavailable');
+        }
+        copyStatus.textContent = 'Copied';
+      } catch {
+        copyStatus.textContent = 'Copy failed. Select and copy the URL instead.';
+      }
+    });
+  </script>
 </body>
 </html>

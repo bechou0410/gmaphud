@@ -8,6 +8,14 @@ Experimental rootless iOS tweak that displays fresh **VietMap Live speed and spe
 
 > Experimental software for stationary testing and research. It is not a certified driving aid. Displayed information may be wrong, unavailable or delayed. Follow actual signs, road conditions and applicable law. Read [DISCLAIMER.md](DISCLAIMER.md) before use; a disclaimer does not guarantee legal protection.
 
+## CarPlay previews
+
+These CarPlay Simulator captures show the full-map and Dashboard layouts. The `TEST` badge is enabled for stationary UI testing; values shown are not a live-road performance claim.
+
+| Full map | Dashboard |
+| --- | --- |
+| ![GMapHUD full-map view in CarPlay Simulator](docs/screenshots/gmaphud-full-map.png) | ![GMapHUD Dashboard view in CarPlay Simulator](docs/screenshots/gmaphud-dashboard.png) |
+
 ## Features
 
 - Full-map speed pill and compact vertical Dashboard card; light/dark map colors.
@@ -35,7 +43,7 @@ UI states were checked using a real phone connected to Apple's CarPlay Simulator
 ## Install and remove
 
 1. Use a compatible rootless jailbreak and legitimately installed apps with any required VietMap entitlement/subscription. These are not supplied here.
-2. In **Sileo → Sources → +**, add **https://bechou0410.github.io/gmaphud/**, refresh, then search for **GMapHUD**. The [source page](https://bechou0410.github.io/gmaphud/) also has an Add to Sileo button. Alternatively, download the `.deb` from [Releases](https://github.com/bechou0410/gmaphud/releases), and verify its SHA-256 against `SHA256SUMS`.
+2. Copy **https://bechou0410.github.io/gmaphud/** into **Sileo → Sources → +** or **Zebra → Sources → +**, refresh, then search for **GMapHUD**. The [source page](https://bechou0410.github.io/gmaphud/) has quick-add buttons for both. Alternatively, download the `.deb` from [Releases](https://github.com/bechou0410/gmaphud/releases), and verify its SHA-256 against `SHA256SUMS`.
 3. Install through your jailbreak's package manager. Review removal prompts for old bridge/probe packages listed in [tweak/control](tweak/control). This package does not uninstall vendor TrueDash. The source supports `iphoneos-arm64` rootless packages only.
 4. Close and reopen VietMap and Google Maps, then open Google Maps in CarPlay. Keep VietMap's background alerts running. A Live Activity alone does not prove fresh speed samples.
 
