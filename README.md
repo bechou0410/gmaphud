@@ -34,7 +34,7 @@ This release does not port other road signs, cameras, warning distances, navigat
 | Device / OS | iPhone 11, iOS 18.6.2, rootless jailbreak |
 | Google Maps | 26.39.0, executable UUID `E8BB60A0-E434-3412-AC6B-9B6800E031A6` |
 | VietMap Live | 3.4.2 |
-| Package | `com.chou.googlemaps.vietmap` 0.1.10, arm64/arm64e |
+| Package | `com.chou.googlemaps.vietmap` 0.1.11, arm64/arm64e |
 
 Private method signatures and executable/version guards leave unsupported targets inactive. A version string alone does not guarantee a matching Google executable. Package and notification identifiers retain their original namespace for compatibility with existing installations.
 

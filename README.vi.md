@@ -34,7 +34,7 @@ Bản này chưa chuyển các biển cảnh báo khác, camera, khoảng cách 
 | Thiết bị / hệ điều hành | iPhone 11, iOS 18.6.2, jailbreak rootless |
 | Google Maps | 26.39.0, UUID executable `E8BB60A0-E434-3412-AC6B-9B6800E031A6` |
 | VietMap Live | 3.4.2 |
-| Gói | `com.chou.googlemaps.vietmap` 0.1.10, arm64/arm64e |
+| Gói | `com.chou.googlemaps.vietmap` 0.1.11, arm64/arm64e |
 
 Các kiểm tra chữ ký phương thức nội bộ và phiên bản/executable sẽ không kích hoạt phần tích hợp trên bản không được hỗ trợ. Chỉ trùng số phiên bản chưa bảo đảm executable của Google Maps khớp. Mã gói và định danh thông báo giữ nguyên để tương thích với bản đang cài.
 
