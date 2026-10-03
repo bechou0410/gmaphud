@@ -10,7 +10,7 @@ Experimental rootless iOS tweak that displays fresh **VietMap Live speed and spe
 
 ## CarPlay previews
 
-These CarPlay Simulator captures show the full-map and Dashboard layouts. The `TEST` badge is enabled for stationary UI testing; values shown are not a live-road performance claim.
+These CarPlay Simulator captures show the full-map TEST display and a simulated-location Dashboard overspeed state. Both are UI illustrations; neither establishes real-road accuracy.
 
 | Full map | Dashboard |
 | --- | --- |
