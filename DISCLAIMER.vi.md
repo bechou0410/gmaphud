@@ -4,7 +4,7 @@ Bản tiếng Việt của [DISCLAIMER.md](DISCLAIMER.md). Văn bản [giấy ph
 
 ## Dự án độc lập và ghi nhận tác giả
 
-GMapHUD là dự án cộng đồng thử nghiệm độc lập. Các tên VietMap, VietMap Live, Google Maps, CarPlay, Apple và OpenAI chỉ dùng để chỉ khả năng tương thích hoặc ghi nhận hỗ trợ phát triển bằng AI. Tên và nhãn hiệu thuộc về chủ sở hữu tương ứng. Dự án không tuyên bố có liên kết, tài trợ, phê duyệt, chứng nhận hay bảo trợ từ các bên này. Codex được ghi nhận là trợ lý AI phát triển; chủ repository là người xuất bản. Đây không phải sản phẩm chính thức của OpenAI.
+GMapHUD là dự án cộng đồng thử nghiệm độc lập. Các tên VietMap, VietMap Live, Google Maps, CarPlay, Apple và OpenAI chỉ dùng để chỉ khả năng tương thích hoặc ghi nhận hỗ trợ phát triển bằng AI. Tên và nhãn hiệu thuộc về chủ sở hữu tương ứng. Dự án không tuyên bố có liên kết, tài trợ, phê duyệt, chứng nhận hay bảo trợ từ các bên này. chou được ghi nhận là tác giả dự án và người xuất bản; Codex hỗ trợ phát triển bằng AI. Cách ghi này không biến OpenAI thành đơn vị xuất bản, bảo trì hay chủ sở hữu bản quyền. Đây không phải sản phẩm chính thức của OpenAI.
 
 ## An toàn và độ chính xác
 

@@ -82,8 +82,10 @@ def build_sileo_depiction():
         },
     }
     changelog = (
-        ("0.1.11", "Gói hiện tại trong nguồn Sileo; chưa có ghi chú phát hành riêng.",
-         "Current package in the Sileo source; no separate release notes published."),
+        ("0.1.12", "Cập nhật ghi nhận tác giả dự án là chou và nêu rõ Codex hỗ trợ phát triển bằng AI.",
+         "Credits chou as project author and discloses Codex AI development assistance."),
+        ("0.1.11", "Bản trước trong nguồn Sileo; không có ghi chú phát hành riêng.",
+         "Previous package in the Sileo source; no separate release notes published."),
         ("0.1.10", "Hoàn thiện nhận diện dự án trong giấy phép MIT và tài liệu đóng kèm; thống nhất đường dẫn GitHub/Sileo. Tích hợp tốc độ không đổi so với 0.1.8.",
          "Completed project branding in the MIT notice and bundled documents, and consolidated the GitHub/Sileo publication route. Speed integration unchanged from 0.1.8."),
         ("0.1.9", "Cập nhật tên dự án, thông báo đóng gói và liên kết xuất bản. Tích hợp tốc độ không đổi so với 0.1.8.",

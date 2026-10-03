@@ -4,7 +4,7 @@
 
 Experimental rootless iOS tweak that displays fresh **VietMap Live speed and speed-limit data in Google Maps CarPlay**. Inspired by the traffic bubble feature in DuoDash and TrueDash. Google Maps continues to handle navigation.
 
-**Author: Codex, an AI assistant from OpenAI.** The repository owner requested, tested and publishes this independent community project. This credit describes development assistance; it does not make OpenAI the publisher, copyright holder, maintainer or support provider. Not affiliated with or endorsed by VietMap, Google, Apple or OpenAI.
+**Author: chou · AI-assisted with Codex.** chou leads, tests and publishes this independent community project; Codex provided AI development assistance. This credit does not imply that OpenAI is the publisher, copyright holder, maintainer or support provider. Not affiliated with or endorsed by VietMap, Google, Apple or OpenAI.
 
 > Experimental software for stationary testing and research. It is not a certified driving aid. Displayed information may be wrong, unavailable or delayed. Follow actual signs, road conditions and applicable law. Read [DISCLAIMER.md](DISCLAIMER.md) before use; a disclaimer does not guarantee legal protection.
 
@@ -34,7 +34,7 @@ This release does not port other road signs, cameras, warning distances, navigat
 | Device / OS | iPhone 11, iOS 18.6.2, rootless jailbreak |
 | Google Maps | 26.39.0, executable UUID `E8BB60A0-E434-3412-AC6B-9B6800E031A6` |
 | VietMap Live | 3.4.2 |
-| Package | `com.chou.googlemaps.vietmap` 0.1.11, arm64/arm64e |
+| Package | `com.chou.googlemaps.vietmap` 0.1.12, arm64/arm64e |
 
 Private method signatures and executable/version guards leave unsupported targets inactive. A version string alone does not guarantee a matching Google executable. Package and notification identifiers retain their original namespace for compatibility with existing installations.
 

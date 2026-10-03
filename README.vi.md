@@ -4,7 +4,7 @@
 
 Tweak thử nghiệm cho iOS jailbreak rootless, hiển thị **tốc độ hiện tại và giới hạn tốc độ từ VietMap Live trên Google Maps CarPlay**. Ý tưởng từ tính năng bong bóng giao thông của DuoDash và TrueDash. Google Maps tiếp tục đảm nhiệm việc dẫn đường.
 
-**Tác giả: Codex, trợ lý AI của OpenAI.** Chủ repository là người yêu cầu, kiểm thử và xuất bản dự án cộng đồng độc lập này. Việc ghi nhận Codex mô tả hỗ trợ phát triển, không có nghĩa OpenAI là đơn vị xuất bản, chủ sở hữu bản quyền, bên bảo trì hay cung cấp hỗ trợ. Dự án không liên kết hoặc được VietMap, Google, Apple hay OpenAI bảo trợ.
+**Tác giả: chou · có AI hỗ trợ bằng Codex.** chou định hướng, kiểm thử và xuất bản dự án cộng đồng độc lập này; Codex hỗ trợ phát triển bằng AI. Ghi nhận này không có nghĩa OpenAI là đơn vị xuất bản, chủ sở hữu bản quyền, bên bảo trì hay cung cấp hỗ trợ. Dự án không liên kết hoặc được VietMap, Google, Apple hay OpenAI bảo trợ.
 
 > Phần mềm thử nghiệm dành cho nghiên cứu và kiểm thử khi xe đã đỗ an toàn; chưa được chứng nhận là thiết bị hỗ trợ lái xe. Dữ liệu có thể sai, thiếu hoặc trễ. Tuân thủ biển báo thực tế, điều kiện đường và pháp luật áp dụng. Đọc [thông báo trách nhiệm và quyền bên thứ ba](DISCLAIMER.vi.md) trước khi sử dụng; disclaimer không bảo đảm loại bỏ mọi rủi ro pháp lý.
 
@@ -34,7 +34,7 @@ Bản này chưa chuyển các biển cảnh báo khác, camera, khoảng cách 
 | Thiết bị / hệ điều hành | iPhone 11, iOS 18.6.2, jailbreak rootless |
 | Google Maps | 26.39.0, UUID executable `E8BB60A0-E434-3412-AC6B-9B6800E031A6` |
 | VietMap Live | 3.4.2 |
-| Gói | `com.chou.googlemaps.vietmap` 0.1.11, arm64/arm64e |
+| Gói | `com.chou.googlemaps.vietmap` 0.1.12, arm64/arm64e |
 
 Các kiểm tra chữ ký phương thức nội bộ và phiên bản/executable sẽ không kích hoạt phần tích hợp trên bản không được hỗ trợ. Chỉ trùng số phiên bản chưa bảo đảm executable của Google Maps khớp. Mã gói và định danh thông báo giữ nguyên để tương thích với bản đang cài.
 

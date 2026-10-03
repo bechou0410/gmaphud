@@ -3,19 +3,19 @@ Name: GMapHUD
 Description: Experimental fresh VietMap speed data in Google Maps native CarPlay controls.
 Icon: https://bechou0410.github.io/gmaphud/gmaphud-icon.png
 Maintainer: bechou0410
-Author: Codex (AI assistant)
+Author: chou (AI-assisted with Codex)
 Section: Tweaks
 Depends: mobilesubstrate
 Conflicts: com.chou.vietmapbridge.truedash, com.chou.vietmapbridge.probe, com.chou.googlemaps.vietmap-probe
 Architecture: iphoneos-arm64
-Version: 0.1.11
+Version: 0.1.12
 Installed-Size: 556
-Filename: pool/com.chou.googlemaps.vietmap_0.1.11_iphoneos-arm64.deb
-Size: 31868
-MD5sum: 1161380746bb4f42f4d02bc7fff58183
-SHA1: 8818ec97dd07d7612515e86d0a3c60af31f47124
-SHA256: c8a8ce6a238b64b7e91ef55638f2d7ec8b9f0adfcc0c0fff0d52eb2da0278071
-SHA512: d3f94ebde7bcb87977bf51f4b1d1f369ecf9c8bff729288674085f185929533749534d780db181bcccb0a390a25a53c219cc9312d27e4dc2f10671b9ba998bbe
+Filename: pool/com.chou.googlemaps.vietmap_0.1.12_iphoneos-arm64.deb
+Size: 31962
+MD5sum: e0b538885449c2e208a55e2e45ecff13
+SHA1: 2faa3ad4dac8c72bd30a73303af3458f6b4912fe
+SHA256: 3a099743647efdf8e9e25a4f13126ce3c90b11816870bd234535d6373129822d
+SHA512: 0354dff766d7cc7e154076a21a2d3e1b1f57e073e161bab034915b949e3a9b0297d1dd7126c3fab5a382d11bb6981d98d2333f56180c34124241ce8271402032
 Depiction: https://bechou0410.github.io/gmaphud/
 SileoDepiction: https://bechou0410.github.io/gmaphud/sileo-depiction.json
 Homepage: https://github.com/bechou0410/gmaphud

@@ -2,7 +2,7 @@
 
 ## Independent project and attribution
 
-GMapHUD is an independent experimental community project. VietMap, VietMap Live, Google Maps, CarPlay, Apple and OpenAI names identify compatibility or AI development attribution only. Their names and marks remain with their respective owners. No affiliation, sponsorship, approval, certification or endorsement is claimed. Codex is credited as the AI development assistant; the repository owner publishes the project. This is not an official OpenAI product.
+GMapHUD is an independent experimental community project. VietMap, VietMap Live, Google Maps, CarPlay, Apple and OpenAI names identify compatibility or AI development attribution only. Their names and marks remain with their respective owners. No affiliation, sponsorship, approval, certification or endorsement is claimed. chou is credited as project author and publisher; Codex provided AI development assistance. This attribution does not make OpenAI the publisher, maintainer or copyright holder. This is not an official OpenAI product.
 
 ## Safety and accuracy
 
@@ -34,4 +34,4 @@ Use this repository's Issues to identify the specific file/material and concern.
 
 ## Tóm tắt tiếng Việt
 
-Đây là dự án thử nghiệm độc lập, không được VietMap, Google, Apple hoặc OpenAI bảo trợ. Codex được ghi nhận là trợ lý AI phát triển; chủ repository là người xuất bản. Dữ liệu có thể sai, trễ hoặc thiếu, không thay thế biển báo thực tế, đồng hồ xe hay nghĩa vụ lái xe an toàn. Chỉ cấu hình/kiểm thử khi xe đã đỗ an toàn. Người dùng cần tuân thủ pháp luật, điều khoản ứng dụng và quyền của bên thứ ba; dự án không cấp quyền với bản đồ, dữ liệu hoặc phần mềm của họ. Mã dự án được cung cấp theo MIT, không có bảo đảm; disclaimer không bảo đảm tránh mọi trách nhiệm pháp lý.
+Đây là dự án thử nghiệm độc lập, không được VietMap, Google, Apple hoặc OpenAI bảo trợ. chou được ghi nhận là tác giả dự án và người xuất bản; Codex hỗ trợ phát triển bằng AI. Dữ liệu có thể sai, trễ hoặc thiếu, không thay thế biển báo thực tế, đồng hồ xe hay nghĩa vụ lái xe an toàn. Chỉ cấu hình/kiểm thử khi xe đã đỗ an toàn. Người dùng cần tuân thủ pháp luật, điều khoản ứng dụng và quyền của bên thứ ba; dự án không cấp quyền với bản đồ, dữ liệu hoặc phần mềm của họ. Mã dự án được cung cấp theo MIT, không có bảo đảm; disclaimer không bảo đảm tránh mọi trách nhiệm pháp lý.

@@ -111,11 +111,19 @@
         },
         {
           "class": "DepictionSubheaderView",
+          "title": "0.1.12"
+        },
+        {
+          "class": "DepictionMarkdownView",
+          "markdown": "**Tiếng Việt:** Cập nhật ghi nhận tác giả dự án là chou và nêu rõ Codex hỗ trợ phát triển bằng AI.\n\n**English:** Credits chou as project author and discloses Codex AI development assistance."
+        },
+        {
+          "class": "DepictionSubheaderView",
           "title": "0.1.11"
         },
         {
           "class": "DepictionMarkdownView",
-          "markdown": "**Tiếng Việt:** Gói hiện tại trong nguồn Sileo; chưa có ghi chú phát hành riêng.\n\n**English:** Current package in the Sileo source; no separate release notes published."
+          "markdown": "**Tiếng Việt:** Bản trước trong nguồn Sileo; không có ghi chú phát hành riêng.\n\n**English:** Previous package in the Sileo source; no separate release notes published."
         },
         {
           "class": "DepictionSubheaderView",
