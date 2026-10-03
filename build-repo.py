@@ -6,6 +6,7 @@ from email.utils import format_datetime
 import gzip
 import hashlib
 import html
+import json
 import lzma
 from pathlib import Path
 import re
@@ -60,14 +61,18 @@ def main():
         for filename, content in indexes.items():
             release += f" {hashlib.new(algorithm, content).hexdigest()} {len(content)} {filename}\n"
     (site / "Release").write_text(release)
-    page = (ROOT / "repo-template.html").read_text()
-    for marker, value in {"VERSION": version, "REPO_URL": URL, "PACKAGE_PATH": "pool/" + name}.items():
-        page = page.replace("{{" + marker + "}}", html.escape(value, quote=True))
-    (site / "index.html").write_text(page)
-    notices = "<!doctype html><html lang='en'><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>GMapHUD notices</title><style>body{max-width:800px;margin:40px auto;padding:0 20px;font:16px/1.6 system-ui}pre{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit}</style><a href='./'>GMapHUD</a>"
-    for filename in ("DISCLAIMER.md", "LICENSE"):
-        notices += f"<h1>{html.escape(filename)}</h1><pre>{html.escape((ROOT / filename).read_text())}</pre>"
-    (site / "notices.html").write_text(notices + "</html>")
+    template = (ROOT / "repo-template.html").read_text(encoding="utf-8")
+    locales = json.loads((ROOT / "repo-locales.json").read_text(encoding="utf-8"))
+    for language, filename in (("vi", "index.html"), ("en", "en.html")):
+        values = {**locales[language], "LANG": language, "VERSION": version, "REPO_URL": URL,
+                  "PACKAGE_PATH": "pool/" + name, "VI_CURRENT": "page" if language == "vi" else "false",
+                  "EN_CURRENT": "page" if language == "en" else "false"}
+        page = re.sub(r"\{\{([A-Z_]+)\}\}", lambda match: html.escape(values[match[1]], quote=True), template)
+        (site / filename).write_text(page, encoding="utf-8")
+    notices = "<!doctype html><html lang='vi'><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>GMapHUD · Thông báo / Notices</title><style>body{max-width:800px;margin:40px auto;padding:0 20px;font:16px/1.6 system-ui}pre{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit}</style><a href='./'>GMapHUD</a><nav aria-label='Ngôn ngữ / Language'><a href='#vi' lang='vi'>Tiếng Việt</a> · <a href='#en' lang='en'>English</a> · <a href='#license' lang='en'>MIT</a></nav>"
+    for section, language, filename in (("vi", "vi", "DISCLAIMER.vi.md"), ("en", "en", "DISCLAIMER.md"), ("license", "en", "LICENSE")):
+        notices += f"<section id='{section}' lang='{language}'><h1>{html.escape(filename)}</h1><pre>{html.escape((ROOT / filename).read_text(encoding='utf-8'))}</pre></section>"
+    (site / "notices.html").write_text(notices + "</html>", encoding="utf-8")
     (site / ".nojekyll").touch()
     print(f"Prepared GMapHUD {version} at {URL}; package SHA256 {hashlib.sha256(data).hexdigest()}")
 

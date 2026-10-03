@@ -1,41 +1,43 @@
 <!doctype html>
-<html lang="en">
+<html lang="{{LANG}}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
-  <title>GMapHUD · Sileo source</title>
+  <title>GMapHUD · {{SOURCE_TITLE}}</title>
   <style>
     *{box-sizing:border-box}body{margin:0;background:#10151b;color:#eff3f6;font:16px/1.65 system-ui,-apple-system,sans-serif}main{max-width:680px;margin:64px auto;padding:0 24px}h1{font-size:52px;letter-spacing:-2px;line-height:1.1;margin:18px 0}h2{font-size:23px;margin:0 0 14px}p{color:#bdc8d2}a{color:#9cdbc9}section{margin:28px 0;padding:24px;border:1px solid #303e49;border-radius:20px;background:#19212a}.tag{display:inline-block;color:#c4b497;font-size:12px;letter-spacing:.08em;text-transform:uppercase}.button{display:inline-block;padding:12px 22px;background:#9cdbc9;color:#10151b;border-radius:12px;text-decoration:none;font-weight:650}code{display:block;overflow-wrap:anywhere;padding:12px 0;color:#eff3f6;font-size:14px}.meta{font-size:14px}footer{padding:16px 0 40px;color:#91a0ac;font-size:13px}li{margin:8px 0}@media(prefers-color-scheme:light){body{background:#f3f5f5;color:#15262c}p,footer{color:#50636d}section{background:#fff;border-color:#d2ddde}a{color:#226653}code{color:#15262c}.tag{color:#796030}}@media(max-width:480px){main{margin-top:36px}h1{font-size:44px}section{padding:20px}}
   </style>
+  <style>nav{display:flex;gap:16px;margin-bottom:24px}nav a{font-size:14px;text-decoration:none}nav a[aria-current="page"]{font-weight:700;text-decoration:underline;text-underline-offset:5px}</style>
 </head>
 <body><main>
-  <span class="tag">Experimental · Rootless iOS</span>
+  <nav aria-label="{{LANGUAGE_NAV}}"><a href="./" lang="vi" hreflang="vi" aria-current="{{VI_CURRENT}}">Tiếng Việt</a><a href="en.html" lang="en" hreflang="en" aria-current="{{EN_CURRENT}}">English</a></nav>
+  <span class="tag">{{TAG}}</span>
   <h1>GMapHUD</h1>
-  <p>Fresh VietMap Live speed and limits, on Google Maps CarPlay.</p>
-  <p class="meta">Inspired by the traffic bubble feature in DuoDash and TrueDash.</p>
+  <p>{{INTRO}}</p>
+  <p class="meta">{{INSPIRATION}}</p>
   <section>
-    <h2>Add the source</h2>
-    <p>Open this page on your jailbroken iPhone, or paste this URL into Sileo → Sources → +.</p>
+    <h2>{{ADD_TITLE}}</h2>
+    <p>{{ADD_INSTRUCTIONS}}</p>
     <code>{{REPO_URL}}</code>
-    <a class="button" href="sileo://source/{{REPO_URL}}">Add to Sileo</a>
+    <a class="button" href="sileo://source/{{REPO_URL}}">{{ADD_BUTTON}}</a>
   </section>
   <section id="gmaphud">
     <h2>GMapHUD {{VERSION}}</h2>
-    <p>A speed pill on the full map and a compact vertical card in Dashboard. Near-limit and overspeed colors; fresh fields only.</p>
+    <p>{{FEATURES}}</p>
     <ul>
-      <li>Tested: iPhone 11, iOS 18.6.2 rootless, Google Maps 26.39.0 and VietMap Live 3.4.2. The Google executable must match the guard in the README.</li>
-      <li>Keep VietMap background alerts running. After installation, close and reopen both apps.</li>
-      <li>Includes speed and limits only. No other signs, audible alerts, GPS simulation or subscription/DRM bypass.</li>
+      <li>{{COMPATIBILITY}}</li>
+      <li>{{BACKGROUND}}</li>
+      <li>{{SCOPE}}</li>
     </ul>
-    <p class="meta">Author: Codex (AI development assistant). Published independently by bechou0410. Project source: MIT.</p>
-    <p><a href="{{PACKAGE_PATH}}">Download .deb</a> · <a href="https://github.com/bechou0410/gmaphud">Source &amp; instructions</a></p>
+    <p class="meta">{{AUTHOR}}</p>
+    <p><a href="{{PACKAGE_PATH}}">{{DOWNLOAD}}</a> · <a href="https://github.com/bechou0410/gmaphud">{{SOURCE_LINK}}</a> · <a href="{{README_URL}}">{{GUIDE_LINK}}</a></p>
   </section>
   <section>
-    <h2>Before use</h2>
-    <p>For stationary testing and research. Not a certified driving aid: readings may be wrong, late or missing. Follow actual signs and applicable law. Review compatibility before installing.</p>
-    <p>Independent project, without affiliation or endorsement by VietMap, Google, Apple or OpenAI. Third-party apps and data retain their owners’ rights. A disclaimer does not guarantee legal protection.</p>
-    <a href="notices.html">Read the full disclaimer &amp; MIT license</a>
+    <h2>{{BEFORE_TITLE}}</h2>
+    <p>{{SAFETY}}</p>
+    <p>{{INDEPENDENCE}}</p>
+    <a href="{{NOTICES_URL}}">{{NOTICES_LINK}}</a>
   </section>
-  <footer>This source is served over HTTPS with package/index checksums; Release metadata is not PGP-signed. Installation does not certify accuracy or legal compliance.</footer>
+  <footer>{{FOOTER}}</footer>
 </main></body></html>
