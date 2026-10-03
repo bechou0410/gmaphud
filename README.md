@@ -1,7 +1,5 @@
 # GMapHUD
 
-Formerly MapSpeed. Version 0.1.9 changes project/package branding and notices; the speed integration is unchanged from 0.1.8. The original MIT copyright notice is retained.
-
 Experimental rootless iOS tweak that displays fresh **VietMap Live speed and speed-limit data in Google Maps CarPlay**. Inspired by the traffic bubble feature in DuoDash and TrueDash. Google Maps continues to handle navigation.
 
 **Author: Codex, an AI assistant from OpenAI.** The repository owner requested, tested and publishes this independent community project. This credit describes development assistance; it does not make OpenAI the publisher, copyright holder, maintainer or support provider. Not affiliated with or endorsed by VietMap, Google, Apple or OpenAI.
@@ -26,7 +24,7 @@ This release does not port other road signs, cameras, warning distances, navigat
 | Device / OS | iPhone 11, iOS 18.6.2, rootless jailbreak |
 | Google Maps | 26.39.0, executable UUID `E8BB60A0-E434-3412-AC6B-9B6800E031A6` |
 | VietMap Live | 3.4.2 |
-| Package | `com.chou.googlemaps.vietmap` 0.1.9, arm64/arm64e |
+| Package | `com.chou.googlemaps.vietmap` 0.1.10, arm64/arm64e |
 
 Private method signatures and executable/version guards leave unsupported targets inactive. A version string alone does not guarantee a matching Google executable. Package and notification identifiers retain their original namespace for compatibility with existing installations.
 
@@ -38,8 +36,6 @@ UI states were checked using a real phone connected to Apple's CarPlay Simulator
 2. In **Sileo → Sources → +**, add **https://bechou0410.github.io/gmaphud/**, refresh, then search for **GMapHUD**. The [source page](https://bechou0410.github.io/gmaphud/) also has an Add to Sileo button. Alternatively, download the `.deb` from [Releases](https://github.com/bechou0410/gmaphud/releases), and verify its SHA-256 against `SHA256SUMS`.
 3. Install through your jailbreak's package manager. Review removal prompts for old bridge/probe packages listed in [tweak/control](tweak/control). This package does not uninstall vendor TrueDash. The source supports `iphoneos-arm64` rootless packages only.
 4. Close and reopen VietMap and Google Maps, then open Google Maps in CarPlay. Keep VietMap's background alerts running. A Live Activity alone does not prove fresh speed samples.
-
-Already using the old **https://bechou0410.github.io/mapspeed/** source? Refresh it and update to **GMapHUD 0.1.9**; the package ID is unchanged, so no uninstall/reinstall is needed. Use only one source URL to avoid duplicate entries.
 
 No default SSH password is provided or required. A respring is not normally required if both app processes are reopened.
 
@@ -66,9 +62,7 @@ To publish an audited package, run `python3 build-repo.py packages/<package>.deb
 
 This is a flat HTTPS APT source (`deb https://bechou0410.github.io/gmaphud/ ./`) with package/index checksums. Release metadata is not PGP-signed; checksums alone do not authenticate the publisher. No global APT trust/security overrides are supplied. To roll back a source publication, revert its commit and push, retaining any already published package files. Confirm that the Pages build succeeded and public indexes match the intended package before announcing an update.
 
-The compatibility repository [bechou0410/mapspeed](https://github.com/bechou0410/mapspeed) serves only the legacy `/mapspeed/` source. The canonical code and releases are here in `bechou0410/gmaphud`. For each publication, also copy the reviewed, committed `docs/` into the compatibility checkout, retain its `Release` identity fields (`Origin: MapSpeed`, `Label: MapSpeed`, `Codename: mapspeed`), and commit/push there. Package/index bytes and checksum sections must match the canonical source; preserving the legacy identity avoids a source identity change for existing clients. Verify both Pages builds and public indexes. Do not overwrite existing package files with different bytes. The legacy source name may remain MapSpeed in Sileo, while the package is named GMapHUD.
-
-Renaming the primary repository changes its Pages URL. The original repository name is intentionally reused for the APT compatibility source, so old GitHub code/clone links now refer to that source repository; update local code checkouts with `git remote set-url origin https://github.com/bechou0410/gmaphud.git`. Rollback through a new higher package version if clients have already upgraded; reverting the source index alone does not downgrade installed packages.
+Rollback through a new higher package version if clients have already upgraded; reverting the source index alone does not downgrade installed packages.
 
 ## Stationary display test
 

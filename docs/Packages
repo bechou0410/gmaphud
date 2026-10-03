@@ -7,14 +7,14 @@ Section: Tweaks
 Depends: mobilesubstrate
 Conflicts: com.chou.vietmapbridge.truedash, com.chou.vietmapbridge.probe, com.chou.googlemaps.vietmap-probe
 Architecture: iphoneos-arm64
-Version: 0.1.9
+Version: 0.1.10
 Installed-Size: 556
-Filename: pool/com.chou.googlemaps.vietmap_0.1.9_iphoneos-arm64.deb
-Size: 31862
-MD5sum: 74cd125f4d23c91da080467a2af71a53
-SHA1: 558f8f068837d76f098a14d8964c9f38d259da89
-SHA256: 0ee022468b90983cc358f56f51499bb9d23701209e34149ffdad440a16d9736e
-SHA512: 3cf18b732fc74e95f805d10a19e6bf81d29899c6a0bddaa4281fbccfab58282d2b9975ce8e230be0eaf4fdf429c2cb199fa8a4cc407117648f3321dc188beafc
+Filename: pool/com.chou.googlemaps.vietmap_0.1.10_iphoneos-arm64.deb
+Size: 31878
+MD5sum: 760c684965792f534865be4c2a5d32ca
+SHA1: 288702e3385b7515e4c5130e2442ac07380dd52c
+SHA256: 398897d00851e54dc0534aba27751550a281ad64de98ddf435555680d7e19a07
+SHA512: 1e70569921744752002b413e25db2df3fdcf11ea4c4a7b262f81e4b793be324f6e4dcc1ff8777c4c2237081db74259b4af7610f719e1bced4a91564e50bc84e6
 Depiction: https://bechou0410.github.io/gmaphud/
 Homepage: https://github.com/bechou0410/gmaphud
 Bugs: https://github.com/bechou0410/gmaphud/issues
