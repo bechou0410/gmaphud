@@ -57,6 +57,11 @@ def build_sileo_depiction():
                 "hay vượt thuê bao/DRM. Mã nguồn theo giấy phép MIT. Dự án độc lập, không được "
                 "VietMap, Google hay Apple bảo trợ."
             ),
+            "links": "Liên kết",
+            "links_text": (
+                f"[Trang chủ]({URL}) · [GitHub](https://github.com/bechou0410/gmaphud) · "
+                f"[Thông báo trách nhiệm]({URL}notices.html#vi)"
+            ),
         },
         "en": {
             "tab": "English",
@@ -78,6 +83,11 @@ def build_sileo_depiction():
                 "follow actual signs. This is not a certified driving aid.\n\n"
                 "Speed and limits only; no other signs, audible alerts, GPS simulation, or subscription/DRM "
                 "bypass. Source is MIT-licensed. Independent project, not endorsed by VietMap, Google, or Apple."
+            ),
+            "links": "Links",
+            "links_text": (
+                f"[Project website]({URL}) · [GitHub](https://github.com/bechou0410/gmaphud) · "
+                f"[Disclaimer]({URL}notices.html#en)"
             ),
         },
     }
@@ -116,6 +126,8 @@ def build_sileo_depiction():
                 {"class": "DepictionMarkdownView", "markdown": text["compatibility_text"]},
                 {"class": "DepictionSubheaderView", "title": text["safety"]},
                 {"class": "DepictionMarkdownView", "markdown": text["safety_text"]},
+                {"class": "DepictionSubheaderView", "title": text["links"]},
+                {"class": "DepictionMarkdownView", "markdown": text["links_text"]},
             ],
         })
     change_views = [{"class": "DepictionHeaderView", "title": "Nhật ký thay đổi / Change log"}]

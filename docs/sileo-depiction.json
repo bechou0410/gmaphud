@@ -49,6 +49,14 @@
         {
           "class": "DepictionMarkdownView",
           "markdown": "Ảnh dùng tuyến giả lập; không chứng minh độ chính xác ngoài đường thực tế. Dữ liệu có thể sai, trễ hoặc thiếu. Chỉ dùng để nghiên cứu/kiểm thử khi xe đã đỗ an toàn; tuân thủ biển báo thực tế. Không phải thiết bị hỗ trợ lái xe được chứng nhận.\n\nChỉ hiển thị tốc độ và giới hạn; không có biển báo khác, cảnh báo âm thanh, giả lập GPS hay vượt thuê bao/DRM. Mã nguồn theo giấy phép MIT. Dự án độc lập, không được VietMap, Google hay Apple bảo trợ."
+        },
+        {
+          "class": "DepictionSubheaderView",
+          "title": "Liên kết"
+        },
+        {
+          "class": "DepictionMarkdownView",
+          "markdown": "[Trang chủ](https://bechou0410.github.io/gmaphud/) · [GitHub](https://github.com/bechou0410/gmaphud) · [Thông báo trách nhiệm](https://bechou0410.github.io/gmaphud/notices.html#vi)"
         }
       ]
     },
@@ -98,6 +106,14 @@
         {
           "class": "DepictionMarkdownView",
           "markdown": "Screenshots use a simulated route; they do not establish real-road accuracy. Readings may be wrong, delayed, or missing. For research and stationary testing only; follow actual signs. This is not a certified driving aid.\n\nSpeed and limits only; no other signs, audible alerts, GPS simulation, or subscription/DRM bypass. Source is MIT-licensed. Independent project, not endorsed by VietMap, Google, or Apple."
+        },
+        {
+          "class": "DepictionSubheaderView",
+          "title": "Links"
+        },
+        {
+          "class": "DepictionMarkdownView",
+          "markdown": "[Project website](https://bechou0410.github.io/gmaphud/) · [GitHub](https://github.com/bechou0410/gmaphud) · [Disclaimer](https://bechou0410.github.io/gmaphud/notices.html#en)"
         }
       ]
     },
