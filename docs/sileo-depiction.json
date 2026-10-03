@@ -1,0 +1,105 @@
+{
+  "minVersion": "0.4",
+  "class": "DepictionTabView",
+  "tintColor": "#9BE8B8",
+  "tabs": [
+    {
+      "class": "DepictionStackView",
+      "tabname": "Tiếng Việt",
+      "views": [
+        {
+          "class": "DepictionHeaderView",
+          "title": "GMapHUD trên CarPlay"
+        },
+        {
+          "class": "DepictionMarkdownView",
+          "markdown": "Hiển thị tốc độ hiện tại và giới hạn từ VietMap Live trong Google Maps CarPlay. Google Maps tiếp tục đảm nhiệm việc dẫn đường."
+        },
+        {
+          "class": "DepictionSubheaderView",
+          "title": "Ảnh xem trước · CarPlay Simulator"
+        },
+        {
+          "class": "DepictionScreenshotsView",
+          "itemSize": "{320, 192}",
+          "itemCornerRadius": 10,
+          "screenshots": [
+            {
+              "url": "https://bechou0410.github.io/gmaphud/screenshots/gmaphud-full-map-f7c79e32.png",
+              "accessibilityText": "Bản đồ CarPlay đầy đủ: trạng thái bình thường, 15/50 km/h; tuyến giả lập."
+            },
+            {
+              "url": "https://bechou0410.github.io/gmaphud/screenshots/gmaphud-dashboard.png",
+              "accessibilityText": "Dashboard CarPlay: trạng thái vượt giới hạn, 74/50 km/h; tuyến giả lập."
+            }
+          ]
+        },
+        {
+          "class": "DepictionSubheaderView",
+          "title": "Thiết lập đã kiểm thử"
+        },
+        {
+          "class": "DepictionMarkdownView",
+          "markdown": "iPhone 11 · iOS 18.6.2 rootless · Google Maps 26.39.0 (executable UUID phải khớp README) · VietMap Live 3.4.2."
+        },
+        {
+          "class": "DepictionSubheaderView",
+          "title": "Phạm vi và lưu ý"
+        },
+        {
+          "class": "DepictionMarkdownView",
+          "markdown": "Ảnh dùng tuyến giả lập; không chứng minh độ chính xác ngoài đường thực tế. Dữ liệu có thể sai, trễ hoặc thiếu. Chỉ dùng để nghiên cứu/kiểm thử khi xe đã đỗ an toàn; tuân thủ biển báo thực tế. Không phải thiết bị hỗ trợ lái xe được chứng nhận.\n\nChỉ hiển thị tốc độ và giới hạn; không có biển báo khác, cảnh báo âm thanh, giả lập GPS hay vượt thuê bao/DRM. Mã nguồn theo giấy phép MIT. Dự án độc lập, không được VietMap, Google hay Apple bảo trợ."
+        }
+      ]
+    },
+    {
+      "class": "DepictionStackView",
+      "tabname": "English",
+      "views": [
+        {
+          "class": "DepictionHeaderView",
+          "title": "GMapHUD on CarPlay"
+        },
+        {
+          "class": "DepictionMarkdownView",
+          "markdown": "Displays current speed and limits from VietMap Live in Google Maps CarPlay. Google Maps continues to handle navigation."
+        },
+        {
+          "class": "DepictionSubheaderView",
+          "title": "Previews · CarPlay Simulator"
+        },
+        {
+          "class": "DepictionScreenshotsView",
+          "itemSize": "{320, 192}",
+          "itemCornerRadius": 10,
+          "screenshots": [
+            {
+              "url": "https://bechou0410.github.io/gmaphud/screenshots/gmaphud-full-map-f7c79e32.png",
+              "accessibilityText": "Full-map CarPlay: normal state at 15/50 km/h; simulated route."
+            },
+            {
+              "url": "https://bechou0410.github.io/gmaphud/screenshots/gmaphud-dashboard.png",
+              "accessibilityText": "CarPlay Dashboard: overspeed state at 74/50 km/h; simulated route."
+            }
+          ]
+        },
+        {
+          "class": "DepictionSubheaderView",
+          "title": "Tested setup"
+        },
+        {
+          "class": "DepictionMarkdownView",
+          "markdown": "iPhone 11 · iOS 18.6.2 rootless · Google Maps 26.39.0 (executable UUID must match the README) · VietMap Live 3.4.2."
+        },
+        {
+          "class": "DepictionSubheaderView",
+          "title": "Scope and safety"
+        },
+        {
+          "class": "DepictionMarkdownView",
+          "markdown": "Screenshots use a simulated route; they do not establish real-road accuracy. Readings may be wrong, delayed, or missing. For research and stationary testing only; follow actual signs. This is not a certified driving aid.\n\nSpeed and limits only; no other signs, audible alerts, GPS simulation, or subscription/DRM bypass. Source is MIT-licensed. Independent project, not endorsed by VietMap, Google, or Apple."
+        }
+      ]
+    }
+  ]
+}

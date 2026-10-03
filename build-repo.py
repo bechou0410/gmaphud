@@ -16,6 +16,102 @@ import sys
 
 ROOT = Path(__file__).resolve().parent
 URL = "https://bechou0410.github.io/gmaphud/"
+SILEO_DEPICTION_URL = URL + "sileo-depiction.json"
+SCREENSHOTS = (
+    URL + "screenshots/gmaphud-full-map-f7c79e32.png",
+    URL + "screenshots/gmaphud-dashboard.png",
+)
+
+
+def build_sileo_depiction():
+    screenshots = {
+        "vi": [
+            "Bản đồ CarPlay đầy đủ: trạng thái bình thường, 15/50 km/h; tuyến giả lập.",
+            "Dashboard CarPlay: trạng thái vượt giới hạn, 74/50 km/h; tuyến giả lập.",
+        ],
+        "en": [
+            "Full-map CarPlay: normal state at 15/50 km/h; simulated route.",
+            "CarPlay Dashboard: overspeed state at 74/50 km/h; simulated route.",
+        ],
+    }
+    copy = {
+        "vi": {
+            "tab": "Tiếng Việt",
+            "title": "GMapHUD trên CarPlay",
+            "intro": (
+                "Hiển thị tốc độ hiện tại và giới hạn từ VietMap Live trong Google Maps CarPlay. "
+                "Google Maps tiếp tục đảm nhiệm việc dẫn đường."
+            ),
+            "screenshots": "Ảnh xem trước · CarPlay Simulator",
+            "compatibility": "Thiết lập đã kiểm thử",
+            "compatibility_text": (
+                "iPhone 11 · iOS 18.6.2 rootless · Google Maps 26.39.0 "
+                "(executable UUID phải khớp README) · VietMap Live 3.4.2."
+            ),
+            "safety": "Phạm vi và lưu ý",
+            "safety_text": (
+                "Ảnh dùng tuyến giả lập; không chứng minh độ chính xác ngoài đường thực tế. "
+                "Dữ liệu có thể sai, trễ hoặc thiếu. Chỉ dùng để nghiên cứu/kiểm thử khi xe đã đỗ an toàn; "
+                "tuân thủ biển báo thực tế. Không phải thiết bị hỗ trợ lái xe được chứng nhận.\n\n"
+                "Chỉ hiển thị tốc độ và giới hạn; không có biển báo khác, cảnh báo âm thanh, giả lập GPS "
+                "hay vượt thuê bao/DRM. Mã nguồn theo giấy phép MIT. Dự án độc lập, không được "
+                "VietMap, Google hay Apple bảo trợ."
+            ),
+        },
+        "en": {
+            "tab": "English",
+            "title": "GMapHUD on CarPlay",
+            "intro": (
+                "Displays current speed and limits from VietMap Live in Google Maps CarPlay. "
+                "Google Maps continues to handle navigation."
+            ),
+            "screenshots": "Previews · CarPlay Simulator",
+            "compatibility": "Tested setup",
+            "compatibility_text": (
+                "iPhone 11 · iOS 18.6.2 rootless · Google Maps 26.39.0 "
+                "(executable UUID must match the README) · VietMap Live 3.4.2."
+            ),
+            "safety": "Scope and safety",
+            "safety_text": (
+                "Screenshots use a simulated route; they do not establish real-road accuracy. "
+                "Readings may be wrong, delayed, or missing. For research and stationary testing only; "
+                "follow actual signs. This is not a certified driving aid.\n\n"
+                "Speed and limits only; no other signs, audible alerts, GPS simulation, or subscription/DRM "
+                "bypass. Source is MIT-licensed. Independent project, not endorsed by VietMap, Google, or Apple."
+            ),
+        },
+    }
+    tabs = []
+    for language in ("vi", "en"):
+        text = copy[language]
+        tabs.append({
+            "class": "DepictionStackView",
+            "tabname": text["tab"],
+            "views": [
+                {"class": "DepictionHeaderView", "title": text["title"]},
+                {"class": "DepictionMarkdownView", "markdown": text["intro"]},
+                {"class": "DepictionSubheaderView", "title": text["screenshots"]},
+                {
+                    "class": "DepictionScreenshotsView",
+                    "itemSize": "{320, 192}",
+                    "itemCornerRadius": 10,
+                    "screenshots": [
+                        {"url": url, "accessibilityText": description}
+                        for url, description in zip(SCREENSHOTS, screenshots[language])
+                    ],
+                },
+                {"class": "DepictionSubheaderView", "title": text["compatibility"]},
+                {"class": "DepictionMarkdownView", "markdown": text["compatibility_text"]},
+                {"class": "DepictionSubheaderView", "title": text["safety"]},
+                {"class": "DepictionMarkdownView", "markdown": text["safety_text"]},
+            ],
+        })
+    return {
+        "minVersion": "0.4",
+        "class": "DepictionTabView",
+        "tintColor": "#9BE8B8",
+        "tabs": tabs,
+    }
 
 
 def main():
@@ -42,7 +138,8 @@ def main():
     stanza = control + "\n" + f"Filename: pool/{name}\nSize: {len(data)}\n"
     for field, algorithm in (("MD5sum", "md5"), ("SHA1", "sha1"), ("SHA256", "sha256"), ("SHA512", "sha512")):
         stanza += f"{field}: {hashlib.new(algorithm, data).hexdigest()}\n"
-    stanza += f"Depiction: {URL}\nHomepage: https://github.com/bechou0410/gmaphud\n"
+    stanza += f"Depiction: {URL}\nSileoDepiction: {SILEO_DEPICTION_URL}\n"
+    stanza += "Homepage: https://github.com/bechou0410/gmaphud\n"
     stanza += "Bugs: https://github.com/bechou0410/gmaphud/issues\n"
     indexes = {"Packages": stanza.encode()}
     indexes["Packages.gz"] = gzip.compress(indexes["Packages"], mtime=0)
@@ -50,6 +147,10 @@ def main():
     indexes["Packages.xz"] = lzma.compress(indexes["Packages"])
     for filename, content in indexes.items():
         (site / filename).write_bytes(content)
+    (site / "sileo-depiction.json").write_text(
+        json.dumps(build_sileo_depiction(), ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
     release = (
         "Origin: GMapHUD\nLabel: GMapHUD\nSuite: experimental\nCodename: gmaphud\n"
         "Version: 1\nArchitectures: iphoneos-arm64\nComponents: main\n"

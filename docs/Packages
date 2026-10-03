@@ -17,5 +17,6 @@ SHA1: 8818ec97dd07d7612515e86d0a3c60af31f47124
 SHA256: c8a8ce6a238b64b7e91ef55638f2d7ec8b9f0adfcc0c0fff0d52eb2da0278071
 SHA512: d3f94ebde7bcb87977bf51f4b1d1f369ecf9c8bff729288674085f185929533749534d780db181bcccb0a390a25a53c219cc9312d27e4dc2f10671b9ba998bbe
 Depiction: https://bechou0410.github.io/gmaphud/
+SileoDepiction: https://bechou0410.github.io/gmaphud/sileo-depiction.json
 Homepage: https://github.com/bechou0410/gmaphud
 Bugs: https://github.com/bechou0410/gmaphud/issues
