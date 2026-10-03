@@ -10,7 +10,7 @@ Experimental rootless iOS tweak that displays fresh **VietMap Live speed and spe
 
 ## CarPlay previews
 
-These CarPlay Simulator captures show the full-map TEST display and a simulated-location Dashboard overspeed state. Both are UI illustrations; neither establishes real-road accuracy.
+These CarPlay Simulator captures show a simulated route: the full map at 15/50 km/h and a Dashboard overspeed state at 74/50 km/h. Both are UI illustrations; neither establishes real-road accuracy.
 
 | Full map | Dashboard |
 | --- | --- |

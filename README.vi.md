@@ -10,7 +10,7 @@ Tweak thử nghiệm cho iOS jailbreak rootless, hiển thị **tốc độ hi�
 
 ## Ảnh xem trước CarPlay
 
-Ảnh chụp từ CarPlay Simulator gồm giao diện bản đồ bật `TEST` và Dashboard ở vị trí giả lập, hiển thị cảnh báo 74/50 km/h. Cả hai chỉ minh họa giao diện, không khẳng định độ chính xác trên đường thật.
+Ảnh chụp từ CarPlay Simulator trên tuyến giả lập: bản đồ đầy đủ ở trạng thái 15/50 km/h và Dashboard ở trạng thái vượt giới hạn 74/50 km/h. Cả hai chỉ minh họa giao diện, không khẳng định độ chính xác trên đường thật.
 
 | Bản đồ đầy đủ | Dashboard |
 | --- | --- |
