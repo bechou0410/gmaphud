@@ -14,7 +14,7 @@ Tweak thử nghiệm cho iOS jailbreak rootless, hiển thị **tốc độ hi�
 
 | Bản đồ đầy đủ | Dashboard |
 | --- | --- |
-| ![Giao diện bản đồ đầy đủ GMapHUD trên CarPlay Simulator](docs/screenshots/gmaphud-full-map.png) | ![Giao diện Dashboard GMapHUD trên CarPlay Simulator](docs/screenshots/gmaphud-dashboard.png) |
+| ![Giao diện bản đồ đầy đủ GMapHUD trên CarPlay Simulator](docs/screenshots/gmaphud-full-map-f7c79e32.png) | ![Giao diện Dashboard GMapHUD trên CarPlay Simulator](docs/screenshots/gmaphud-dashboard.png) |
 
 ## Tính năng
 

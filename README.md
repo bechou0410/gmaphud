@@ -14,7 +14,7 @@ These CarPlay Simulator captures show a simulated route: the full map at 15/50 k
 
 | Full map | Dashboard |
 | --- | --- |
-| ![GMapHUD full-map view in CarPlay Simulator](docs/screenshots/gmaphud-full-map.png) | ![GMapHUD Dashboard view in CarPlay Simulator](docs/screenshots/gmaphud-dashboard.png) |
+| ![GMapHUD full-map view in CarPlay Simulator](docs/screenshots/gmaphud-full-map-f7c79e32.png) | ![GMapHUD Dashboard view in CarPlay Simulator](docs/screenshots/gmaphud-dashboard.png) |
 
 ## Features
 
