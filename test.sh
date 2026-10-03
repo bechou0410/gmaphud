@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 source_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-test_dir=$(mktemp -d /tmp/mapspeed-tests.XXXXXX)
+test_dir=$(mktemp -d /tmp/gmaphud-tests.XXXXXX)
 trap 'rm -rf "$test_dir"' EXIT HUP INT TERM
 xcrun clang -Wall -Wextra -Werror -fobjc-arc -framework Foundation \
   -I"$source_dir/common" -I"$source_dir/provider" \

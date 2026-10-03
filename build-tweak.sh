@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 source_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-build_dir=$(mktemp -d /tmp/mapspeed-build.XXXXXX)
+build_dir=$(mktemp -d /tmp/gmaphud-build.XXXXXX)
 trap 'rm -rf "$build_dir"' EXIT HUP INT TERM
 cp -R "$source_dir/tweak/." "$build_dir/"
 cp "$source_dir"/common/speed-state.[mh] "$source_dir"/common/test-state.[mh] "$source_dir"/common/speed-presentation.[mh] "$build_dir/"

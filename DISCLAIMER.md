@@ -2,7 +2,7 @@
 
 ## Independent project and attribution
 
-MapSpeed is an independent experimental community project. VietMap, VietMap Live, Google Maps, CarPlay, Apple and OpenAI names identify compatibility or AI development attribution only. Their names and marks remain with their respective owners. No affiliation, sponsorship, approval, certification or endorsement is claimed. Codex is credited as the AI development assistant; the repository owner publishes the project. This is not an official OpenAI product.
+GMapHUD is an independent experimental community project. VietMap, VietMap Live, Google Maps, CarPlay, Apple and OpenAI names identify compatibility or AI development attribution only. Their names and marks remain with their respective owners. No affiliation, sponsorship, approval, certification or endorsement is claimed. Codex is credited as the AI development assistant; the repository owner publishes the project. This is not an official OpenAI product.
 
 ## Safety and accuracy
 

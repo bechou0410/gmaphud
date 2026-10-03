@@ -1,5 +1,5 @@
 Package: com.chou.googlemaps.vietmap
-Name: MapSpeed
+Name: GMapHUD
 Description: Experimental fresh VietMap speed data in Google Maps native CarPlay controls.
 Maintainer: bechou0410
 Author: Codex (AI assistant)
@@ -7,14 +7,14 @@ Section: Tweaks
 Depends: mobilesubstrate
 Conflicts: com.chou.vietmapbridge.truedash, com.chou.vietmapbridge.probe, com.chou.googlemaps.vietmap-probe
 Architecture: iphoneos-arm64
-Version: 0.1.8
+Version: 0.1.9
 Installed-Size: 556
-Filename: pool/com.chou.googlemaps.vietmap_0.1.8_iphoneos-arm64.deb
-Size: 31894
-MD5sum: 27833ba3d6782d3de98e3dba8bd09158
-SHA1: a954fcd327fc59fdf9639d8f9f38ea7b5494d5c8
-SHA256: b6723c1cb9ce33e818c8f35cd8df43e7787833a94a62a5bc9d9d2c02fc590a31
-SHA512: 6d21d89598f7819741a708fbb014bf047a0c58a74513327f6276966e12ca311dddab3f9cf310ff9c04c3b4297423fe09403c2a0e0e5a3d7e5d84aead911c2ffb
-Depiction: https://bechou0410.github.io/mapspeed/
-Homepage: https://github.com/bechou0410/mapspeed
-Bugs: https://github.com/bechou0410/mapspeed/issues
+Filename: pool/com.chou.googlemaps.vietmap_0.1.9_iphoneos-arm64.deb
+Size: 31862
+MD5sum: 74cd125f4d23c91da080467a2af71a53
+SHA1: 558f8f068837d76f098a14d8964c9f38d259da89
+SHA256: 0ee022468b90983cc358f56f51499bb9d23701209e34149ffdad440a16d9736e
+SHA512: 3cf18b732fc74e95f805d10a19e6bf81d29899c6a0bddaa4281fbccfab58282d2b9975ce8e230be0eaf4fdf429c2cb199fa8a4cc407117648f3321dc188beafc
+Depiction: https://bechou0410.github.io/gmaphud/
+Homepage: https://github.com/bechou0410/gmaphud
+Bugs: https://github.com/bechou0410/gmaphud/issues
