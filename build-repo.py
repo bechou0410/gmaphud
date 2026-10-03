@@ -81,6 +81,16 @@ def build_sileo_depiction():
             ),
         },
     }
+    changelog = (
+        ("0.1.11", "Gói hiện tại trong nguồn Sileo; chưa có ghi chú phát hành riêng.",
+         "Current package in the Sileo source; no separate release notes published."),
+        ("0.1.10", "Hoàn thiện nhận diện dự án trong giấy phép MIT và tài liệu đóng kèm; thống nhất đường dẫn GitHub/Sileo. Tích hợp tốc độ không đổi so với 0.1.8.",
+         "Completed project branding in the MIT notice and bundled documents, and consolidated the GitHub/Sileo publication route. Speed integration unchanged from 0.1.8."),
+        ("0.1.9", "Cập nhật tên dự án, thông báo đóng gói và liên kết xuất bản. Tích hợp tốc độ không đổi so với 0.1.8.",
+         "Updated project/package branding, bundled notices, and publication links. Speed integration unchanged from 0.1.8."),
+        ("0.1.8", "Bản thử nghiệm đầu tiên: hiển thị tốc độ và giới hạn từ VietMap Live trên Google Maps CarPlay, gồm bảng trên bản đồ và thẻ Dashboard; kèm công cụ kiểm thử hiển thị khi xe đã đỗ.",
+         "First experimental release: displays VietMap Live speed and limits in Google Maps CarPlay, with a full-map pill and Dashboard card; includes a stationary display-test tool."),
+    )
     tabs = []
     for language in ("vi", "en"):
         text = copy[language]
@@ -106,6 +116,17 @@ def build_sileo_depiction():
                 {"class": "DepictionMarkdownView", "markdown": text["safety_text"]},
             ],
         })
+    change_views = [{"class": "DepictionHeaderView", "title": "Nhật ký thay đổi / Change log"}]
+    for version, vi, en in changelog:
+        change_views.extend([
+            {"class": "DepictionSubheaderView", "title": version},
+            {"class": "DepictionMarkdownView", "markdown": f"**Tiếng Việt:** {vi}\n\n**English:** {en}"},
+        ])
+    tabs.append({
+        "class": "DepictionStackView",
+        "tabname": "Nhật ký / Changes",
+        "views": change_views,
+    })
     return {
         "minVersion": "0.4",
         "class": "DepictionTabView",

@@ -100,6 +100,48 @@
           "markdown": "Screenshots use a simulated route; they do not establish real-road accuracy. Readings may be wrong, delayed, or missing. For research and stationary testing only; follow actual signs. This is not a certified driving aid.\n\nSpeed and limits only; no other signs, audible alerts, GPS simulation, or subscription/DRM bypass. Source is MIT-licensed. Independent project, not endorsed by VietMap, Google, or Apple."
         }
       ]
+    },
+    {
+      "class": "DepictionStackView",
+      "tabname": "Nhật ký / Changes",
+      "views": [
+        {
+          "class": "DepictionHeaderView",
+          "title": "Nhật ký thay đổi / Change log"
+        },
+        {
+          "class": "DepictionSubheaderView",
+          "title": "0.1.11"
+        },
+        {
+          "class": "DepictionMarkdownView",
+          "markdown": "**Tiếng Việt:** Gói hiện tại trong nguồn Sileo; chưa có ghi chú phát hành riêng.\n\n**English:** Current package in the Sileo source; no separate release notes published."
+        },
+        {
+          "class": "DepictionSubheaderView",
+          "title": "0.1.10"
+        },
+        {
+          "class": "DepictionMarkdownView",
+          "markdown": "**Tiếng Việt:** Hoàn thiện nhận diện dự án trong giấy phép MIT và tài liệu đóng kèm; thống nhất đường dẫn GitHub/Sileo. Tích hợp tốc độ không đổi so với 0.1.8.\n\n**English:** Completed project branding in the MIT notice and bundled documents, and consolidated the GitHub/Sileo publication route. Speed integration unchanged from 0.1.8."
+        },
+        {
+          "class": "DepictionSubheaderView",
+          "title": "0.1.9"
+        },
+        {
+          "class": "DepictionMarkdownView",
+          "markdown": "**Tiếng Việt:** Cập nhật tên dự án, thông báo đóng gói và liên kết xuất bản. Tích hợp tốc độ không đổi so với 0.1.8.\n\n**English:** Updated project/package branding, bundled notices, and publication links. Speed integration unchanged from 0.1.8."
+        },
+        {
+          "class": "DepictionSubheaderView",
+          "title": "0.1.8"
+        },
+        {
+          "class": "DepictionMarkdownView",
+          "markdown": "**Tiếng Việt:** Bản thử nghiệm đầu tiên: hiển thị tốc độ và giới hạn từ VietMap Live trên Google Maps CarPlay, gồm bảng trên bản đồ và thẻ Dashboard; kèm công cụ kiểm thử hiển thị khi xe đã đỗ.\n\n**English:** First experimental release: displays VietMap Live speed and limits in Google Maps CarPlay, with a full-map pill and Dashboard card; includes a stationary display-test tool."
+        }
+      ]
     }
   ]
 }

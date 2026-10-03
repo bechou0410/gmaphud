@@ -6,7 +6,7 @@ Version: 1
 Architectures: iphoneos-arm64
 Components: main
 Description: Experimental VietMap speed integration for Google Maps CarPlay
-Date: Sat, 03 Oct 2026 02:44:06 GMT
+Date: Sat, 03 Oct 2026 02:52:31 GMT
 MD5Sum:
  35bb7aa5baca1f9bc70aed66a65c3bf9 1069 Packages
  5815e95eb21950c50c024136763590d7 610 Packages.gz

@@ -66,7 +66,7 @@ Gói được tạo trong `packages/`. Hai script dùng thư mục tạm và h�
 
 ## Duy trì nguồn Sileo
 
-[Nguồn tĩnh](https://bechou0410.github.io/gmaphud/) được GitHub Pages xuất bản từ `main` → `/docs`. [build-repo.py](build-repo.py) đưa gói đã build vào nguồn, tạo chỉ mục, trang và depiction Sileo song ngữ có carousel ảnh CarPlay; [repo-template.html](repo-template.html) chứa bố cục landing page dùng chung và [repo-locales.json](repo-locales.json) chứa nội dung tiếng Việt/Anh của trang. Trang mặc định dùng tiếng Việt; [en.html](https://bechou0410.github.io/gmaphud/en.html) dùng tiếng Anh. Cấu hình xuất bản nằm trong Settings → Pages của repository. Xem log tại Actions hoặc bằng `gh api repos/bechou0410/gmaphud/pages/builds/latest`.
+[Nguồn tĩnh](https://bechou0410.github.io/gmaphud/) được GitHub Pages xuất bản từ `main` → `/docs`. [build-repo.py](build-repo.py) đưa gói đã build vào nguồn, tạo chỉ mục, trang và depiction Sileo song ngữ có carousel ảnh CarPlay cùng tab nhật ký thay đổi; [repo-template.html](repo-template.html) chứa bố cục landing page dùng chung và [repo-locales.json](repo-locales.json) chứa nội dung tiếng Việt/Anh của trang. Trang mặc định dùng tiếng Việt; [en.html](https://bechou0410.github.io/gmaphud/en.html) dùng tiếng Anh. Cấu hình xuất bản nằm trong Settings → Pages của repository. Xem log tại Actions hoặc bằng `gh api repos/bechou0410/gmaphud/pages/builds/latest`.
 
 `docs/CydiaIcon*.png` là biểu tượng repo được Sileo tải từ gốc nguồn. Trường `Icon` trong [tweak/control](tweak/control) là biểu tượng riêng của gói; `docs/gmaphud-icon.svg/png` dùng cho favicon và trang web.
 
