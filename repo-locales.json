@@ -54,7 +54,8 @@
     "NOTICES_LINK": "Đọc thông báo đầy đủ và giấy phép MIT",
     "NOTICES_URL": "notices.html#vi",
     "FOOTER": "Nguồn được phục vụ qua HTTPS, có checksum gói/chỉ mục; metadata Release chưa được ký PGP. Cài đặt không chứng nhận độ chính xác hay việc tuân thủ pháp luật.",
-    "FALLBACK_SOURCE": "Nguồn GitHub Pages dự phòng"
+    "FALLBACK_SOURCE": "Nguồn GitHub Pages dự phòng",
+    "YTHUD_LINK": "YTHUD · Video trong ô nhạc Dashboard (rootless)"
   },
   "en": {
     "SOURCE_TITLE": "Sileo source",
@@ -111,6 +112,7 @@
     "NOTICES_LINK": "Read the full disclaimer & MIT license",
     "NOTICES_URL": "notices.html#en",
     "FOOTER": "This source is served over HTTPS with package/index checksums; Release metadata is not PGP-signed. Installation does not certify accuracy or legal compliance.",
-    "FALLBACK_SOURCE": "Fallback GitHub Pages source"
+    "FALLBACK_SOURCE": "Fallback GitHub Pages source",
+    "YTHUD_LINK": "YTHUD · Video in the Dashboard music tile (rootless)"
   }
 }

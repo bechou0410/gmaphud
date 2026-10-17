@@ -1,0 +1,91 @@
+{
+  "minVersion": "0.4",
+  "class": "DepictionTabView",
+  "tintColor": "#27704d",
+  "tabs": [
+    {
+      "class": "DepictionStackView",
+      "tabname": "Tiếng Việt",
+      "views": [
+        {
+          "class": "DepictionHeaderView",
+          "title": "YTHUD 0.1.0 · experimental"
+        },
+        {
+          "class": "DepictionMarkdownView",
+          "markdown": "Đưa video YouTube vào vùng hình của ô nhạc Now Playing trên CarPlay Dashboard. Giữ mini player native, nút Next, Pause/Play và tự chuyển video của YouTube."
+        },
+        {
+          "class": "DepictionSubheaderView",
+          "title": "Compatibility / Tương thích"
+        },
+        {
+          "class": "DepictionMarkdownView",
+          "markdown": "Rootless jailbreak · iOS 18.6.2 · YouTube 21.41.5 · CarSurf. arm64 + arm64e. YouTube 21.41.5 only; other versions keep their native backend."
+        },
+        {
+          "class": "DepictionSubheaderView",
+          "title": "Install / Cài đặt"
+        },
+        {
+          "class": "DepictionMarkdownView",
+          "markdown": "Thêm https://gmaphud.caidat.app/ vào Sileo/Zebra, làm mới nguồn và tìm YTHUD. Cài gói rootless rồi mở lại YouTube và kết nối lại CarPlay (hoặc respring). Mở YouTube trên CarPlay qua bridge đang có, phát video rồi chuyển sang Dashboard. Chạm đơn mini player để mở lớn khi trở về app. Tweak không tự cài bridge hoặc launcher."
+        },
+        {
+          "class": "DepictionSubheaderView",
+          "title": "Known limitations / Giới hạn"
+        },
+        {
+          "class": "DepictionMarkdownView",
+          "markdown": "Livestream chưa xuất được ra Dashboard. Đã gặp một trường hợp quay lại YouTube bị đen hình sau Next/Pause; các lượt khác trả hình thành công nhưng lỗi này chưa được khắc phục. Quảng cáo, khóa máy, kết nối lại phụ kiện và độ ổn định dài hạn chưa được kiểm đầy đủ."
+        },
+        {
+          "class": "DepictionMarkdownView",
+          "markdown": "Author: chou · AI-assisted with Codex. [Source](https://github.com/bechou0410/gmaphud/tree/main/ythud) · [Issues](https://github.com/bechou0410/gmaphud/issues)"
+        }
+      ]
+    },
+    {
+      "class": "DepictionStackView",
+      "tabname": "English",
+      "views": [
+        {
+          "class": "DepictionHeaderView",
+          "title": "YTHUD 0.1.0 · experimental"
+        },
+        {
+          "class": "DepictionMarkdownView",
+          "markdown": "Shows YouTube video in the Now Playing music tile on CarPlay Dashboard. Keeps YouTube’s native mini player, Next, Pause/Play and automatic next-video flow."
+        },
+        {
+          "class": "DepictionSubheaderView",
+          "title": "Compatibility / Tương thích"
+        },
+        {
+          "class": "DepictionMarkdownView",
+          "markdown": "Rootless jailbreak · iOS 18.6.2 · YouTube 21.41.5 · CarSurf. arm64 + arm64e. YouTube 21.41.5 only; other versions keep their native backend."
+        },
+        {
+          "class": "DepictionSubheaderView",
+          "title": "Install / Cài đặt"
+        },
+        {
+          "class": "DepictionMarkdownView",
+          "markdown": "Add https://gmaphud.caidat.app/ to Sileo/Zebra, refresh and search for YTHUD. Install the rootless package, reopen YouTube and reconnect CarPlay (or respring). Open YouTube on CarPlay through your existing bridge, play a video and switch to Dashboard. Single-tap the mini player to expand on return. This package does not install a bridge or launcher."
+        },
+        {
+          "class": "DepictionSubheaderView",
+          "title": "Known limitations / Giới hạn"
+        },
+        {
+          "class": "DepictionMarkdownView",
+          "markdown": "Livestream output is unsupported. One return to YouTube after Next/Pause remained black; later successful returns do not establish a fix. Ads, screen locking, accessory reconnection and long-term stability are not fully verified."
+        },
+        {
+          "class": "DepictionMarkdownView",
+          "markdown": "Author: chou · AI-assisted with Codex. [Source](https://github.com/bechou0410/gmaphud/tree/main/ythud) · [Issues](https://github.com/bechou0410/gmaphud/issues)"
+        }
+      ]
+    }
+  ]
+}

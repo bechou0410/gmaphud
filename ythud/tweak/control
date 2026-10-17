@@ -1,0 +1,15 @@
+Package: com.chou.ythud
+Name: YTHUD
+Version: 0.1.0
+Architecture: iphoneos-arm64
+Description: YouTube video in the CarPlay Dashboard music tile. Tested with YouTube 21.41.5; livestream output is not supported.
+Maintainer: chou
+Author: chou
+Section: Tweaks
+Depends: mobilesubstrate, firmware (>= 16.0)
+Conflicts: com.chou.youtube-dashboard
+Replaces: com.chou.youtube-dashboard
+Homepage: https://github.com/bechou0410/gmaphud/tree/main/ythud
+Bugs: https://github.com/bechou0410/gmaphud/issues
+Depiction: https://bechou0410.github.io/gmaphud/ythud/
+SileoDepiction: https://bechou0410.github.io/gmaphud/ythud/sileo-depiction.json

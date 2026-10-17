@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Publish an existing GMapHUD package into the static Sileo source."""
+"""Publish audited GMapHUD packages and optional YTHUD into the static source."""
 import bz2
 from datetime import datetime, timezone
 from email.utils import format_datetime
@@ -18,6 +18,15 @@ ROOT = Path(__file__).resolve().parent
 URL = "https://bechou0410.github.io/gmaphud/"
 SOURCE_URL = "https://gmaphud.caidat.app/"
 SILEO_DEPICTION_URL = URL + "sileo-depiction.json"
+YTHUD_PACKAGE = "com.chou.ythud"
+YTHUD_LINKS = {
+    "Homepage": "https://github.com/bechou0410/gmaphud/tree/main/ythud",
+    "Bugs": "https://github.com/bechou0410/gmaphud/issues",
+    "Depiction": URL + "ythud/",
+    "SileoDepiction": URL + "ythud/sileo-depiction.json",
+}
+HASHES = (("MD5sum", "md5"), ("SHA1", "sha1"), ("SHA256", "sha256"), ("SHA512", "sha512"))
+INDEX_FIELDS = {"Filename", "Size", *(field for field, _ in HASHES)}
 SCREENSHOTS = (
     URL + "screenshots/full-map-top-left.png",
     URL + "screenshots/full-map-top-right.png",
@@ -193,40 +202,113 @@ def build_sileo_depiction():
     }
 
 
+def control_fields(control):
+    fields = {}
+    key = None
+    for line in control.splitlines():
+        if line.startswith((" ", "\t")) and key:
+            fields[key] += "\n" + line
+            continue
+        match = re.fullmatch(r"([A-Za-z][A-Za-z0-9-]*): (.*)", line)
+        if not match or match[1] in fields:
+            raise SystemExit("Invalid or duplicate package metadata field.")
+        key = match[1]
+        fields[key] = match[2]
+    return fields
+
+
+def read_package(package, package_id, architectures):
+    data = package.read_bytes()
+    control = subprocess.check_output(["dpkg-deb", "--field", str(package)], text=True).strip()
+    fields = control_fields(control)
+    arch = fields.get("Architecture")
+    if fields.get("Package") != package_id or arch not in architectures:
+        raise SystemExit(f"Unexpected package identity or architecture for {package_id}.")
+    version = fields.get("Version", "")
+    if not re.fullmatch(r"[A-Za-z0-9.+:~\-]+", version):
+        raise SystemExit("Invalid package version.")
+    if INDEX_FIELDS & fields.keys():
+        raise SystemExit("Package control must not contain repository index fields.")
+    if package_id == YTHUD_PACKAGE and any(fields.get(key) != value for key, value in YTHUD_LINKS.items()):
+        raise SystemExit("YTHUD must declare its dedicated publication links.")
+    name = f"{package_id}_{version}_{arch}.deb"
+    return arch, (version, name, data, control)
+
+
+def published_ythud(site):
+    index = site / "Packages"
+    if not index.exists():
+        return None
+    retained = None
+    for stanza in index.read_text(encoding="utf-8").strip().split("\n\n"):
+        if not stanza:
+            continue
+        fields = control_fields(stanza)
+        if fields.get("Package") == "com.chou.googlemaps.vietmap":
+            continue
+        if fields.get("Package") != YTHUD_PACKAGE or retained is not None:
+            raise SystemExit("Expected at most one published YTHUD package alongside GMapHUD.")
+        version = fields.get("Version", "")
+        if not re.fullmatch(r"[A-Za-z0-9.+:~\-]+", version):
+            raise SystemExit("Invalid published YTHUD version.")
+        filename = f"pool/{YTHUD_PACKAGE}_{version}_iphoneos-arm64.deb"
+        if fields.get("Filename") != filename:
+            raise SystemExit("Published YTHUD must reference its canonical pool filename.")
+        package = site / filename
+        if package.is_symlink() or not package.is_file():
+            raise SystemExit("Published YTHUD artifact is missing or is not a regular file.")
+        _, record = read_package(package, YTHUD_PACKAGE, ("iphoneos-arm64",))
+        data = record[2]
+        if fields.get("Size") != str(len(data)) or any(
+            fields.get(field) != hashlib.new(algorithm, data).hexdigest() for field, algorithm in HASHES
+        ):
+            raise SystemExit("Published YTHUD artifact does not match its size or checksums.")
+        if {key: value for key, value in fields.items() if key not in INDEX_FIELDS} != control_fields(record[3]):
+            raise SystemExit("Published YTHUD metadata does not match its package control.")
+        retained = stanza + "\n"
+    return retained
+
+
+def package_stanza(record, gmaphud=False):
+    _, name, data, control = record
+    stanza = control + "\n" + f"Filename: pool/{name}\nSize: {len(data)}\n"
+    for field, algorithm in HASHES:
+        stanza += f"{field}: {hashlib.new(algorithm, data).hexdigest()}\n"
+    if gmaphud:
+        stanza += f"Depiction: {URL}\nSileoDepiction: {SILEO_DEPICTION_URL}\n"
+        stanza += "Homepage: https://github.com/bechou0410/gmaphud\nBugs: https://github.com/bechou0410/gmaphud/issues\n"
+    return stanza
+
+
 def main():
-    if len(sys.argv) != 3:
-        raise SystemExit("Usage: python3 build-repo.py rootless.deb rootful.deb")
+    if len(sys.argv) not in (3, 4):
+        raise SystemExit("Usage: python3 build-repo.py rootless.deb rootful.deb [ythud.deb]")
     site = ROOT / "docs"
     pool = site / "pool"
     records = {}
-    for argument in sys.argv[1:]:
-        package = Path(argument).resolve(strict=True)
-        control = subprocess.check_output(["dpkg-deb", "--field", str(package)], text=True).strip()
-        fields = dict(re.findall(r"^([A-Za-z][A-Za-z0-9-]*): (.*)$", control, re.MULTILINE))
-        arch = fields.get("Architecture")
-        if fields.get("Package") != "com.chou.googlemaps.vietmap" or arch not in ("iphoneos-arm", "iphoneos-arm64") or arch in records:
+    for argument in sys.argv[1:3]:
+        arch, record = read_package(Path(argument).resolve(strict=True), "com.chou.googlemaps.vietmap", ("iphoneos-arm", "iphoneos-arm64"))
+        if arch in records:
             raise SystemExit("Expected one rootful and one rootless GMapHUD package.")
-        version = fields["Version"]
-        if not re.fullmatch(r"[A-Za-z0-9.+:~\-]+", version):
-            raise SystemExit("Invalid package version.")
-        name = f"com.chou.googlemaps.vietmap_{version}_{arch}.deb"
-        data = package.read_bytes()
-        target = pool / name
-        if target.exists() and target.read_bytes() != data:
-            raise SystemExit("Published package versions are immutable; bump the version first.")
-        records[arch] = (version, name, data, control)
+        records[arch] = record
     if len({record[0] for record in records.values()}) != 1:
         raise SystemExit("Both packages must have the same version.")
+    ythud_stanza = published_ythud(site)
+    ythud = None
+    if len(sys.argv) == 4:
+        _, ythud = read_package(Path(sys.argv[3]).resolve(strict=True), YTHUD_PACKAGE, ("iphoneos-arm64",))
+        ythud_stanza = package_stanza(ythud)
+    incoming = list(records.values()) + ([ythud] if ythud else [])
+    for _, name, data, _ in incoming:
+        target = pool / name
+        if target.is_symlink() or (target.exists() and target.read_bytes() != data):
+            raise SystemExit("Published package versions are immutable; bump the version first.")
     pool.mkdir(parents=True, exist_ok=True)
-    stanzas = []
-    for arch, (version, name, data, control) in sorted(records.items()):
+    for _, name, data, _ in incoming:
         (pool / name).write_bytes(data)
-        stanza = control + "\n" + f"Filename: pool/{name}\nSize: {len(data)}\n"
-        for field, algorithm in (("MD5sum", "md5"), ("SHA1", "sha1"), ("SHA256", "sha256"), ("SHA512", "sha512")):
-            stanza += f"{field}: {hashlib.new(algorithm, data).hexdigest()}\n"
-        stanza += f"Depiction: {URL}\nSileoDepiction: {SILEO_DEPICTION_URL}\n"
-        stanza += "Homepage: https://github.com/bechou0410/gmaphud\nBugs: https://github.com/bechou0410/gmaphud/issues\n"
-        stanzas.append(stanza)
+    stanzas = [package_stanza(record, gmaphud=True) for _, record in sorted(records.items())]
+    if ythud_stanza:
+        stanzas.append(ythud_stanza)
     stanza = "\n".join(stanzas)
     version, name, data, _ = records["iphoneos-arm64"]
     indexes = {"Packages": stanza.encode()}

@@ -92,7 +92,7 @@ The primary [installation source](https://gmaphud.caidat.app/) uses a Cloudflare
 
 `docs/CydiaIcon*.png` are the repository icons Sileo fetches from the source root. The `Icon` field in [tweak/control](tweak/control) is the separate package icon; `docs/gmaphud-icon.svg/png` serve the website favicon and branding.
 
-To publish an audited package, run `python3 build-repo.py packages/<rootless>.deb packages/<rootful>.deb` with Python 3 and `dpkg-deb` installed, review the resulting `docs/` changes, then commit and push. The index advertises the supplied version; previous package files remain available for existing downloads. Published filenames are immutable: bump the version before changing package bytes. Only audited production GMapHUD packages belong in this source. Never put logs, keys, app dumps or other local files in `docs/`; the entire directory becomes public.
+To publish an audited package, run `python3 build-repo.py packages/<rootless>.deb packages/<rootful>.deb` with Python 3 and `dpkg-deb` installed, review the resulting `docs/` changes, then commit and push. The index advertises the supplied version; previous package files remain available for existing downloads. Published filenames are immutable: bump the version before changing package bytes. Only reviewed release packages belong in this source. YTHUD is a separate experimental rootless package; append its .deb as the third argument when publishing it. A later GMapHUD-only invocation retains the published YTHUD record and verifies its artifact. Never put logs, keys, app dumps or other local files in `docs/`; the entire directory becomes public.
 
 This is a flat HTTPS APT source (`deb https://gmaphud.caidat.app/ ./`) with package/index checksums. Release metadata is not PGP-signed; checksums alone do not authenticate the publisher. No global APT trust/security overrides are supplied. To roll back a source publication, revert its commit and push, retaining any already published package files. Confirm that the Pages build succeeded and public indexes match the intended package before announcing an update.
 
@@ -156,3 +156,7 @@ Glow intensity is scoped separately: map warning is stronger, whole-screen warni
 In Settings → GMapHUD, pick Classic or New UI (beta) under Giao diện; the change applies to every screen without reopening Google Maps. Then choose Full Map, Dashboard or iPhone. Each page includes its own switch, position, Auto/Horizontal/Vertical layout, size and drag-to-reorder controls. Both previews update with the order. iPhone also has X/Y positioning. Reset restores only its associated setting.
 
 In **Background**, enable automatic VietMap wake or optional source exit 20 seconds after CarPlay disconnect. Existing location permissions are preserved.
+
+## Other packages
+
+**[YTHUD](ythud/README.md)** — Experimental rootless package for YouTube video in the Dashboard music tile. Requires YouTube 21.41.5 and an existing CarPlay app bridge. Livestream is unsupported; an intermittent black picture when returning to YouTube is unresolved. [Depiction](https://bechou0410.github.io/gmaphud/ythud/).

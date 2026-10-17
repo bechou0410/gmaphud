@@ -1,0 +1,11 @@
+#!/bin/sh
+set -e
+if [ "$1" = configure ]; then
+    # These four unmanaged files belong to the preceding development trial.
+    # Loading both versions would install the same player hooks twice.
+    rm -f /var/jb/usr/lib/TweakInject/YTAVTrial.dylib \
+        /var/jb/usr/lib/TweakInject/YTAVTrial.plist \
+        /var/jb/usr/lib/TweakInject/YTAVDedicatedDashboard.dylib \
+        /var/jb/usr/lib/TweakInject/YTAVDedicatedDashboard.plist
+fi
+exit 0

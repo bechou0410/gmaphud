@@ -95,7 +95,7 @@ Quy tắc phiên bản: trong một chu kỳ phát triển chưa phát hành, m�
 
 `docs/CydiaIcon*.png` là biểu tượng repo được Sileo tải từ gốc nguồn. Trường `Icon` trong [tweak/control](tweak/control) là biểu tượng riêng của gói; `docs/gmaphud-icon.svg/png` dùng cho favicon và trang web.
 
-Để xuất bản gói đã rà soát, chạy `python3 build-repo.py packages/<rootless>.deb packages/<rootful>.deb` với Python 3 và `dpkg-deb`, kiểm tra thay đổi trong `docs/`, rồi commit và push. Chỉ mục quảng bá phiên bản vừa cung cấp; tệp gói cũ vẫn giữ cho các lượt tải đã có. Tệp đã xuất bản là bất biến: tăng phiên bản trước khi đổi nội dung gói. Chỉ đưa gói GMapHUD sản xuất đã rà soát vào nguồn. Không đưa log, khóa, bản dump ứng dụng hoặc dữ liệu cục bộ khác vào `docs/`; toàn bộ thư mục này được công khai.
+Để xuất bản gói đã rà soát, chạy `python3 build-repo.py packages/<rootless>.deb packages/<rootful>.deb` với Python 3 và `dpkg-deb`, kiểm tra thay đổi trong `docs/`, rồi commit và push. Chỉ mục quảng bá phiên bản vừa cung cấp; tệp gói cũ vẫn giữ cho các lượt tải đã có. Tệp đã xuất bản là bất biến: tăng phiên bản trước khi đổi nội dung gói. Chỉ đưa gói phát hành đã rà soát vào nguồn. YTHUD là gói rootless thử nghiệm riêng; thêm tệp .deb của YTHUD làm đối số thứ ba khi xuất bản gói này. Lần chạy chỉ có hai gói GMapHUD về sau sẽ giữ và xác minh gói YTHUD đã công bố. Không đưa log, khóa, bản dump ứng dụng hoặc dữ liệu cục bộ khác vào `docs/`; toàn bộ thư mục này được công khai.
 
 Đây là nguồn APT dạng phẳng qua HTTPS (`deb https://gmaphud.caidat.app/ ./`), có checksum gói/chỉ mục. Metadata Release chưa được ký PGP; riêng checksum không xác thực được người xuất bản. Dự án không cung cấp cách tắt cơ chế tin cậy/bảo mật APT toàn cục. Để hoàn tác một lần xuất bản nguồn, revert commit và push, đồng thời giữ tệp gói đã xuất bản. Xác nhận Pages build thành công và chỉ mục công khai khớp gói dự định trước khi thông báo cập nhật.
 
@@ -160,3 +160,7 @@ Nhịp cảnh báo tăng theo mức vượt: dưới 5 km/h — 0,75 Hz; từ 5 
 Trong Cài đặt → GMapHUD, chọn Classic hoặc New UI (beta) ở mục Giao diện; thay đổi áp dụng cho mọi màn hình mà không cần mở lại Google Maps. Sau đó chọn Bản đồ đầy đủ, Dashboard hoặc Trên iPhone. Mỗi trang có công tắc riêng, vị trí, bố cục Ngang/Dọc/Tự động, kích cỡ và kéo thả thứ tự các phần. Hai preview ngang/dọc cập nhật khi đổi thứ tự. iPhone có thêm tinh chỉnh X/Y. Nút Đặt lại chỉ khôi phục phần tương ứng.
 
 Trong **Chạy nền**, có thể bật tự đánh thức VietMap và tùy chọn thoát nguồn sau 20 giây ngắt CarPlay. Quyền định vị gốc được giữ nguyên.
+
+## Gói khác trong nguồn
+
+**[YTHUD](ythud/README.md)** — Gói rootless thử nghiệm đưa video YouTube vào ô nhạc Dashboard. Cần YouTube 21.41.5 và bridge mở app trên CarPlay đang có. Livestream chưa hỗ trợ; còn lỗi đen hình không thường xuyên khi quay lại YouTube. [Depiction](https://bechou0410.github.io/gmaphud/ythud/).
