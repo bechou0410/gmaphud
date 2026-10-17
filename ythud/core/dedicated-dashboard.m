@@ -35,6 +35,62 @@ static void Log(NSString *text) {
         [events writeData:[line dataUsingEncoding:NSUTF8StringEncoding]];
     }
 }
+static BOOL Signature(id object, const char *name, const char *encoding) {
+    Method method = class_getInstanceMethod(object_getClass(object), sel_registerName(name));
+    return method && !strcmp(method_getTypeEncoding(method), encoding);
+}
+static id ReadObject(id object, const char *name) {
+    if (!Signature(object, name, "@16@0:8")) return nil;
+    return ((id (*)(id, SEL))objc_msgSend)(object, sel_registerName(name));
+}
+static BOOL OpenYouTube(UIView *view, BOOL activate) {
+    @try {
+        UIViewController *widget = nil;
+        Class widgetClass = NSClassFromString(@"DBNowPlayingWidgetViewController");
+        UIResponder *responder = view;
+        for (unsigned depth = 0; responder && depth < 32; depth++, responder = responder.nextResponder) {
+            if (widgetClass && [responder isKindOfClass:widgetClass]) { widget = (UIViewController *)responder; break; }
+        }
+        id environment = ReadObject(widget, "environment");
+        Class dashboardClass = NSClassFromString(@"DBDashboard");
+        if (!dashboardClass || ![environment isKindOfClass:dashboardClass] ||
+            !Signature(environment, "_launchAppWithInfo:forURL:", "v32@0:8@16@24")) return NO;
+        id controller = ReadObject(NSClassFromString(@"DBApplicationController"), "sharedInstance");
+        if (!Signature(controller, "applicationWithBundleIdentifier:", "@24@0:8@16")) return NO;
+        id application = ((id (*)(id, SEL, id))objc_msgSend)(controller,
+            sel_registerName("applicationWithBundleIdentifier:"), @"com.google.ios.youtube");
+        if (![ReadObject(application, "bundleIdentifier") isEqual:@"com.google.ios.youtube"]) return NO;
+        Class launchInfoClass = NSClassFromString(@"DBApplicationLaunchInfo");
+        if (!Signature(launchInfoClass, "launchInfoForApplication:", "@24@0:8@16")) return NO;
+        if (activate) {
+            id info = ((id (*)(id, SEL, id))objc_msgSend)(launchInfoClass,
+                sel_registerName("launchInfoForApplication:"), application);
+            if (![info isKindOfClass:launchInfoClass]) return NO;
+            ((void (*)(id, SEL, id, id))objc_msgSend)(environment,
+                sel_registerName("_launchAppWithInfo:forURL:"), info, nil);
+            Log(@"TAP opened-youtube-on-carplay");
+        }
+        return YES;
+    } @catch (NSException *exception) {
+        Log([@"TAP failed " stringByAppendingString:exception.name]); return NO;
+    }
+}
+static BOOL CurrentOutput(void) {
+    unsigned context = 0;
+    return overlay && Visible(overlay) && lastContext &&
+        YTAVChannelExport(&channel, &context) && context == lastContext;
+}
+@interface YTAVDashboardVideoButton : UIButton
+@end
+@implementation YTAVDashboardVideoButton
+- (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event {
+    // Unsupported launch routes and withdrawn outputs keep native tile hit testing.
+    return [super pointInside:point withEvent:event] && CurrentOutput() && OpenYouTube(self, NO);
+}
+- (void)openYouTube {
+    if (CurrentOutput()) OpenYouTube(self, YES);
+}
+@end
 static void Update(void) {
     NSMutableOrderedSet *windows = [NSMutableOrderedSet new];
     for (UIScene *scene in UIApplication.sharedApplication.connectedScenes)
@@ -64,7 +120,10 @@ static void Update(void) {
         Remove(); host = [NSClassFromString(@"CALayerHost") layer];
         Method m = class_getInstanceMethod(object_getClass(host), sel_registerName("setContextId:"));
         if (!m || strcmp(method_getTypeEncoding(m), "v20@0:8I16")) { host = nil; return; }
-        overlay = [UIView new]; overlay.backgroundColor = UIColor.blackColor; overlay.userInteractionEnabled = NO;
+        YTAVDashboardVideoButton *button = [YTAVDashboardVideoButton new];
+        [button addTarget:button action:@selector(openYouTube) forControlEvents:UIControlEventPrimaryActionTriggered];
+        button.accessibilityLabel = @"Open YouTube";
+        overlay = button; overlay.backgroundColor = UIColor.blackColor;
         overlay.clipsToBounds = YES; [target addSubview:overlay]; [overlay.layer addSublayer:host];
     }
     [CATransaction begin]; [CATransaction setDisableActions:YES];

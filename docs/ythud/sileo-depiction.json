@@ -9,7 +9,7 @@
       "views": [
         {
           "class": "DepictionHeaderView",
-          "title": "YTHUD 0.1.1 · experimental"
+          "title": "YTHUD 0.1.2 · experimental"
         },
         {
           "class": "DepictionMarkdownView",
@@ -29,7 +29,7 @@
         },
         {
           "class": "DepictionMarkdownView",
-          "markdown": "Thêm https://gmaphud.caidat.app/ vào Sileo/Zebra, làm mới nguồn và tìm YTHUD. Cài gói rootless rồi mở lại YouTube và kết nối lại CarPlay (hoặc respring). Mở YouTube trên CarPlay qua bridge đang có, phát video rồi chuyển sang Dashboard. Chạm đơn mini player để mở lớn khi trở về app. Tweak không tự cài bridge hoặc launcher."
+          "markdown": "Thêm https://gmaphud.caidat.app/ vào Sileo/Zebra, làm mới nguồn và tìm YTHUD. Cài gói rootless rồi mở lại YouTube và kết nối lại CarPlay (hoặc respring). Mở YouTube trên CarPlay qua bridge đang có, phát video rồi chuyển sang Dashboard. Từ 0.1.2, chạm video trong ô nhạc để trở lại YouTube trên CarPlay, kể cả khi Pause. Chạm đơn mini player để mở lớn khi trở về app. Tweak không tự cài bridge."
         },
         {
           "class": "DepictionSubheaderView",
@@ -51,7 +51,7 @@
       "views": [
         {
           "class": "DepictionHeaderView",
-          "title": "YTHUD 0.1.1 · experimental"
+          "title": "YTHUD 0.1.2 · experimental"
         },
         {
           "class": "DepictionMarkdownView",
@@ -71,7 +71,7 @@
         },
         {
           "class": "DepictionMarkdownView",
-          "markdown": "Add https://gmaphud.caidat.app/ to Sileo/Zebra, refresh and search for YTHUD. Install the rootless package, reopen YouTube and reconnect CarPlay (or respring). Open YouTube on CarPlay through your existing bridge, play a video and switch to Dashboard. Single-tap the mini player to expand on return. This package does not install a bridge or launcher."
+          "markdown": "Add https://gmaphud.caidat.app/ to Sileo/Zebra, refresh and search for YTHUD. Install the rootless package, reopen YouTube and reconnect CarPlay (or respring). Open YouTube on CarPlay through your existing bridge, play a video and switch to Dashboard. From 0.1.2, tap the Dashboard video to return to YouTube on CarPlay, including while paused. Single-tap the mini player to expand on return. This package does not install a bridge."
         },
         {
           "class": "DepictionSubheaderView",
