@@ -15,7 +15,10 @@ static NSNumber *boardLimit;
 static CLLocation *boardAnchor;
 static double boardReceived=-1;
 static NSMutableDictionary *candidateGroups, *candidateTimes;
-static NSMutableSet *passedPoints;
+static NSMutableSet *passedPoints, *passedLaneBoards;
+// GOFA's lane board ahead (identity, lanes text, where it stands) and when GOFA last posted it.
+static NSDictionary *laneBoard;
+static double laneBoardReceived=-1;
 static CLLocation *position;
 static double positionTime=-1, lastGPSUnixTime=-1;
 static int requestToken=-1;
@@ -89,6 +92,24 @@ static void Publish(BOOL force) {
         }
       }
     }
+    // The lane board ahead: its lanes with the distance to it, until it is reached or GOFA clears it.
+    [samples removeObjectForKey:@"lanes"];
+    BOOL boardCurrent=laneBoard && now-laneBoardReceived>=0 && now-laneBoardReceived<3;
+    if (!boardCurrent) [passedLaneBoards removeAllObjects];
+    else if (position && now-positionTime>=0 && now-positionTime<5) {
+        id key=laneBoard[@"identity"];
+        [passedLaneBoards intersectSet:[NSSet setWithObject:key]];
+        CLLocation *target=[[CLLocation alloc] initWithLatitude:[laneBoard[@"latitude"] doubleValue] longitude:[laneBoard[@"longitude"] doubleValue]];
+        double distance=[position distanceFromLocation:target];
+        unsigned codes[GVMMaximumLanes];
+        unsigned count=GVMGofaLaneCodes([laneBoard[@"lanes"] UTF8String],codes,GVMMaximumLanes);
+        if (GVMGofaPointPassed([passedLaneBoards containsObject:key],distance)) [passedLaneBoards addObject:key];
+        else if (count && isfinite(distance) && distance<=10000) {
+            NSMutableArray *items=NSMutableArray.array;
+            for (unsigned i=0;i<count;i++) [items addObject:@{@"code":@(codes[i]),@"enabled":@YES}];
+            samples[@"lanes"]=@{@"distance":@(llround(distance)),@"items":items,@"receivedAt":@(now)};
+        }
+    }
     NSDictionary *output=GVMSourceOutput(GVMSourceGofa,samples,alerts,now);
     GVMPublishSourceOutput(output,now,force);
     static double lastStatus=-1;
@@ -134,19 +155,24 @@ __attribute__((constructor)) static void Initialize(void) {
     dispatch_async(dispatch_get_main_queue(), ^{
         samples=NSMutableDictionary.dictionary; candidateGroups=NSMutableDictionary.dictionary;
         candidateTimes=NSMutableDictionary.dictionary;
-        passedPoints=NSMutableSet.set;
+        passedPoints=NSMutableSet.set; passedLaneBoards=NSMutableSet.set;
         Class cls=NSClassFromString(@"GOFA.GofaLocationManager");
         SEL selector=@selector(locationManager:didUpdateLocations:);
         Method method=class_getInstanceMethod(cls,selector);
         if (method && !strcmp(method_getTypeEncoding(method),"v32@0:8@16@24")) MSHookMessageEx(cls,selector,(IMP)Locations,(IMP *)&originalLocations);
-        for (NSString *name in @[@"notificationSpeedBoard",@"notificationNextBoard",@"notificationOtherBoard"]) {
+        for (NSString *name in @[@"notificationSpeedBoard",@"notificationNextBoard",@"notificationOtherBoard",@"notificationLaneBoards"]) {
             [NSNotificationCenter.defaultCenter addObserverForName:name object:nil queue:nil usingBlock:^(NSNotification *note) {
                 double received=NSProcessInfo.processInfo.systemUptime;
                 void *raw=GVMGofaPayload((__bridge const void *)note);
                 NSDictionary *payload=CFBridgingRelease(raw);
                 if (!payload) return;
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    if (payload[@"candidates"]) {
+                    if (payload[@"laneBoard"]) {
+                        if (received<laneBoardReceived) return;
+                        laneBoardReceived=received;
+                        laneBoard=[payload[@"laneBoard"] isKindOfClass:NSDictionary.class] ? payload[@"laneBoard"] : nil;
+                    }
+                    else if (payload[@"candidates"]) {
                         NSString *group=payload[@"candidateGroup"];
                         if (candidateTimes[group] && received<[candidateTimes[group] doubleValue]) return;
                         candidateGroups[group]=payload[@"candidates"]; candidateTimes[group]=@(received);

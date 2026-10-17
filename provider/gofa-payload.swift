@@ -48,6 +48,21 @@ public func gofaPayload(_ pointer: UnsafeRawPointer) -> UnsafeMutableRawPointer?
         }
         result["candidates"] = candidates
         result["candidateGroup"] = note.name.rawValue
+    } else if note.name.rawValue == "notificationLaneBoards" {
+        // GOFA posts its lane board ahead about once a second, or none; one it cannot describe is none.
+        guard let raw = info["pushLaneBoardsValue"] else { return nil }
+        result["laneBoard"] = unwrap(raw).flatMap(laneBoard) ?? NSNull()
     } else { return nil }
     return Unmanaged.passRetained(result as NSDictionary).toOpaque()
+}
+// The lanes of a GOFA lane board (`metadata.detail_lanes`) and where it stands. Coordinates stay in
+// the source process, solely for native distanceFromLocation.
+private func laneBoard(_ point: Any) -> [String: Any]? {
+    guard String(reflecting: type(of: point)) == "GOFA.DatapointModel",
+          let identity = integer(field(point, "id")),
+          let latitude = field(point, "lat") as? Double, let longitude = field(point, "lon") as? Double,
+          latitude.isFinite, longitude.isFinite, abs(latitude) <= 90, abs(longitude) <= 180,
+          let metadata = field(point, "metadata"), let lanes = field(metadata, "detail_lanes") as? String,
+          !lanes.isEmpty, lanes.utf8.count <= 256 else { return nil }
+    return ["identity": identity, "lanes": lanes, "latitude": latitude, "longitude": longitude]
 }
