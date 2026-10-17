@@ -22,3 +22,13 @@ NSArray<NSDictionary *> *GVMVietMapOverlayStickyAlerts(id payload);
 // bitmask string per lane, left to right. nil when a partial patch has no laneInfo (they stay as they
 // are); empty when there are none or they cannot be read.
 NSArray<NSNumber *> *GVMVietMapOverlayLaneCodes(id payload);
+// One lane's direction bitmask from its updateLaneInfo imageId, `lane_<directions>_<to follow>`:
+// VietMap's direction names joined by "-" in each group. Some names hold "_" themselves
+// (UTURN_LEFT, SLIGHT_RIGHT), so the id is read name by name. 0 when it cannot be read.
+NSUInteger GVMVietMapLaneCodeForImage(id imageId);
+// updateLaneInfo, VietMap's advance lane countdown: `{distance, laneItems:[{enabled, imageId}]}` as a
+// JSON string or a dictionary. Returns {distance, items:[{code, enabled}]}, or an empty dictionary when
+// there is no countdown to show: VietMap cleared it (no lanes), or it cannot be used (unreadable,
+// distance missing, more than 12 lanes, or no lane direction recognised), so the panel in effect
+// shows instead of a stale or blank countdown.
+NSDictionary *GVMVietMapAdvanceLanes(id payload);

@@ -60,8 +60,10 @@ static void PublishBackgroundHeartbeat(UIView *view, BOOL test, double now) {
         ![UIScreen.screens containsObject:window.screen] || CGRectIsEmpty(view.bounds)) return;
     for (UIView *ancestor=view; ancestor; ancestor=ancestor.superview)
         if (ancestor.hidden || ancestor.alpha<=0.01) return;
+    BOOL resumed=GVMHeartbeatResumed(now,lastBackgroundHeartbeat);
     lastBackgroundHeartbeat=now;
     notify_set_state(backgroundToken,(uint64_t)(now*1000));
+    if (resumed) notify_post(GVM_BACKGROUND_SIGNAL);
 }
 static id Read(id object, NSString *name) { return ((id (*)(id, SEL))objc_msgSend)(object, NSSelectorFromString(name)); }
 static void SetBool(id object, NSString *name, BOOL value) { ((void (*)(id, SEL, BOOL))objc_msgSend)(object, NSSelectorFromString(name), value); }

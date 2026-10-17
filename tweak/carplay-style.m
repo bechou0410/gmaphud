@@ -112,6 +112,7 @@ CGRect GVMLayoutSpeedCard(UIView *map) {
     // Navigation on the full map, New UI: signs in effect and lanes move under CarPlay's maneuver
     // card, and the bubble keeps the dial and the signs ahead. What does not fit stays in the bubble.
     NSUInteger laneCount=[strip.lanes[@"items"] count];
+    BOOL laneTag=[strip.lanes[@"distance"] isKindOfClass:NSNumber.class];
     GVMEffectDock dock;
     memset(&dock,0,sizeof dock);
     NSMutableArray<NSDictionary *> *inEffect=[NSMutableArray new], *ahead=[NSMutableArray new];
@@ -124,7 +125,7 @@ CGRect GVMLayoutSpeedCard(UIView *map) {
         GVMCardSize probeCanvas=GVMHaloCanvasSize(GVMHaloArrangementFor(probe),MIN(ahead.count,2));
         double scale=probeCanvas.width>0 ? probe.width/probeCanvas.width : 0;
         dock=GVMEffectDockFor((GVMModuleRect){slot.origin.x,slot.origin.y,slot.size.width,slot.size.height},
-            inEffect.count,laneCount,scale);
+            inEffect.count,laneCount,laneTag,scale);
     }
     NSArray<NSDictionary *> *docked=[inEffect subarrayWithRange:NSMakeRange(0,dock.signs)];
     NSMutableArray<NSDictionary *> *remaining=[NSMutableArray new];
@@ -201,7 +202,7 @@ CGRect GVMLayoutSpeedCard(UIView *map) {
         GVMModuleRect cardRect={frame.origin.x,frame.origin.y,frame.size.width,frame.size.height};
         GVMModuleRect area={left,top,MAX(0,right-left),MAX(0,bottom-top)};
         double reachWidth=phone ? 0.6 : dashboard ? 1 : 0.5, reachHeight=phone ? 0.65 : dashboard ? 1 : 0.5;
-        lanes=GVMLaneStripLayoutFor(cardRect,scale,arrangement,dial,atRight,atBottom,laneCount,area,reachWidth,reachHeight);
+        lanes=GVMLaneStripLayoutFor(cardRect,scale,arrangement,dial,atRight,atBottom,laneCount,laneTag,area,reachWidth,reachHeight);
     }
     strip.hidden=lanes.place==GVMLaneStripHidden;
     if (!strip.hidden) {
@@ -308,6 +309,10 @@ void GVMUpdateSpeedCard(UIView *map, NSDictionary *output, BOOL night) {
     CGRect frame = GVMLayoutSpeedCard(map);
     BOOL changed = card.sourceID!=sourceID || alertsChanged || !CGRectEqualToRect(card.frame,frame) || card.night!=night ||
         !((card.speed==speed)||[card.speed isEqual:speed]) || !((card.limit==limit)||[card.limit isEqual:limit]);
+    if ([card isKindOfClass:GVMHaloSpeedCard.class]) {
+        BOOL limitDial=GVMDecodeLimitDial(GVMCurrentPresentationOptions());
+        if (((GVMHaloSpeedCard *)card).limitDial!=limitDial) { ((GVMHaloSpeedCard *)card).limitDial=limitDial; changed=YES; }
+    }
     card.sourceID=sourceID; card.frame=frame; card.speed=speed; card.limit=limit; card.night=night;
     if (changed) [card setNeedsDisplay];
     card.accessibilityLabel=[NSString stringWithFormat:@"Speed %@ km/h, limit %@ km/h", speed ?: @"unavailable",limit ?: @"unavailable"];

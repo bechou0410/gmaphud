@@ -39,6 +39,12 @@ extern const char *GVMInterfaceStyleName;
 uint64_t GVMEncodeInterfaceStyle(id value);
 GVMInterfaceStyle GVMDecodeInterfaceStyle(uint64_t state);
 GVMInterfaceStyle GVMCurrentInterfaceStyle(void);
+// New UI dial (preference haloDial: "limit" makes the large circle the speed limit sign and the small
+// one the current speed; anything else keeps the speed dial), carried to Google Maps in one state.
+extern const char *GVMPresentationOptionsName;
+uint64_t GVMEncodePresentationOptions(id dial);
+BOOL GVMDecodeLimitDial(uint64_t state);
+uint64_t GVMCurrentPresentationOptions(void);
 
 extern const char *GVMOverspeedModeName, *GVMOverspeedLeaseName;
 NSUInteger GVMOverspeedMode(void);

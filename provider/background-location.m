@@ -7,6 +7,8 @@
 #import <objc/message.h>
 #import <substrate.h>
 #include <notify.h>
+#include <stdio.h>
+#include <unistd.h>
 
 @interface GVMLocationSession : NSObject
 @property(nonatomic, weak) CLLocationManager *manager;
@@ -229,7 +231,8 @@ static void ObserveDelegate(id delegate) {
     Class cls=object_getClass(delegate);
     NSString *name=NSStringFromClass(cls);
     SEL selector=@selector(locationManager:didUpdateLocations:);
-    if ([delegateClasses containsObject:name]) return;
+    // A class name that does not convert (nil) would end the app when stored or logged.
+    if (!name || [delegateClasses containsObject:name]) return;
     Method method=class_getInstanceMethod(cls,selector);
     if (!method) return;
     NSMethodSignature *signature=[NSMethodSignature signatureWithObjCTypes:method_getTypeEncoding(method)];
@@ -349,14 +352,49 @@ static void Indicator(CLLocationManager *manager,SEL selector,BOOL value) {
     originalIndicator(manager,selector,leased ? YES : value);
     if (session && session.applied!=leased) originalIndicator(manager,selector,session.applied ? YES : session.requestedIndicator);
 }
+// On a screen, the iPhone's or CarPlay's, the app is the user's: tell the supervisor so it never
+// closes this process. SpringBoard's own process state does not count CarPlay scenes as foreground.
+static void PublishShown(void) {
+    static int token=-1;
+    char name[96];
+    snprintf(name,sizeof(name),GVM_BACKGROUND_SOURCE_SHOWN,(unsigned)ManagedSourceID());
+    if (token<0 && notify_register_check(name,&token)!=NOTIFY_STATUS_OK) { token=-1; return; }
+    uint64_t pid=(uint64_t)getpid(), previous=0;
+    if (notify_get_state(token,&previous)==NOTIFY_STATUS_OK && previous==pid) return;
+    notify_set_state(token,pid);
+    notify_post(name);
+    Record(@"app shown on a screen; GMapHUD will not close this process");
+}
+__attribute__((constructor)) static void ObserveShown(void) {
+#if GVM_GOFA_SOURCE
+    NSString *bundle=@"com.lumi.GOFA";
+#elif GVM_WAZE_SOURCE
+    NSString *bundle=@"com.waze.iphone";
+#else
+    NSString *bundle=@"vn.vietmap.live";
+#endif
+    // Any build of the source app: GMapHUD may have woken it even where its adapter is inactive.
+    if (![NSBundle.mainBundle.bundleIdentifier isEqualToString:bundle]) return;
+    dispatch_async(dispatch_get_main_queue(),^{
+        for (NSNotificationName name in @[UISceneWillEnterForegroundNotification,UISceneDidActivateNotification,
+            UIApplicationWillEnterForegroundNotification,UIApplicationDidBecomeActiveNotification])
+            [NSNotificationCenter.defaultCenter addObserverForName:name object:nil queue:NSOperationQueue.mainQueue
+                usingBlock:^(__unused NSNotification *note) { PublishShown(); }];
+        // Launched by the user straight to the screen, before the observers were in place.
+        if (UIApplication.sharedApplication.applicationState!=UIApplicationStateBackground) PublishShown();
+        for (UIScene *scene in UIApplication.sharedApplication.connectedScenes)
+            if (scene.activationState==UISceneActivationStateForegroundActive ||
+                scene.activationState==UISceneActivationStateForegroundInactive) PublishShown();
+    });
+}
 __attribute__((constructor)) static void InitializeLocationSession(void) {
 #if GVM_GOFA_SOURCE
     if (![NSBundle.mainBundle.bundleIdentifier isEqualToString:@"com.lumi.GOFA"] ||
         ![[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"] isEqual:@"4.2.1"] ||
         ![[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleVersion"] isEqual:@"3"]) return;
 #elif GVM_WAZE_SOURCE
-    if (![NSBundle.mainBundle.bundleIdentifier isEqualToString:@"com.waze.iphone"] ||
-        ![[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"] isEqual:@"5.25.0"]) return;
+    // Public CoreLocation calls only, so any Waze build; its native GPS start stays 5.25.0-only.
+    if (![NSBundle.mainBundle.bundleIdentifier isEqualToString:@"com.waze.iphone"]) return;
 #else
     if (![NSBundle.mainBundle.bundleIdentifier isEqualToString:@"vn.vietmap.live"]) return;
 #endif

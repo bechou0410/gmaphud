@@ -151,11 +151,17 @@ int main(int argc,const char **argv) { @autoreleasepool {
 
     // VietMap lanes are the ones VietMap Live shows (its overlay's laneInfo): in effect where they show,
     // with no distance, kept as they stand and published with the publication time.
-    NSDictionary *vmLanes=GVMVietMapLaneSample(@[@1,@1,@1,@5,@4],101);
+    NSDictionary *vmLanes=GVMVietMapLaneSample(nil,@[@1,@1,@1,@5,@4],101);
     Require(vmLanes[@"distance"]==NSNull.null && [vmLanes[@"items"][3] isEqual:(@{@"code":@5,@"enabled":@YES})] && [vmLanes[@"receivedAt"] isEqual:@101],@"VietMap lanes are in effect, without a distance");
-    Require(!GVMVietMapLaneSample(@[],101) && !GVMVietMapLaneSample(nil,101),@"no lanes shown, no lanes");
-    Require([GVMVietMapLaneSample(@[@1,@5],400)[@"receivedAt"] isEqual:@400],@"lanes VietMap still shows stay fresh while it publishes");
-    Require(!GVMSourceOutput(1,@{@"lanes":GVMVietMapLaneSample(@[@1,@5],100)},@[],105)[@"lanes"],@"lanes expire when VietMap Live stops publishing");
+    Require(!GVMVietMapLaneSample(nil,@[],101) && !GVMVietMapLaneSample(nil,nil,101),@"no lanes shown, no lanes");
+    Require([GVMVietMapLaneSample(nil,@[@1,@5],400)[@"receivedAt"] isEqual:@400],@"lanes VietMap still shows stay fresh while it publishes");
+    Require(!GVMSourceOutput(1,@{@"lanes":GVMVietMapLaneSample(nil,@[@1,@5],100)},@[],105)[@"lanes"],@"lanes expire when VietMap Live stops publishing");
+    // Its advance countdown shows the next junction's lanes early, with their distance, over the panel in effect.
+    NSDictionary *countdown=@{@"distance":@166,@"items":@[@{@"code":@1,@"enabled":@YES},@{@"code":@4,@"enabled":@NO}]};
+    NSDictionary *early=GVMVietMapLaneSample(countdown,@[@1,@1,@5],120);
+    Require([early[@"distance"] isEqual:@166] && [early[@"items"] isEqual:countdown[@"items"]] && [early[@"receivedAt"] isEqual:@120],@"advance lanes show with their distance");
+    Require(GVMVietMapLaneSample(@{@"distance":@40,@"items":@[]},@[@1,@5],120)[@"distance"]==NSNull.null,@"an empty countdown falls back to the panel in effect");
+    Require([GVMSourceOutput(1,@{@"lanes":early},@[],121)[@"lanes"][@"distance"] isEqual:@166],@"advance lanes pass the output contract");
     NSDictionary *vmOutput=GVMVietMapOutput(@{@"lanes":vmLanes},@[],101);
     Require([vmOutput[@"lanes"][@"items"] count]==5 && GVMEncodeSourceOutput(vmOutput,101,&words) && [GVMDecodeSourceOutput(1,words,101)[@"lanes"] isEqual:vmOutput[@"lanes"]],@"VietMap lanes reach the wire");
 

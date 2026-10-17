@@ -83,7 +83,9 @@ NSString *GVMDiagnosticsReport(void) {
     char model[128]={0}; size_t size=sizeof(model);
     sysctlbyname("hw.machine",model,&size,NULL,0);
     NSMutableString *report=[NSMutableString stringWithFormat:@"GMapHUD %@ — Chẩn đoán\nNgày xuất: %@\nThiết bị: %s\nOS: %@\nRootless /var/jb: %@\n\nKhông chứa tọa độ, tuyến đường, tài khoản hoặc số sê-ri.\nĐây là các mốc chẩn đoán gần nhất, không phải toàn bộ log ứng dụng.\nKhông có dữ liệu không đồng nghĩa tweak bị tắt. Mở lại cả hai app sau khi cài.\n",PackageVersion,NSDate.date,model,NSProcessInfo.processInfo.operatingSystemVersionString,[[NSFileManager defaultManager] fileExistsAtPath:@"/var/jb"] ? @"có" : @"không"];
-    [report appendFormat:@"\nPhiên bản đang cài:\nGoogle Maps [com.google.Maps]: %@\nNguồn cảnh báo VietMap Live [vn.vietmap.live]: %@\n",GVMDiagnosticsAppVersion(@"com.google.Maps"),GVMDiagnosticsAppVersion(@"vn.vietmap.live")];
+    [report appendFormat:@"\nPhiên bản đang cài:\nGoogle Maps [com.google.Maps]: %@\nNguồn cảnh báo VietMap Live [vn.vietmap.live]: %@\nNguồn cảnh báo Waze [com.waze.iphone]: %@\nNguồn cảnh báo GOFA [com.lumi.GOFA]: %@\n",
+        GVMDiagnosticsAppVersion(@"com.google.Maps"),GVMDiagnosticsAppVersion(@"vn.vietmap.live"),
+        GVMDiagnosticsAppVersion(@"com.waze.iphone"),GVMDiagnosticsAppVersion(@"com.lumi.GOFA")];
     NSTimeInterval now=NSProcessInfo.processInfo.systemUptime;
     for (NSString *source in @[@"vietmap",@"googlemaps"]) {
         [report appendFormat:@"\n=== %@ ===\n",source];

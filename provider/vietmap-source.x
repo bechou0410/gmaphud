@@ -18,9 +18,12 @@ static BOOL forceOutput;
 static NSArray<NSDictionary *> *upcomingAlerts, *stickyAlerts;
 static NSTimeInterval upcomingReceived, stickyReceived;
 // The lanes VietMap Live shows (its overlay's laneInfo): in effect on the stretch being driven, kept
-// until VietMap changes or clears them. updateLaneInfo, its advance countdown, is only observed.
+// until VietMap changes or clears them. Its advance countdown (updateLaneInfo) shows the next
+// junction's lanes earlier, with their distance, while it runs.
 static NSArray<NSNumber *> *laneCodes;
 static NSTimeInterval laneCodesReceived=-1;
+static NSDictionary *advanceLanes;
+static NSTimeInterval advanceReceived=-1;
 #endif
 
 @protocol VMFlutterMethodCall
@@ -62,7 +65,8 @@ static void Publish(void) {
     NSMutableDictionary *samples=[[source freshSamplesAtUptime:now] mutableCopy] ?: [NSMutableDictionary new];
     GVMDiagnosticsRecord(GVMDiagnosticSamples,(samples[@"speed"] ? 1 : 0) | (samples[@"speedLimit"] ? 2 : 0) | (UIApplication.sharedApplication.applicationState==UIApplicationStateActive ? 4 : 0));
     if (GVMSelectedSourceID()!=GVMSourceVietMap) return;
-    NSDictionary *lanes=GVMVietMapLaneSample(laneCodes,now);
+    BOOL counting=advanceLanes && now-advanceReceived<GVMVietMapAdvanceLaneLifetime;
+    NSDictionary *lanes=GVMVietMapLaneSample(counting ? advanceLanes : nil,laneCodes,now);
     if (lanes) samples[@"lanes"]=lanes;
     NSMutableArray *entries=[NSMutableArray new];
     for (NSDictionary *alert in upcomingAlerts)
@@ -169,13 +173,21 @@ static void SetMethodCallHandler(id channel, SEL selector, VMFlutterHandler hand
         NSArray *overlaySticky=nil;
         NSArray<NSNumber *> *overlayLanes=nil;
 #endif
-        id mainLimit=nil; BOOL hasMainLimit=NO;
+        id mainLimit=nil, mainSpeed=nil; BOOL hasMainLimit=NO, hasMainSpeed=NO;
         NSTimeInterval received = NSProcessInfo.processInfo.systemUptime;
         @try {
     #ifdef VM_GOOGLE_MAPS_RELAY
             if ([name isEqualToString:@"vml_main_channel"] && ([[call method] isEqualToString:@"updateLaneInfo"] ||
                 [[call method] isEqualToString:@"cacheImage"]))
                 ObserveAlerts([call method],[call arguments],0,received);
+            if ([name isEqualToString:@"vml_main_channel"] && [[call method] isEqualToString:@"updateLaneInfo"]) {
+                NSDictionary *ahead=GVMVietMapAdvanceLanes([call arguments]);
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if (received<advanceReceived) return;
+                    advanceLanes=ahead.count ? ahead : nil; advanceReceived=received;
+                    Publish();
+                });
+            }
             if ([name isEqualToString:@"vietmap_car_method_channel"] && [[call method] isEqualToString:@"setNavigationImage"])
                 ObserveAlerts(@"setNavigationImage",[call arguments],0,received);
             if ([name isEqualToString:@"vml_main_channel"] &&
@@ -198,6 +210,9 @@ static void SetMethodCallHandler(id channel, SEL selector, VMFlutterHandler hand
                 if ([[call method] isEqualToString:@"updateSpeedLimit"]) {
                     hasMainLimit=YES;
                     mainLimit=[value isKindOfClass:NSNumber.class] ? [value copy] : NSNull.null;
+                } else {
+                    hasMainSpeed=YES;
+                    mainSpeed=[value isKindOfClass:NSNumber.class] ? [value copy] : NSNull.null;
                 }
                 NSString *method=[[call method] copy];
                 BOOL numeric=[value isKindOfClass:NSNumber.class];
@@ -253,6 +268,13 @@ static void SetMethodCallHandler(id channel, SEL selector, VMFlutterHandler hand
             id copiedLimit=mainLimit;
             dispatch_async(dispatch_get_main_queue(), ^{
                 [source applyMainSpeedLimit:copiedLimit receivedAt:received];
+                Publish();
+            });
+        }
+        if (hasMainSpeed) {
+            id copiedSpeed=mainSpeed;
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [source applyMainSpeed:copiedSpeed receivedAt:received];
                 Publish();
             });
         }
@@ -343,7 +365,7 @@ static void ImageLoaded(const struct mach_header *header, intptr_t slide) {
             [NSNotificationCenter.defaultCenter addObserverForName:UIApplicationWillTerminateNotification
                 object:nil queue:NSOperationQueue.mainQueue usingBlock:^(NSNotification *note) {
 #ifdef VM_GOOGLE_MAPS_RELAY
-                    upcomingAlerts=@[]; stickyAlerts=@[]; laneCodes=nil; forceOutput=YES;
+                    upcomingAlerts=@[]; stickyAlerts=@[]; laneCodes=nil; advanceLanes=nil; forceOutput=YES;
 #endif
                     source = [VMNavSource new]; Publish();
                 }];

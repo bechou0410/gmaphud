@@ -63,10 +63,14 @@ GVMCardSize GVMHaloCanvasSize(GVMHaloArrangement arrangement,NSUInteger alerts);
 GVMModuleRect GVMHaloDialFrame(GVMHaloArrangement arrangement,BOOL alertsFirst,BOOL trailing,NSUInteger alerts);
 GVMModuleRect GVMHaloAlertFrame(GVMHaloArrangement arrangement,BOOL alertsFirst,BOOL trailing,NSUInteger alerts,NSUInteger index);
 // Lane strip, in points at size L: one cell per lane (30 wide up to six lanes, 26 up to eight, 22
-// beyond), arrows 4 narrower than the cell and a plate 20 taller than the arrows. The lanes are in
-// effect where they show, so there is no distance tag and the strip is the plate.
+// beyond), arrows 4 narrower than the cell and a plate 20 taller than the arrows. Lanes in effect
+// have no distance and the strip is the plate. Lanes announced ahead (`tagged`) carry a distance tag
+// across the plate's bottom edge, like the sign tags: 10 more points (half the tag and its stroke),
+// and at least the tag's width.
 typedef struct { double cell, arrow, plate, width, height; } GVMLaneStripMetrics;
-GVMLaneStripMetrics GVMLaneStripMetricsFor(NSUInteger lanes);
+GVMLaneStripMetrics GVMLaneStripMetricsFor(NSUInteger lanes, BOOL tagged);
+// The plate's own width (the strip may be wider for a tag).
+double GVMLanePlateWidth(GVMLaneStripMetrics strip, NSUInteger lanes);
 // Arrows never drop below this many points, whatever the bubble size.
 extern const double GVMLaneMinimumArrow;
 typedef NS_ENUM(NSUInteger, GVMLaneStripPlace) { GVMLaneStripHidden, GVMLaneStripBelow, GVMLaneStripAbove, GVMLaneStripBeside };
@@ -79,7 +83,7 @@ typedef struct { GVMModuleRect frame; double scale; GVMLaneStripPlace place; } G
 // column. The strip keeps the bubble's scale, shrinks on its own to fit down to the minimum arrow,
 // and is hidden rather than cut. The dial never moves.
 GVMLaneStripLayout GVMLaneStripLayoutFor(GVMModuleRect card, double cardScale, GVMHaloArrangement arrangement,
-    GVMModuleRect dial, BOOL right, BOOL bottom, NSUInteger lanes, GVMModuleRect area,
+    GVMModuleRect dial, BOOL right, BOOL bottom, NSUInteger lanes, BOOL tagged, GVMModuleRect area,
     double reachWidth, double reachHeight);
 // Navigation: CarPlay's guidance column has a free slot between its maneuver card and the arrival
 // estimates (`slot`, host points). Signs in effect (up to two) and the lane strip are laid out there in
@@ -90,7 +94,7 @@ typedef struct {
     NSUInteger signs; BOOL lanes; double diameter;
     GVMModuleRect signFrames[2]; GVMModuleRect strip; double stripScale;
 } GVMEffectDock;
-GVMEffectDock GVMEffectDockFor(GVMModuleRect slot, NSUInteger signs, NSUInteger lanes, double cardScale);
+GVMEffectDock GVMEffectDockFor(GVMModuleRect slot, NSUInteger signs, NSUInteger lanes, BOOL tagged, double cardScale);
 // Stored orders keep their three names; the limit now lives on the dial, so only whether
 // alerts come first matters.
 BOOL GVMAlertsFirst(NSArray<NSString *> *order);

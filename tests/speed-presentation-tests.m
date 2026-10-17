@@ -266,54 +266,63 @@ static void DockTests(void) {
     // estimates start at 188; the slot keeps 6 points from each. Bubble at 48%.
     GVMModuleRect slot={53,100,142,82};
     double k=0.479;
-    GVMEffectDock one=GVMEffectDockFor(slot,1,5,k);
+    GVMEffectDock one=GVMEffectDockFor(slot,1,5,NO,k);
     assert(one.signs==1 && one.lanes && Close(one.diameter,58*k) && Close(one.stripScale,14.0/26));
     assert(one.signFrames[0].x==53 && Close(one.strip.x,53+58*k+6) && Close(one.strip.y+one.strip.height/2,141) && Close(one.signFrames[0].y+one.diameter/2,141));
-    GVMEffectDock two=GVMEffectDockFor(slot,2,5,k);
+    GVMEffectDock two=GVMEffectDockFor(slot,2,5,NO,k);
     assert(two.signs==2 && two.lanes && two.diameter>=20 && two.diameter<58*k && Close(two.strip.x+two.strip.width,53+142));
-    GVMEffectDock wide=GVMEffectDockFor(slot,1,8,k);
+    GVMEffectDock wide=GVMEffectDockFor(slot,1,8,NO,k);
     assert(wide.signs==0 && wide.lanes && wide.strip.width<=142+1e-9);  // eight lanes take the row; the sign stays in the bubble
-    GVMEffectDock signsOnly=GVMEffectDockFor(slot,2,0,k);
+    GVMEffectDock signsOnly=GVMEffectDockFor(slot,2,0,NO,k);
     assert(signsOnly.signs==2 && !signsOnly.lanes && Close(signsOnly.diameter,58*k));
-    assert(GVMEffectDockFor((GVMModuleRect){53,100,142,15},1,5,k).signs==0 && !GVMEffectDockFor((GVMModuleRect){53,100,142,15},1,5,k).lanes);
-    assert(!GVMEffectDockFor(slot,0,0,k).lanes && GVMEffectDockFor(slot,0,0,k).signs==0);
+    assert(GVMEffectDockFor((GVMModuleRect){53,100,142,15},1,5,NO,k).signs==0 && !GVMEffectDockFor((GVMModuleRect){53,100,142,15},1,5,NO,k).lanes);
+    assert(!GVMEffectDockFor(slot,0,0,NO,k).lanes && GVMEffectDockFor(slot,0,0,NO,k).signs==0);
     // Large screens keep the bubble's own sizes.
-    GVMEffectDock big=GVMEffectDockFor((GVMModuleRect){106,200,284,170},1,5,1);
+    GVMEffectDock big=GVMEffectDockFor((GVMModuleRect){106,200,284,170},1,5,NO,1);
     assert(big.signs==1 && Close(big.diameter,58) && Close(big.stripScale,1));
 }
 static void LaneLayoutTests(void) {
-    GVMLaneStripMetrics five=GVMLaneStripMetricsFor(5), eight=GVMLaneStripMetricsFor(8), twelve=GVMLaneStripMetricsFor(12);
+    GVMLaneStripMetrics five=GVMLaneStripMetricsFor(5,NO), eight=GVMLaneStripMetricsFor(8,NO), twelve=GVMLaneStripMetricsFor(12,NO);
     assert(five.cell==30 && five.arrow==26 && five.plate==46 && five.width==160 && five.height==46);
     assert(eight.cell==26 && eight.width==218 && twelve.cell==22 && twelve.arrow==18);
+    // Lanes announced ahead carry a distance tag across the plate's bottom edge.
+    GVMLaneStripMetrics tagged=GVMLaneStripMetricsFor(5,YES), single=GVMLaneStripMetricsFor(1,YES);
+    assert(tagged.height==56 && tagged.width==160 && GVMLanePlateWidth(tagged,5)==160);
+    assert(single.width==58 && GVMLanePlateWidth(single,1)==40 && single.height==56);
+    GVMLaneStripLayout taggedBelow=GVMLaneStripLayoutFor((GVMModuleRect){90,10,GVMHaloCanvasSize(GVMHaloRow,2).width,GVMHaloCanvasSize(GVMHaloRow,2).height},
+        1,GVMHaloRow,Scaled(GVMHaloDialFrame(GVMHaloRow,NO,NO,2),90,10,1),NO,NO,5,YES,(GVMModuleRect){90,10,700,460},0.5,0.5);
+    assert(taggedBelow.place==GVMLaneStripBelow && taggedBelow.frame.height==56);
+    GVMEffectDock taggedDock=GVMEffectDockFor((GVMModuleRect){53,100,142,40},0,5,YES,0.556);
+    assert(taggedDock.lanes && Close(taggedDock.strip.height,56*taggedDock.stripScale) && taggedDock.strip.height<=40+1e-9);
     // Full map 800 x 480, row with two alerts at size L, top-left: the strip hangs under the group,
     // lined up with the dial block, at the bubble's own scale.
     GVMModuleRect area={90,10,700,460};
     GVMCardSize row=GVMHaloCanvasSize(GVMHaloRow,2);
     GVMModuleRect card={90,10,row.width,row.height};
     GVMModuleRect dial=Scaled(GVMHaloDialFrame(GVMHaloRow,NO,NO,2),90,10,1);
-    GVMLaneStripLayout below=GVMLaneStripLayoutFor(card,1,GVMHaloRow,dial,NO,NO,5,area,0.5,0.5);
+    GVMLaneStripLayout below=GVMLaneStripLayoutFor(card,1,GVMHaloRow,dial,NO,NO,5,NO,area,0.5,0.5);
     assert(below.place==GVMLaneStripBelow && below.scale==1 && below.frame.x==dial.x &&
         below.frame.y==card.y+card.height && below.frame.width==160 && below.frame.height==46);
     // Bottom corners put it over the group instead, so nothing moves off screen and the dial stays.
     GVMModuleRect low={90,470-row.height,row.width,row.height};
-    GVMLaneStripLayout above=GVMLaneStripLayoutFor(low,1,GVMHaloRow,Scaled(GVMHaloDialFrame(GVMHaloRow,NO,NO,2),90,low.y,1),NO,YES,5,area,0.5,0.5);
+    GVMLaneStripLayout above=GVMLaneStripLayoutFor(low,1,GVMHaloRow,Scaled(GVMHaloDialFrame(GVMHaloRow,NO,NO,2),90,low.y,1),NO,YES,5,NO,area,0.5,0.5);
     assert(above.place==GVMLaneStripAbove && Close(above.frame.y+above.frame.height,low.y));
     // Alerts first on the right: the dial is the right-hand block and the strip lines up with its right edge.
     GVMModuleRect rightCard={790-row.width,10,row.width,row.height};
     GVMModuleRect rightDial=Scaled(GVMHaloDialFrame(GVMHaloRow,YES,YES,2),rightCard.x,10,1);
-    GVMLaneStripLayout rightRow=GVMLaneStripLayoutFor(rightCard,1,GVMHaloRow,rightDial,YES,NO,5,area,0.5,0.5);
+    GVMLaneStripLayout rightRow=GVMLaneStripLayoutFor(rightCard,1,GVMHaloRow,rightDial,YES,NO,5,NO,area,0.5,0.5);
     assert(rightRow.place==GVMLaneStripBelow && Close(rightRow.frame.x+rightRow.frame.width,rightDial.x+rightDial.width));
     // Dial alone at the right edge: the strip is wider than the bubble and stays on screen.
     GVMCardSize lone=GVMHaloCanvasSize(GVMHaloRow,0);
     GVMModuleRect loneCard={790-lone.width,10,lone.width,lone.height};
-    GVMLaneStripLayout clamped=GVMLaneStripLayoutFor(loneCard,1,GVMHaloRow,Scaled(GVMHaloDialFrame(GVMHaloRow,NO,YES,0),loneCard.x,10,1),YES,NO,5,area,0.5,0.5);
+    GVMLaneStripLayout clamped=GVMLaneStripLayoutFor(loneCard,1,GVMHaloRow,Scaled(GVMHaloDialFrame(GVMHaloRow,NO,YES,0),loneCard.x,10,1),YES,NO,5,NO,area,0.5,0.5);
     assert(clamped.place==GVMLaneStripBelow && Close(clamped.frame.x+clamped.frame.width,790));
     // A column puts the strip beside the dial, on the inner side, centred on the dial.
     double k=0.867;
     GVMCardSize column=GVMHaloCanvasSize(GVMHaloColumn,2);
     GVMModuleRect colCard={90,10,column.width*k,column.height*k};
     GVMModuleRect colDial=Scaled(GVMHaloDialFrame(GVMHaloColumn,NO,NO,2),90,10,k);
-    GVMLaneStripLayout beside=GVMLaneStripLayoutFor(colCard,k,GVMHaloColumn,colDial,NO,NO,5,area,0.5,0.5);
+    GVMLaneStripLayout beside=GVMLaneStripLayoutFor(colCard,k,GVMHaloColumn,colDial,NO,NO,5,NO,area,0.5,0.5);
     double circleRight=colDial.x+(GVMHaloDialBlock+GVMHaloDial)/2*k, middle=colDial.y+(7+GVMHaloDial/2)*k;
     double badgeBottom=colDial.y+(7+GVMHaloBadgeDrop+GVMHaloBadge/2)*k;
     assert(beside.place==GVMLaneStripBeside && Close(beside.scale,k) && Close(beside.frame.x,circleRight+GVMHaloGap*k) &&
@@ -321,29 +330,29 @@ static void LaneLayoutTests(void) {
     assert(beside.frame.y+beside.frame.height<=colCard.y+(GVMHaloPadding+GVMHaloDialBlock)*k);
     GVMModuleRect colRight={790-colCard.width,10,colCard.width,colCard.height};
     GVMModuleRect colRightDial=Scaled(GVMHaloDialFrame(GVMHaloColumn,NO,YES,2),colRight.x,10,k);
-    GVMLaneStripLayout besideLeft=GVMLaneStripLayoutFor(colRight,k,GVMHaloColumn,colRightDial,YES,NO,5,area,0.5,0.5);
+    GVMLaneStripLayout besideLeft=GVMLaneStripLayoutFor(colRight,k,GVMHaloColumn,colRightDial,YES,NO,5,NO,area,0.5,0.5);
     assert(besideLeft.place==GVMLaneStripBeside && Close(besideLeft.frame.x+besideLeft.frame.width,colRightDial.x+(GVMHaloDialBlock-GVMHaloDial)/2*k-GVMHaloGap*k));
     // Small bubbles: the strip keeps 14-point arrows even when the bubble is smaller.
     GVMModuleRect small={0,0,305,227};
     double tiny=0.425;
     GVMModuleRect tinyCard={6,6,column.width*tiny,column.height*tiny};
-    GVMLaneStripLayout floorStrip=GVMLaneStripLayoutFor(tinyCard,tiny,GVMHaloColumn,Scaled(GVMHaloDialFrame(GVMHaloColumn,NO,NO,2),6,6,tiny),NO,NO,5,small,0.5,0.5);
+    GVMLaneStripLayout floorStrip=GVMLaneStripLayoutFor(tinyCard,tiny,GVMHaloColumn,Scaled(GVMHaloDialFrame(GVMHaloColumn,NO,NO,2),6,6,tiny),NO,NO,5,NO,small,0.5,0.5);
     assert(floorStrip.place==GVMLaneStripBeside && Close(floorStrip.scale*26,14) && floorStrip.frame.x+floorStrip.frame.width<=152.5+0.01);
     // A column too narrow for the strip beside the dial puts it under the column.
     GVMModuleRect narrow={0,0,120,300};
     GVMModuleRect narrowCard={0,0,column.width*0.6,column.height*0.6};
-    GVMLaneStripLayout under=GVMLaneStripLayoutFor(narrowCard,0.6,GVMHaloColumn,Scaled(GVMHaloDialFrame(GVMHaloColumn,NO,NO,2),0,0,0.6),NO,NO,5,narrow,1,1);
+    GVMLaneStripLayout under=GVMLaneStripLayoutFor(narrowCard,0.6,GVMHaloColumn,Scaled(GVMHaloDialFrame(GVMHaloColumn,NO,NO,2),0,0,0.6),NO,NO,5,NO,narrow,1,1);
     assert(under.place==GVMLaneStripBelow && Close(under.frame.y,narrowCard.height) && under.frame.width<=120+0.01 && under.scale>=14.0/26-1e-9);
     // Not enough room even at the minimum: hidden, never cut.
-    GVMLaneStripLayout hidden=GVMLaneStripLayoutFor(narrowCard,0.6,GVMHaloColumn,Scaled(GVMHaloDialFrame(GVMHaloColumn,NO,NO,2),0,0,0.6),NO,NO,5,(GVMModuleRect){0,0,70,170},1,1);
+    GVMLaneStripLayout hidden=GVMLaneStripLayoutFor(narrowCard,0.6,GVMHaloColumn,Scaled(GVMHaloDialFrame(GVMHaloColumn,NO,NO,2),0,0,0.6),NO,NO,5,NO,(GVMModuleRect){0,0,70,170},1,1);
     assert(hidden.place==GVMLaneStripHidden);
-    assert(GVMLaneStripLayoutFor(card,1,GVMHaloRow,dial,NO,NO,0,area,0.5,0.5).place==GVMLaneStripHidden);
-    assert(GVMLaneStripLayoutFor(card,1,GVMHaloRow,dial,NO,NO,13,area,0.5,0.5).place==GVMLaneStripHidden);
+    assert(GVMLaneStripLayoutFor(card,1,GVMHaloRow,dial,NO,NO,0,NO,area,0.5,0.5).place==GVMLaneStripHidden);
+    assert(GVMLaneStripLayoutFor(card,1,GVMHaloRow,dial,NO,NO,13,NO,area,0.5,0.5).place==GVMLaneStripHidden);
     // Wider roads use narrower cells; their smaller arrows still keep 14 points.
-    GVMLaneStripLayout wide=GVMLaneStripLayoutFor(card,0.5,GVMHaloRow,dial,NO,NO,8,area,0.5,0.5);
+    GVMLaneStripLayout wide=GVMLaneStripLayoutFor(card,0.5,GVMHaloRow,dial,NO,NO,8,NO,area,0.5,0.5);
     assert(wide.place==GVMLaneStripBelow && Close(wide.scale*22,14) && Close(wide.frame.width,218*wide.scale));
     // The strip shrinks to fit the reach before it gives up: a shallow area under a full-size row.
-    GVMLaneStripLayout squeezed=GVMLaneStripLayoutFor(card,1,GVMHaloRow,dial,NO,NO,5,(GVMModuleRect){90,10,700,300},0.5,0.5);
+    GVMLaneStripLayout squeezed=GVMLaneStripLayoutFor(card,1,GVMHaloRow,dial,NO,NO,5,NO,(GVMModuleRect){90,10,700,300},0.5,0.5);
     assert(squeezed.place==GVMLaneStripBelow && squeezed.scale<1 && Close(squeezed.frame.y+squeezed.frame.height,10+150));
 }
 int main(void) {
@@ -455,6 +464,10 @@ int main(void) {
     assert(GVMOffsetPercentFromPoints(@(-200),800)==-25);
     assert(GVMOffsetPercentFromPoints(@100,0)==0);
     assert(GVMOffsetPercent(@YES)==0);
+    assert(GVMDecodeLimitDial(GVMEncodePresentationOptions(@"limit")));
+    assert(!GVMDecodeLimitDial(GVMEncodePresentationOptions(@"speed")) && !GVMDecodeLimitDial(GVMEncodePresentationOptions(nil)));
+    assert(!GVMDecodeLimitDial(GVMEncodePresentationOptions(@5)));
+    assert(!GVMDecodeLimitDial(0) && !GVMDecodeLimitDial(3));
     assert(GVMSliderPercent(@(-18),YES)==-18 && GVMSliderPercent(@(-27),YES)==-27 && GVMSliderPercent(@140,NO)==140);
     for (NSUInteger mode=0;mode<3;mode++) {
         NSUInteger decoded=99;

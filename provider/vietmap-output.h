@@ -4,9 +4,13 @@ NSDictionary *GVMVietMapOutputAlert(NSDictionary *alert, NSTimeInterval received
 // distance, so upcoming signs take the two alert places first, and a sign that is also upcoming is
 // shown once, with its distance.
 NSDictionary *GVMVietMapOutput(NSDictionary *samples, NSArray<NSDictionary *> *alertEntries, NSTimeInterval now);
-// The lane sample for the source output: the lanes VietMap Live shows (its overlay's laneInfo), which
-// are in effect on the stretch being driven. Like a sign in effect they have no distance and no advance
-// notice, and VietMap changes or clears them itself; an overlay patch without laneInfo leaves them as
-// they are. They carry the publication time `now`, so they stay fresh only while VietMap Live keeps
+// The lane sample for the source output. While VietMap counts down to a junction (updateLaneInfo,
+// `advance` = {distance, items}), its lanes show early with that distance. Otherwise the lanes VietMap
+// Live shows (its overlay's laneInfo, `codes`) are in effect on the stretch being driven: no distance,
+// and VietMap changes or clears them itself; an overlay patch without laneInfo leaves them as they
+// are. The sample carries the publication time `now`, so it stays fresh only while VietMap Live keeps
 // publishing. nil when there are none.
-NSDictionary *GVMVietMapLaneSample(NSArray<NSNumber *> *codes, NSTimeInterval now);
+NSDictionary *GVMVietMapLaneSample(NSDictionary *advance, NSArray<NSNumber *> *codes, NSTimeInterval now);
+// How long an advance countdown counts without a new updateLaneInfo (VietMap sends one about every
+// two seconds and clears it at the junction).
+extern const NSTimeInterval GVMVietMapAdvanceLaneLifetime;

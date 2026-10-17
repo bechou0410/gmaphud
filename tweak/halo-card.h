@@ -6,4 +6,6 @@
 // settings preview.
 @interface GVMHaloSpeedCard : UIView <GVMSpeedCardView>
 @property(nonatomic) BOOL test, stacked, trailing;
+// The large circle is the speed limit sign and the small one the current speed (Settings: Vòng lớn).
+@property(nonatomic) BOOL limitDial;
 @end

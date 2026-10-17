@@ -10,7 +10,9 @@ __attribute__((constructor)) static void GVMRestorePlacement(void) {
             GVMPublishSavedSizes();
         });
         GVMPublishSavedSizes();
-        GVMRestoreOutputSelection();
+        // SpringBoard alone restores the saved source: CarPlayApp starting on a connection must not
+        // undo the supervisor's fallback for the current Google Maps session.
+        if ([NSBundle.mainBundle.bundleIdentifier isEqualToString:@"com.apple.springboard"]) GVMRestoreOutputSelection();
         CFStringRef domain=CFSTR("com.chou.gmaphud");
         CFPreferencesAppSynchronize(domain);
         NSString *full=CFBridgingRelease(CFPreferencesCopyAppValue(CFSTR("fullPosition"),domain));

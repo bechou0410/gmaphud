@@ -8,12 +8,14 @@
 #import "waze-output.h"
 #import "source-transport.h"
 #import "speed-state.h"
+#include "waze-limit-search.h"
 #if __has_feature(ptrauth_calls)
 #include <ptrauth.h>
 #endif
 #include <string.h>
 #import <mach-o/dyld.h>
 #import <mach-o/loader.h>
+#import <mach-o/getsect.h>
 #include <math.h>
 
 static GVMWazeOutputStore *store;
@@ -64,7 +66,8 @@ static id GPS(id self __attribute__((ns_consumed)),SEL cmd,double longitude,doub
         // A delayed queue must not make the original GPS sample fresh again.
         double current=NSProcessInfo.processInfo.systemUptime;
         if (current-uptime>=5) return;
-        uint64_t limit=ReadNativeLimit ? ReadNativeLimit() : 0;
+        // The getter runs only for the selected source, so a Waze kept for other uses is left alone.
+        uint64_t limit=ReadNativeLimit && GVMSelectedSourceID()==GVMSourceWaze ? ReadNativeLimit() : 0;
         nativeLimitReady=ReadNativeLimit!=NULL;
         [store updateSpeed:speed timestamp:time now:now uptime:uptime optionalLimit:limit];
         Publish(NO);
@@ -80,35 +83,63 @@ static id GPS(id self __attribute__((ns_consumed)),SEL cmd,double longitude,doub
     });
     return result;
 }
-static void ConfigureNativeLimit(void) {
-    const uint8_t expectedUUID[]={0x90,0x94,0x7e,0x86,0xbf,0xf2,0x34,0x34,0xa2,0x8b,0x97,0x9c,0x65,0xdb,0x88,0x46};
-    BOOL matched=NO;
-    intptr_t slide=0;
-    // Injection can reorder dyld images: locate the verified Waze image by UUID.
-    for (uint32_t image=0;image<_dyld_image_count() && !matched;image++) {
-        const struct mach_header_64 *header=(const struct mach_header_64 *)_dyld_get_image_header(image);
-        if (!header || header->magic!=MH_MAGIC_64) continue;
-        const struct load_command *command=(const struct load_command *)(header+1);
-        for (uint32_t i=0;i<header->ncmds;i++) {
-            if (command->cmd==LC_UUID && !memcmp(((const struct uuid_command *)command)->uuid,expectedUUID,16)) {
-                matched=YES; slide=_dyld_get_image_vmaddr_slide(image); break;
-            }
-            command=(const struct load_command *)((const uint8_t *)command+command->cmdsize);
-        }
-    }
-    if (!matched) { limitGuardStatus=@"Waze image UUID mismatch"; return; }
-    const uint8_t expected[]={0xff,0xc3,0x00,0xd1,0xf4,0x4f,0x01,0xa9,0xfd,0x7b,0x02,0xa9,0xfd,0x83,0x00,0x91};
-    void *address=(void *)(slide+0x101028ff4);
-    if (memcmp(address,expected,sizeof(expected))) {
-        NSMutableString *bytes=[NSMutableString stringWithString:@"entry:"];
-        for (unsigned i=0;i<16;i++) [bytes appendFormat:@"%02x",((uint8_t *)address)[i]];
-        limitGuardStatus=bytes; return;
-    }
-    limitGuardStatus=@"matched";
+// Waze's native current-limit getter. 5.25.0 has it at a measured address; other builds are
+// searched for the same code once (cached per build UUID), off the main thread.
+static void UseNativeLimit(const uint32_t *reader,NSString *status) {
+    void *address=(void *)reader;
 #if __has_feature(ptrauth_calls)
     address=ptrauth_sign_unauthenticated(address,ptrauth_key_function_pointer,0);
 #endif
     ReadNativeLimit=(uint64_t (*)(void))address;
+    limitGuardStatus=status;
+}
+static void ConfigureNativeLimit(void) {
+    const struct mach_header_64 *image=NULL;
+    intptr_t slide=0;
+    // Injection can reorder dyld images: take the app executable itself.
+    for (uint32_t i=0;i<_dyld_image_count() && !image;i++) {
+        const struct mach_header_64 *header=(const struct mach_header_64 *)_dyld_get_image_header(i);
+        if (header && header->magic==MH_MAGIC_64 && header->filetype==MH_EXECUTE) { image=header; slide=_dyld_get_image_vmaddr_slide(i); }
+    }
+    unsigned long size=0;
+    const uint32_t *text=image ? (const uint32_t *)getsectiondata(image,"__TEXT","__text",&size) : NULL;
+    if (!text) { limitGuardStatus=@"Waze text not found"; return; }
+    size_t count=size/4;
+    NSString *uuid=nil;
+    const struct load_command *command=(const struct load_command *)(image+1);
+    for (uint32_t i=0;i<image->ncmds && !uuid;i++) {
+        if (command->cmd==LC_UUID)
+            uuid=[[NSUUID alloc] initWithUUIDBytes:((const struct uuid_command *)command)->uuid].UUIDString;
+        command=(const struct load_command *)((const uint8_t *)command+command->cmdsize);
+    }
+    if (!uuid) { limitGuardStatus=@"Waze image UUID missing"; return; }
+    if ([uuid isEqual:@"90947E86-BFF2-3434-A28B-979C65DB8846"]) {
+        long index=GVMWazeLimitReaderIndex(text,count,(uintptr_t)slide+0x101028ff4);
+        if (index>=0) UseNativeLimit(text+index,@"matched 5.25.0");
+        else limitGuardStatus=@"5.25.0 limit getter changed";
+        return;
+    }
+    // One search per build: its result, found or not, is kept with the search version.
+    NSString *cache=[NSTemporaryDirectory() stringByAppendingPathComponent:@"gmaphud-waze-limit-reader.plist"];
+    NSDictionary *known=[NSDictionary dictionaryWithContentsOfFile:cache];
+    NSNumber *cached=[known[@"search"] isEqual:@(GVMWazeLimitSearchVersion)] ? known[uuid] : nil;
+    if ([cached isKindOfClass:NSNumber.class] && cached.longLongValue<0) {
+        limitGuardStatus=@"limit getter not found in this build (searched earlier)";
+        return;
+    }
+    if ([cached isKindOfClass:NSNumber.class] && GVMWazeLimitReaderAt(text,count,(size_t)cached.longLongValue)) {
+        UseNativeLimit(text+cached.longLongValue,@"found earlier for this build");
+        return;
+    }
+    limitGuardStatus=@"searching";
+    dispatch_async(dispatch_get_global_queue(QOS_CLASS_UTILITY,0),^{
+        long index=GVMFindWazeLimitReader(text,count);
+        dispatch_async(dispatch_get_main_queue(),^{
+            [@{@"search":@(GVMWazeLimitSearchVersion),uuid:@(index)} writeToFile:cache atomically:YES];
+            if (index<0) { limitGuardStatus=@"limit getter not found in this build"; return; }
+            UseNativeLimit(text+index,@"found by code search");
+        });
+    });
 }
 static void Status(NSString *message) {
     [message writeToFile:[NSTemporaryDirectory() stringByAppendingPathComponent:@"gmaphud-waze-source.status"]
@@ -119,7 +150,8 @@ static void Publish(BOOL force) {
     GVMPublishSourceOutput([store outputAtUptime:now],now,force);
 }
 
-// Waze 5.25.0 measured signature. Preserve init-family ownership and all arguments.
+// Signature measured in Waze 5.25.0 and checked by type encoding at load. Preserve init-family
+// ownership and all arguments.
 typedef id (*DescriptorInit)(id __attribute__((ns_consumed)), SEL, id alertId, NSInteger priority, BOOL isPreemptive, BOOL isValid, NSInteger distanceMeters, id title, id carplayTitle, id alertDescription, id carplayAlertDescription, id iconName, BOOL isCancellable, BOOL canSendThumbsUp, BOOL isCloseOnly, id primaryButtonText, id secondaryButtonText, BOOL disableCompactEtaBarTaps, BOOL showDistance, BOOL keepOpenAfterAction, BOOL closeOnlyOnSelection, double timeoutSeconds, NSInteger timerType, id zoneAlertData, BOOL shouldShowStillThere, BOOL didPassAlert, NSInteger triggerDistanceMeters, BOOL primaryButtonIsClose, BOOL secondaryButtonIsClose, BOOL shouldShowFocusedAlert, NSInteger silentActivationReason, id coordinate, BOOL shouldCheckDistanceFromLastAlert, NSInteger statsAlertId, NSInteger statsType, NSInteger statsSubtype, NSInteger statsSubtypeTrait, id statsUniqueId, BOOL dismissImmediatelyUponRemoval, BOOL isApproachingWithValidationHasValue, BOOL isApproachingWithValidation, BOOL hideActionsWhenInvalid, BOOL showOnCarPlayDashboard, BOOL doNotHideOnMapMovement) __attribute__((ns_returns_retained));
 static DescriptorInit OriginalDescriptor;
 static id Descriptor(id self __attribute__((ns_consumed)), SEL cmd, id alertId, NSInteger priority, BOOL isPreemptive, BOOL isValid, NSInteger distanceMeters, id title, id carplayTitle, id alertDescription, id carplayAlertDescription, id iconName, BOOL isCancellable, BOOL canSendThumbsUp, BOOL isCloseOnly, id primaryButtonText, id secondaryButtonText, BOOL disableCompactEtaBarTaps, BOOL showDistance, BOOL keepOpenAfterAction, BOOL closeOnlyOnSelection, double timeoutSeconds, NSInteger timerType, id zoneAlertData, BOOL shouldShowStillThere, BOOL didPassAlert, NSInteger triggerDistanceMeters, BOOL primaryButtonIsClose, BOOL secondaryButtonIsClose, BOOL shouldShowFocusedAlert, NSInteger silentActivationReason, id coordinate, BOOL shouldCheckDistanceFromLastAlert, NSInteger statsAlertId, NSInteger statsType, NSInteger statsSubtype, NSInteger statsSubtypeTrait, id statsUniqueId, BOOL dismissImmediatelyUponRemoval, BOOL isApproachingWithValidationHasValue, BOOL isApproachingWithValidation, BOOL hideActionsWhenInvalid, BOOL showOnCarPlayDashboard, BOOL doNotHideOnMapMovement) __attribute__((ns_returns_retained));
@@ -149,10 +181,9 @@ static id Descriptor(id self __attribute__((ns_consumed)), SEL cmd, id alertId, 
 
 __attribute__((constructor)) static void Start(void) {
     if (![NSBundle.mainBundle.bundleIdentifier isEqualToString:@"com.waze.iphone"]) return;
-    // Waze's private model is version-specific; skip unknown builds safely.
-    if (![[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"] isEqual:@"5.25.0"]) {
-        Status(@"Unsupported Waze version"); return;
-    }
+    // Every native entry point below is checked on its own (selector and type encoding, or the
+    // getter's code), so builds other than 5.25.0 keep whatever still matches.
+    NSString *version=[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
     Class cls=NSClassFromString(@"third_party_waze_client_ios_modules_WazeCommonCodeAlerts_WazeCommonCodeAlerts.CommonCodeAlertDescriptorData");
     SEL selector=sel_registerName("initWithAlertId:priority:isPreemptive:isValid:distanceMeters:title:carplayTitle:alertDescription:carplayAlertDescription:iconName:isCancellable:canSendThumbsUp:isCloseOnly:primaryButtonText:secondaryButtonText:disableCompactEtaBarTaps:showDistance:keepOpenAfterAction:closeOnlyOnSelection:timeoutSeconds:timerType:zoneAlertData:shouldShowStillThere:didPassAlert:triggerDistanceMeters:primaryButtonIsClose:secondaryButtonIsClose:shouldShowFocusedAlert:silentActivationReason:coordinate:shouldCheckDistanceFromLastAlert:statsAlertId:statsType:statsSubtype:statsSubtypeTrait:statsUniqueId:dismissImmediatelyUponRemoval:isApproachingWithValidationHasValue:isApproachingWithValidation:hideActionsWhenInvalid:showOnCarPlayDashboard:doNotHideOnMapMovement:");
     Method method=class_getInstanceMethod(cls,selector);
@@ -160,8 +191,8 @@ __attribute__((constructor)) static void Start(void) {
     store=[GVMWazeOutputStore new];
     if (method && !strcmp(method_getTypeEncoding(method),encoding)) {
         MSHookMessageEx(cls,selector,(IMP)Descriptor,(IMP *)&OriginalDescriptor);
-        Status(@"Waze output v1 alert hook active 5.25.0");
-    } else Status(@"Waze alert ABI mismatch; scalar fields checked independently");
+        Status([NSString stringWithFormat:@"Waze %@: output v1 alert hook active",version]);
+    } else Status([NSString stringWithFormat:@"Waze %@: alert ABI mismatch; speed and limit checked independently",version]);
     notify_register_dispatch(GVMOutputRequestName(GVMSourceWaze).UTF8String,&requestToken,
         dispatch_get_main_queue(),^(__unused int token) { Publish(YES); });
     ConfigureNativeLimit();
@@ -174,7 +205,8 @@ __attribute__((constructor)) static void Start(void) {
         [NSTimer scheduledTimerWithTimeInterval:1 repeats:YES block:^(__unused NSTimer *timer) {
             // iOS may deliver no GPS while stationary; Waze still holds its current limit, so
             // re-read that live native state each second as VietMap's engine re-sends it.
-            if (nativeLimitReady) [store updateLimit:ReadNativeLimit() uptime:NSProcessInfo.processInfo.systemUptime];
+            if (nativeLimitReady && GVMSelectedSourceID()==GVMSourceWaze)
+                [store updateLimit:ReadNativeLimit() uptime:NSProcessInfo.processInfo.systemUptime];
             Publish(NO);
         }];
     });

@@ -75,6 +75,13 @@ static NSString *AlertKey(NSDictionary *alert) {
         glow.lineWidth=2; [GVMHaloColor(GVMHaloSignal,1) setStroke]; [glow stroke];
         CGContextRestoreGState(context);
     }
+    if (self.limitDial) {
+        [self drawLimitFace:dial centre:centre limit:hasLimit];
+        [self drawSpeedBadgeAt:CGPointMake(CGRectGetMaxX(dial)-GVMHaloBadgeInset,CGRectGetMinY(dial)+GVMHaloBadgeDrop)
+            live:live state:state tone:tone];
+        [self drawTagBelow:dial live:live];
+        return;
+    }
     UIBezierPath *face=[UIBezierPath bezierPathWithOvalInRect:CGRectInset(dial,0.5,0.5)];
     [GVMHaloColor(GVMHaloInk900,0.8) setFill]; [face fill];
     face.lineWidth=1; [GVMHaloColor(GVMHaloInk600,1) setStroke]; [face stroke];
@@ -99,6 +106,44 @@ static NSString *AlertKey(NSDictionary *alert) {
 
     [self drawBadgeAt:CGPointMake(CGRectGetMaxX(dial)-GVMHaloBadgeInset,CGRectGetMinY(dial)+GVMHaloBadgeDrop) limit:hasLimit over:state==GVMWarningOver];
     [self drawTagBelow:dial live:live];
+}
+
+// The large circle as the limit sign: its P.127 sticker, or a drawn one when the value has no artwork.
+// An unknown limit keeps the dark face with a dashed ring and a dash.
+- (void)drawLimitFace:(CGRect)dial centre:(CGPoint)centre limit:(BOOL)hasLimit {
+    UIImage *sticker=hasLimit ? GVMHaloSignArtwork(GVMRoadAlertSpeedLimit,self.limit) : nil;
+    if (sticker) { GVMHaloDrawSticker(sticker,centre,GVMHaloDial); return; }
+    if (hasLimit) {
+        // P.127 proportions: a red ring a tenth of the diameter on a white face.
+        UIBezierPath *face=[UIBezierPath bezierPathWithOvalInRect:CGRectInset(dial,3.6,3.6)];
+        [UIColor.whiteColor setFill]; [face fill];
+        face.lineWidth=7.2; [GVMHaloColor(GVMHaloSignRed,1) setStroke]; [face stroke];
+        DrawCentered(GVMHaloText(self.limit.stringValue,GVMHaloNumberFont(self.limit.doubleValue>=100 ? 28 : 34),
+            GVMHaloColor(GVMHaloInk900,1),0),centre);
+        return;
+    }
+    UIBezierPath *face=[UIBezierPath bezierPathWithOvalInRect:CGRectInset(dial,1.5,1.5)];
+    [GVMHaloColor(GVMHaloInk900,0.8) setFill]; [face fill];
+    CGFloat dash[]={7,6}; [face setLineDash:dash count:2 phase:0];
+    face.lineWidth=3; [GVMHaloColor(GVMHaloInk400,1) setStroke]; [face stroke];
+    DrawCentered(GVMHaloText(@"—",GVMHaloNumberFont(32),GVMHaloColor(GVMHaloInk400,1),0),centre);
+}
+// The small circle as the current speed: a dark disc whose ring and digits take the state colour,
+// with the over-limit halo of the limit badge; "--" and a dashed ring without a live speed.
+- (void)drawSpeedBadgeAt:(CGPoint)centre live:(BOOL)live state:(GVMWarning)state tone:(uint32_t)tone {
+    CGFloat d=GVMHaloBadge, unit=d/30;
+    CGRect badge=CGRectMake(centre.x-d/2,centre.y-d/2,d,d);
+    if (state==GVMWarningOver) {
+        UIBezierPath *halo=[UIBezierPath bezierPathWithOvalInRect:CGRectInset(badge,-1.5*unit,-1.5*unit)];
+        halo.lineWidth=3*unit; [GVMHaloColor(GVMHaloSignal,0.4) setStroke]; [halo stroke];
+    }
+    UIBezierPath *disc=[UIBezierPath bezierPathWithOvalInRect:CGRectInset(badge,1.5*unit,1.5*unit)];
+    [GVMHaloColor(GVMHaloInk900,1) setFill]; [disc fill];
+    if (!live) { CGFloat dash[]={3*unit,2.5*unit}; [disc setLineDash:dash count:2 phase:0]; }
+    disc.lineWidth=(live ? 3 : 2)*unit;
+    [GVMHaloColor(live ? tone : GVMHaloInk400,1) setStroke]; [disc stroke];
+    UIColor *ink=!live ? GVMHaloColor(GVMHaloInk400,1) : state==GVMWarningNormal ? GVMHaloColor(GVMHaloInk050,1) : GVMHaloColor(tone,1);
+    DrawCentered(GVMHaloText(live ? self.speed.stringValue : @"--",GVMHaloNumberFont((self.speed.doubleValue>=100 ? 12 : 14)*unit),ink,0),centre);
 }
 
 - (void)drawBadgeAt:(CGPoint)centre limit:(BOOL)hasLimit over:(BOOL)over {

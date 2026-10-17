@@ -72,7 +72,10 @@ static void DrawLane(NSUInteger code, CGRect box, UIColor *color) {
 // same crisp drop shadow. Proportions follow the set's 164-unit panel: corner 16, rim 8 inset by 6,
 // shade 14, shadow 12 at 45%.
 static const uint32_t GVMLaneSignBlue=0x005BAA;
-@implementation GVMHaloLaneStrip
+@implementation GVMHaloLaneStrip {
+    // Distance of the first countdown message for these lanes, so the tag fills on the approach.
+    double _approachStart;
+}
 - (instancetype)initWithFrame:(CGRect)frame {
     if (!(self=[super initWithFrame:frame])) return nil;
     GVMHaloRegisterFonts();
@@ -83,13 +86,17 @@ static const uint32_t GVMLaneSignBlue=0x005BAA;
 }
 - (void)setLanes:(NSDictionary *)lanes {
     if ((_lanes==lanes) || [_lanes isEqual:lanes]) return;
+    id meters=lanes[@"distance"];
+    BOOL sameLanes=[_lanes[@"items"] isEqual:lanes[@"items"]];
+    if (![meters isKindOfClass:NSNumber.class]) _approachStart=0;
+    else if (!sameLanes || [meters doubleValue]>_approachStart) _approachStart=[meters doubleValue];
     _lanes=[lanes copy];
     [self setNeedsDisplay];
 }
 - (void)setScale:(double)scale {
     if (_scale==scale) return;
     _scale=scale;
-    GVMLaneStripMetrics strip=GVMLaneStripMetricsFor(1);
+    GVMLaneStripMetrics strip=GVMLaneStripMetricsFor(1,NO);
     self.layer.shadowOffset=CGSizeMake(0,12*strip.plate/164*scale);
     [self setNeedsDisplay];
 }
@@ -97,12 +104,17 @@ static const uint32_t GVMLaneSignBlue=0x005BAA;
     (void)rect;
     NSArray<NSDictionary *> *items=self.lanes[@"items"];
     if (![items isKindOfClass:NSArray.class] || !items.count || self.scale<=0) return;
-    GVMLaneStripMetrics strip=GVMLaneStripMetricsFor(items.count);
+    id meters=self.lanes[@"distance"];
+    BOOL tagged=[meters isKindOfClass:NSNumber.class];
+    GVMLaneStripMetrics strip=GVMLaneStripMetricsFor(items.count,tagged);
     CGFloat unit=strip.plate/164, radius=16*unit, rim=8*unit, inset=6*unit, shade=14*unit;
+    CGFloat plateWidth=GVMLanePlateWidth(strip,items.count);
     CGContextRef context=UIGraphicsGetCurrentContext();
     CGContextSaveGState(context);
     CGContextScaleCTM(context,self.scale,self.scale);
-    CGRect plateRect=CGRectMake(0,0,strip.width,strip.plate);
+    // A single lane is narrower than the tag; its panel then sits in the middle of the strip.
+    CGContextTranslateCTM(context,(strip.width-plateWidth)/2,0);
+    CGRect plateRect=CGRectMake(0,0,plateWidth,strip.plate);
     UIBezierPath *plate=[UIBezierPath bezierPathWithRoundedRect:plateRect cornerRadius:radius];
     [GVMHaloColor(GVMLaneSignBlue,1) setFill]; [plate fill];
     // A lane to use stands out only when the route rules some lanes out.
@@ -140,6 +152,10 @@ static const uint32_t GVMLaneSignBlue=0x005BAA;
     band.usesEvenOddFillRule=YES;
     [GVMHaloColor(GVMHaloInk900,0.2) setFill]; [band fill];
     CGContextRestoreGState(context);
+    if (tagged) {
+        CGFloat progress=_approachStart>0 ? MAX(0,MIN(1,1-[meters doubleValue]/_approachStart)) : 0;
+        GVMHaloDrawDistanceTag(plateWidth/2,strip.plate-9,meters,progress);
+    }
     CGContextRestoreGState(context);
 }
 @end

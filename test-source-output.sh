@@ -29,3 +29,6 @@ xcrun clang -Wall -Wextra -Werror -fobjc-arc -framework Foundation \
 "$test_dir/waze-output"
 xcrun clang -Wall -Wextra -Werror "$source_dir/tests/gofa-alert-policy-tests.c" -o "$test_dir/gofa-alert-policy"
 "$test_dir/gofa-alert-policy"
+xcrun clang -Wall -Wextra -Werror -I"$source_dir/provider" "$source_dir/provider/waze-limit-search.c" \
+  "$source_dir/tests/waze-limit-search-tests.c" -o "$test_dir/waze-limit-search"
+"$test_dir/waze-limit-search"

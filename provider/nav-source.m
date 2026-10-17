@@ -53,6 +53,12 @@ NSArray *VMNavCopyOverlayArguments(id arguments) {
     [self applyArguments:@[@{@"speedLimit":value ?: NSNull.null}, @NO] receivedAt:received];
 }
 
+- (void)applyMainSpeed:(id)value receivedAt:(NSTimeInterval)received {
+    // Same km/h as the overlay's speed in the same seconds (connected-source log, 14/10). An invalid
+    // value clears the field rather than keeping an old speed.
+    [self applyArguments:@[@{@"speed":value ?: NSNull.null}, @NO] receivedAt:received];
+}
+
 - (NSDictionary *)payloadAtUptime:(NSTimeInterval)uptime timestamp:(NSTimeInterval)timestamp {
     NSMutableDictionary *payload = [VMNavPayload(nil, INFINITY, timestamp) mutableCopy];
     NSDictionary *samples = [self freshSamplesAtUptime:uptime];

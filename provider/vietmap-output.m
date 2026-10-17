@@ -52,8 +52,14 @@ NSDictionary *GVMVietMapOutputAlert(NSDictionary *alert,NSTimeInterval receivedA
     return @{@"type":type,@"value":value ?: NSNull.null,@"distance":alert[@"distance"] ?: NSNull.null,
         @"receivedAt":@(receivedAt)};
 }
-NSDictionary *GVMVietMapLaneSample(NSArray<NSNumber *> *codes,NSTimeInterval now) {
-    if (![codes isKindOfClass:NSArray.class] || !codes.count || codes.count>GVMMaximumLanes || !isfinite(now)) return nil;
+const NSTimeInterval GVMVietMapAdvanceLaneLifetime=6;
+NSDictionary *GVMVietMapLaneSample(NSDictionary *advance,NSArray<NSNumber *> *codes,NSTimeInterval now) {
+    if (!isfinite(now)) return nil;
+    NSArray *ahead=[advance isKindOfClass:NSDictionary.class] ? advance[@"items"] : nil;
+    if ([ahead isKindOfClass:NSArray.class] && ahead.count && ahead.count<=GVMMaximumLanes &&
+        [advance[@"distance"] isKindOfClass:NSNumber.class])
+        return @{@"distance":advance[@"distance"],@"items":ahead,@"receivedAt":@(now)};
+    if (![codes isKindOfClass:NSArray.class] || !codes.count || codes.count>GVMMaximumLanes) return nil;
     NSMutableArray *items=[NSMutableArray new];
     for (NSNumber *code in codes) [items addObject:@{@"code":code,@"enabled":@YES}];
     return @{@"distance":NSNull.null,@"items":items,@"receivedAt":@(now)};

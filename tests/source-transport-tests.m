@@ -24,7 +24,16 @@ int main(int argc,char **argv) { @autoreleasepool {
     }
     Require(GVMSelectedSourceID()==1 && !GVMReadSourceOutput(now),@"initial source is VietMap, no invented data");
     GVMRestoreOutputSelection();
+    int changed=-1, fired=0;
+    Require(notify_register_check(GVMOutputChangedName(1).UTF8String,&changed)==NOTIFY_STATUS_OK,@"change notification registers");
+    notify_check(changed,&fired); fired=0;   // the first check after registering always reports 1
     Require(GVMPublishSourceOutput(Output(1,now),now,NO),@"selected source publishes");
+    // notifyd delivers asynchronously; give it a moment.
+    for (int i=0;i<100 && !fired;i++) { usleep(10000); notify_check(changed,&fired); }
+    Require(fired==1,@"a committed frame posts its change notification");
+    Require(GVMPublishSourceOutput(Output(1,now),now,NO),@"an unchanged frame is accepted");
+    usleep(200000); notify_check(changed,&fired);
+    Require(fired==0,@"an unchanged frame posts nothing");
     Require([GVMReadSourceOutput(now)[@"speedLimit"][@"value"] isEqual:@50],@"Darwin frame read");
     Require(!GVMSelectOutputSource(0) && !GVMSelectOutputSource(8),@"invalid selection refused");
     for (NSNumber *source in @[@4,@5,@6,@7]) {
@@ -60,6 +69,15 @@ int main(int argc,char **argv) { @autoreleasepool {
     CFPreferencesSetAppValue(CFSTR("sourceID"),(__bridge CFNumberRef)@3,CFSTR(GVM_OUTPUT_NAMESPACE));
     CFPreferencesAppSynchronize(CFSTR(GVM_OUTPUT_NAMESPACE)); GVMRestoreOutputSelection();
     Require(GVMSelectedSourceID()==3,@"saved GOFA survives restoration");
+    // A fallback is live but not saved, observers hear it, and restoring brings the saved choice back.
+    dispatch_semaphore_t selectionSignal=dispatch_semaphore_create(0);
+    GVMObserveSelection(dispatch_get_global_queue(QOS_CLASS_DEFAULT,0),^{ dispatch_semaphore_signal(selectionSignal); });
+    Require(GVMSelectOutputSourceForNow(2) && GVMSelectedSourceID()==2,@"fallback selection is live");
+    Require(dispatch_semaphore_wait(selectionSignal,dispatch_time(DISPATCH_TIME_NOW,NSEC_PER_SEC))==0,@"selection observers hear a fallback");
+    CFPreferencesAppSynchronize(CFSTR(GVM_OUTPUT_NAMESPACE));
+    Require([CFBridgingRelease(CFPreferencesCopyAppValue(CFSTR("sourceID"),CFSTR(GVM_OUTPUT_NAMESPACE))) isEqual:@3],@"fallback selection is not saved");
+    GVMRestoreOutputSelection();
+    Require(GVMSelectedSourceID()==3,@"restoring brings the saved choice back");
     Require(GVMSelectOutputSource(1) && !GVMReadSourceOutput(now),@"leaving GOFA requires a new VietMap frame");
     Require(GVMPublishSourceOutput(Output(1,now),now,YES),@"publish after GOFA isolation test");
     // Independent executable has separate globals/tokens, exercising actual IPC.

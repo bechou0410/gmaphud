@@ -52,6 +52,17 @@ int main(int argc, char **argv) {
             notify_cancel(token);
             return result==NOTIFY_STATUS_OK ? 0 : 3;
         }
+        // Temporary New UI dial, like position: Settings republishes the saved choice.
+        if (argc==3 && strcmp(argv[1],"options")==0) {
+            NSString *dial=[NSString stringWithUTF8String:argv[2]];
+            if (![@[@"speed",@"limit"] containsObject:dial]) return 2;
+            int token=-1;
+            if (notify_register_check(GVMPresentationOptionsName,&token)!=NOTIFY_STATUS_OK) return 3;
+            uint32_t result=notify_set_state(token,GVMEncodePresentationOptions(dial));
+            if (result==NOTIFY_STATUS_OK) notify_post(GVMPresentationOptionsName);
+            notify_cancel(token);
+            return result==NOTIFY_STATUS_OK ? 0 : 3;
+        }
         // Optional test lanes, anywhere after the values: lanes=1,1,1,5,4@127.
         uint64_t laneState=0;
         for (int i=1;i<argc;i++) {
@@ -72,7 +83,7 @@ int main(int argc, char **argv) {
             NSInteger speed, limit, duration;
             if ((argc != 4 && argc != 6) || !Number(argv[1], &speed) || !Number(argv[2], &limit) || !Number(argv[3], &duration) ||
                 !(state = GVMEncodeTest(speed, limit, NSProcessInfo.processInfo.systemUptime, duration))) {
-                fprintf(stderr, "Usage: gvm-test-speed SPEED_KMH LIMIT_KMH SECONDS [SIGN1:METERS SIGN2:METERS] [lanes=CODES@METERS], [--photo], or off; position FULL DASHBOARD; overspeed off|map|screen\n"); return 2;
+                fprintf(stderr, "Usage: gvm-test-speed SPEED_KMH LIMIT_KMH SECONDS [SIGN1:METERS SIGN2:METERS] [lanes=CODES@METERS], [--photo], or off; position FULL DASHBOARD; options speed|limit; overspeed off|map|screen\n"); return 2;
             }
             if (argc == 6) {
                 NSDictionary *first=DisplayAlert(argv[4]), *second=DisplayAlert(argv[5]);

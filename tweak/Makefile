@@ -27,7 +27,7 @@ GMapHUDGuidanceRelay_FRAMEWORKS = UIKit Foundation
 GMapHUDOverspeedScreen_FILES = overspeed-screen.m overspeed-frame.m placement-state.m
 GMapHUDOverspeedScreen_CFLAGS = -fobjc-arc -Wall -Wextra
 GMapHUDOverspeedScreen_FRAMEWORKS = UIKit Foundation QuartzCore
-WazeGMapHUDSource_FILES = background-location.m waze-source.m waze-startup.m waze-output.m source-output.m source-transport.m speed-state.m alert-state.m
+WazeGMapHUDSource_FILES = background-location.m waze-source.m waze-startup.m waze-output.m waze-limit-search.c source-output.m source-transport.m speed-state.m alert-state.m
 WazeGMapHUDSource_CFLAGS = -DGVM_WAZE_SOURCE=1 -fobjc-arc -Wall -Wextra
 WazeGMapHUDSource_FRAMEWORKS = Foundation UIKit CoreLocation
 WazeGMapHUDSource_LIBRARIES = substrate

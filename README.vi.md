@@ -10,7 +10,7 @@ Tweak cho iOS jailbreak rootful/rootless, hiển thị **tốc độ hiện tạ
 
 ## Nguồn cảnh báo
 
-Chọn **VietMap Live**, **Waze** hoặc **GOFA**; mỗi lần chỉ dùng một nguồn. Waze5.25.0; GOFA4.2.1 build3.
+Chọn **VietMap Live**, **Waze** hoặc **GOFA**; mỗi lần chỉ dùng một nguồn. Waze được đọc qua bước kiểm tra riêng cho từng điểm nối vào app, đo trên bản 5.25.0: bản khác vẫn có tốc độ, giới hạn và cảnh báo khi code còn khớp, riêng việc tự bật GPS của Waze khi được đánh thức ngầm chỉ có ở 5.25.0 (bản khác cần mở Waze một lần). GOFA 4.2.1 build 3.
 
 ## Ảnh xem trước vị trí bong bóng
 
@@ -30,7 +30,7 @@ Chọn **VietMap Live**, **Waze** hoặc **GOFA**; mỗi lần chỉ dùng một
 
 ## Tính năng
 
-Chọn kiểu bong bóng trong Cài đặt → GMapHUD → Giao diện. **Classic** (mặc định) giữ bong bóng quen thuộc. **New UI (beta)** gộp tốc độ và biển giới hạn vào một đồng hồ tròn: vòng tiến dần tới giới hạn, chuyển hổ phách khi sát và đỏ khi vượt; nhãn nguồn nằm dưới đồng hồ, biển cảnh báo hiện to với nhãn khoảng cách đầy dần khi xe tới gần. Hai kiểu dùng chung bộ biển báo vẽ phẳng theo hình và màu QCVN 41:2024; camera và CSGT là biển trắng có vòng đỏ như biển tốc độ kèm huy hiệu loại camera ở góc, các báo cáo khác chỉ có trong app là token tròn. Kích cỡ từ 50% đến 250%; ở New UI (beta), khi bố cục đã chọn không đủ chỗ cho cảnh báo ở cỡ lớn, cảnh báo xếp thành hàng dưới đồng hồ để đồng hồ giữ nguyên cỡ và vị trí. New UI (beta) còn hiện biển làn đường đúng như VietMap Live đang hiện, trong suốt thời gian VietMap hiện: mỗi làn một mũi tên, từ trái sang phải, dưới hoặc trên bong bóng ở bố cục ngang và cạnh đồng hồ ở bố cục dọc; như biển hiệu lực, biển làn không có khoảng cách. Khi Google Maps dẫn đường trên bản đồ đầy đủ của CarPlay, biển hiệu lực và làn chuyển xuống dưới ô chỉ dẫn của CarPlay, giữa ô đó và thời gian đến; bong bóng giữ đồng hồ và biển sắp tới, phần không vừa ở lại trong bong bóng. GMapHUDGuidanceRelay, nạp vào CarPlayTemplateUIHost, chỉ đọc vị trí CarPlay vẽ cột chỉ dẫn. Mở lại VietMap Live sau khi cài bản cập nhật để làn đường tới được Google Maps.
+Chọn kiểu bong bóng trong Cài đặt → GMapHUD → Giao diện. **Classic** (mặc định) giữ bong bóng quen thuộc. **New UI (beta)** gộp tốc độ và biển giới hạn vào một đồng hồ tròn: vòng tiến dần tới giới hạn, chuyển hổ phách khi sát và đỏ khi vượt; nhãn nguồn nằm dưới đồng hồ, biển cảnh báo hiện to với nhãn khoảng cách đầy dần khi xe tới gần. Hai kiểu dùng chung bộ biển báo vẽ phẳng theo hình và màu QCVN 41:2024; camera và CSGT là biển trắng có vòng đỏ như biển tốc độ kèm huy hiệu loại camera ở góc, các báo cáo khác chỉ có trong app là token tròn. Kích cỡ từ 50% đến 250%; ở New UI (beta), khi bố cục đã chọn không đủ chỗ cho cảnh báo ở cỡ lớn, cảnh báo xếp thành hàng dưới đồng hồ để đồng hồ giữ nguyên cỡ và vị trí. New UI (beta) còn hiện biển làn đường của VietMap: mỗi làn một mũi tên, từ trái sang phải, dưới hoặc trên bong bóng ở bố cục ngang và cạnh đồng hồ ở bố cục dọc. Biển hiện ngay khi VietMap bắt đầu đếm ngược tới giao lộ, kèm nhãn khoảng cách, rồi giữ lại không có khoảng cách trong suốt thời gian VietMap Live hiện làn đang hiệu lực. Trong Cài đặt, mục Vòng lớn cho vòng lớn là biển giới hạn tốc độ và vòng nhỏ là tốc độ hiện tại. Khi Google Maps dẫn đường trên bản đồ đầy đủ của CarPlay, biển hiệu lực và làn chuyển xuống dưới ô chỉ dẫn của CarPlay, giữa ô đó và thời gian đến; bong bóng giữ đồng hồ và biển sắp tới, phần không vừa ở lại trong bong bóng. GMapHUDGuidanceRelay, nạp vào CarPlayTemplateUIHost, chỉ đọc vị trí CarPlay vẽ cột chỉ dẫn. Mở lại VietMap Live sau khi cài bản cập nhật để làn đường tới được Google Maps.
 
 Bong bóng cho chọn bố cục ngang/dọc và kéo đổi thứ tự các module. Chỉnh kích cỡ và vị trí riêng cho Bản đồ đầy đủ, Dashboard và iPhone. Tối đa hai cảnh báo đường kèm khoảng cách; cảnh báo vượt tốc có thể hiển thị quanh bản đồ hoặc toàn màn hình CarPlay.
 
@@ -111,10 +111,11 @@ Chạy trên iPhone trong shell có quyền dùng công cụ đã cài, khi Goog
 /var/jb/usr/bin/gvm-test-speed 62 50 60
 /var/jb/usr/bin/gvm-test-speed 42 60 60 speed_limit_80:200 no_passing_in:400
 /var/jb/usr/bin/gvm-test-speed 42 60 60 lanes=1,1,1,5,4@127
+/var/jb/usr/bin/gvm-test-speed options limit
 /var/jb/usr/bin/gvm-test-speed off
 ```
 
-Tham số lần lượt là tốc độ hiện tại (0–400 km/h), giới hạn (1–400 km/h), thời lượng (1–300 giây); bản thử 0.1.14 có thể thêm tên hai biển VietMap và khoảng cách (0–10000 m) theo dạng `TÊN_BIỂN:MÉT`. Có thể nhập hai số trần để thử hai biển camera; `TÊN_BIỂN:-` hiện biển đang hiệu lực, không có khoảng cách. `lanes=MÃ@MÉT` thêm tối đa bảy làn thử theo mã làn của VietMap (1 đi thẳng, 4 rẽ phải, 5 thẳng hoặc phải, 16 quay đầu, 64 rẽ trái và tổng của chúng), từ trái sang phải; thêm `x` trước mã cho làn không được đi, bỏ `@MÉT` nếu không cần khoảng cách. Làn chỉ hiện ở New UI (beta). Chỉ mô hình hiển thị trên Google CarPlay thay đổi; GPS, dẫn đường và dữ liệu VietMap thật vẫn giữ nguyên. Mặc định TEST hiển thị đến khi gọi `off` hoặc hết hạn. Sau kiểm thử, dữ liệu thật chưa có vẫn được hiển thị là chưa có.
+Tham số lần lượt là tốc độ hiện tại (0–400 km/h), giới hạn (1–400 km/h), thời lượng (1–300 giây); bản thử 0.1.14 có thể thêm tên hai biển VietMap và khoảng cách (0–10000 m) theo dạng `TÊN_BIỂN:MÉT`. Có thể nhập hai số trần để thử hai biển camera; `TÊN_BIỂN:-` hiện biển đang hiệu lực, không có khoảng cách. `lanes=MÃ@MÉT` thêm tối đa bảy làn thử theo mã làn của VietMap (1 đi thẳng, 4 rẽ phải, 5 thẳng hoặc phải, 16 quay đầu, 64 rẽ trái và tổng của chúng), từ trái sang phải; thêm `x` trước mã cho làn không được đi, bỏ `@MÉT` nếu không cần khoảng cách. Làn chỉ hiện ở New UI (beta). `options speed|limit` tạm đổi vòng lớn của New UI, không ghi đè lựa chọn đã lưu. Chỉ mô hình hiển thị trên Google CarPlay thay đổi; GPS, dẫn đường và dữ liệu VietMap thật vẫn giữ nguyên. Mặc định TEST hiển thị đến khi gọi `off` hoặc hết hạn. Sau kiểm thử, dữ liệu thật chưa có vẫn được hiển thị là chưa có.
 
 ## Chẩn đoán lỗi
 
@@ -159,7 +160,7 @@ Nhịp cảnh báo tăng theo mức vượt: dưới 5 km/h — 0,75 Hz; từ 5 
 
 Trong Cài đặt → GMapHUD, chọn Classic hoặc New UI (beta) ở mục Giao diện; thay đổi áp dụng cho mọi màn hình mà không cần mở lại Google Maps. Sau đó chọn Bản đồ đầy đủ, Dashboard hoặc Trên iPhone. Mỗi trang có công tắc riêng, vị trí, bố cục Ngang/Dọc/Tự động, kích cỡ và kéo thả thứ tự các phần. Hai preview ngang/dọc cập nhật khi đổi thứ tự. iPhone có thêm tinh chỉnh X/Y. Nút Đặt lại chỉ khôi phục phần tương ứng.
 
-Trong **Chạy nền**, có thể bật tự đánh thức VietMap và tùy chọn thoát nguồn sau 20 giây ngắt CarPlay. Quyền định vị gốc được giữ nguyên.
+Trong **Chạy nền**, có thể bật tự đánh thức nguồn đã chọn và tùy chọn thoát nguồn sau 20 giây ngắt CarPlay. Khi Google Maps đang hiện, nguồn đã chọn chưa chạy sẽ được mở ngầm, tối đa mỗi 3 giây một lần; sau 5 lần thất bại (app crash liên tục hoặc chưa cài) GMapHUD tạm dùng nguồn đã cài và có quyền định vị tiếp theo, theo thứ tự VietMap Live, GOFA, Waze, đến phiên Google Maps sau, không đổi lựa chọn đã lưu trong Cài đặt; khi không còn nguồn nào, GMapHUD ngừng đánh thức đến phiên sau nhưng nguồn bạn tự mở vẫn được giữ chạy. GMapHUD chỉ đóng nguồn do chính nó mở và chưa từng hiện trên màn hình iPhone hay CarPlay: khi đổi sang nguồn khác, và 10 giây sau khi Google Maps bị đóng. Quyền định vị gốc được giữ nguyên.
 
 ## Gói khác trong nguồn
 

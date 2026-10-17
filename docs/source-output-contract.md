@@ -5,7 +5,7 @@
 Implemented in internal **0.1.20**. This is the adapter/bridge contract for both
 CarPlay and foreground Google Maps on iPhone. VietMap is the first migrated source.
 The internal Waze adapter uses the same contract. Settings enables VietMap and experimental Waze; GOFA is experimental;
-Waze 5.25.0 support is experimental and build-sensitive.
+Waze support is experimental and build-sensitive. Each native entry point is checked on its own (selector and type encoding, or the limit getter's code with address fields masked, found once per build UUID), so builds other than the measured 5.25.0 keep what still matches; the native GPS start for a cold background launch stays 5.25.0-only.
 
 The owning definitions are [source-output.h](../common/source-output.h),
 [source-output.m](../common/source-output.m) and
@@ -48,7 +48,7 @@ documents the shape; IPC carries numeric states, not JSON or images.
 | alert `receivedAt` | Original receive time of that alert update; independent of scalar fields. |
 | `lanes` | Optional lane set for the next junction: `{distance, items, receivedAt}`. Expires at five seconds like the other fields. A malformed set is omitted whole. |
 | lanes `distance` | Integer 0–10000 **metres** to the junction, or null when unknown. |
-| lanes (VietMap) | The lanes VietMap Live shows: its overlay `laneInfo`, in effect on the stretch being driven, with a null distance. VietMap changes or clears them itself (a patch without `laneInfo` leaves them), so the adapter keeps them as they stand and publishes them with the publication time; if VietMap Live stops publishing, they expire at five seconds. Its `updateLaneInfo` countdown is not used. |
+| lanes (VietMap) | While VietMap counts down to a junction (`updateLaneInfo` on `vml_main_channel`, `{distance, laneItems:[{enabled, imageId}]}`, about every two seconds), its lanes with that distance; the direction comes from `imageId` (`lane_<directions>_<to follow>`, VietMap's names such as STRAIGHT, SLIGHT_RIGHT, UTURN_LEFT joined by "-"). Otherwise the lanes VietMap Live shows: its overlay `laneInfo`, in effect on the stretch being driven, with a null distance. VietMap changes or clears both itself (a patch without `laneInfo` leaves them; a countdown without lanes, or one that cannot be read because its distance is missing or no lane direction is recognised, ends it; a countdown not renewed for six seconds lapses), so the adapter keeps them as they stand and publishes them with the publication time; if VietMap Live stops publishing, they expire at five seconds. |
 | lanes `items` | 1–12 lanes, left to right. Each is `{code, enabled}`: `code` uses VietMap's direction bitmask (1 straight, 4 right, 16 U-turn left, 64 left, 256 U-turn right; other bits are dropped), `enabled` is a boolean and defaults to true. |
 
 Missing, null, invalid or expired scalar samples are omitted. Invalid individual
@@ -73,9 +73,14 @@ IDs and names are defined by the enum and `GVMRoadAlertName` in the owning files
 
 VietMap is the default. Consumers call `GVMReadSourceOutput(now)` and use its entire
 envelope; they do not independently combine speed, limit or alerts from adapters.
-Only the selected adapter can publish. Missing data stays missing; there is no
-merge or automatic fallback to another source. Auto-wake runs only for the selected source when enabled and the visible-host
-lease and existing location permission permit it.
+Only the selected adapter can publish. Missing data stays missing; sources are never
+merged. Auto-wake runs only for the selected source when enabled and the visible-host
+lease and existing location permission permit it. After five failed wakes the
+SpringBoard supervisor selects the next installed source with location permission
+(VietMap, GOFA, Waze) through `GVMSelectOutputSourceForNow`, which advances the epoch
+without saving; the next Google Maps session restores the saved choice with
+`GVMRestoreOutputSelection`. Only SpringBoard restores at start, so CarPlayApp starting on
+a connection does not undo a fallback.
 
 `GVMSelectOutputSource` persists the single ID and advances a selection epoch.
 Switching source immediately makes the old frame unreadable. Returning to a
@@ -110,6 +115,12 @@ unavailable. Each source has **one adapter writer process**; local operations ar
 serialized. This is a consistency protocol, not cross-process writer arbitration
 or cryptographic authentication. Other injected/privileged software can still
 alter Darwin state. There is no network service, GPS feed or authorization change.
+
+After each committed frame that changed, the writer posts
+`com.chou.gmaphud.output.v1.<sourceID>.changed`. `GVMObserveSourceOutput` delivers
+those posts and selection changes, so Google Maps refreshes at once (coalesced to
+10 Hz); its 0.5 s poll remains for expiry. `GVMObserveSelection` delivers selection
+changes alone.
 
 Live production uses this versioned namespace exclusively. Existing bounded
 `gvm-test-speed` display samples keep their old test channels and are translated
@@ -245,6 +256,24 @@ signal must also match the separate location-source ID and current selection.
 Switching sources clears both signals before managing the next app. The provider
 starts only its measured primary GPS delegate when needed; ending the lease stops
 only starts owned by the feature and restores temporary manager flags.
+
+While a Google Maps heartbeat is fresh, a selected source that is not running is
+launched suspended at most every 3 seconds. A failed launch or a process that ends
+before it is proven counts as a failed attempt; launches FrontBoard refuses because
+the phone is locked are not counted. A wake is proven by a process alive for 10
+seconds with output sampled after it started (`GVMWakeProven`), so the last frame of
+a crashed process never resets the count. Five failed attempts, the fifth also given
+its 3 seconds (`GVMWakeSwitchDue`), select the fallback above. When no usable source
+is left, launches stop until the next Google Maps session and the saved choice is live
+again; a selected source that is running (one the user opened) keeps its lease. The supervisor closes only a process that appeared within 15 seconds of its own
+launch request (`GVMWakeOwnsProcess`) and has not been on a screen since: when the
+selection changes, and when Google Maps has been gone for 10 seconds. Each source
+app posts its pid to `com.chou.gmaphud.background.shown.<sourceID>` when one of its
+scenes enters the foreground, because SpringBoard's process state does not count a
+CarPlay scene as foreground. A Google Maps heartbeat that resumes after a gap is
+also posted, and the supervisor handles it, a shown source and a selection change at
+once; otherwise it ticks every second while a map, a countdown or a wake is active
+and every five seconds when idle.
 
 The main preferences menu exposes the source as a dropdown plus `autoWake` and
 `autoExit` switches. Auto-exit observes real `CARSessionStatus` connection changes,

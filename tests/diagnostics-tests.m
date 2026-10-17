@@ -37,7 +37,8 @@ int main(int argc, char **argv) { @autoreleasepool {
     [manager removeItemAtPath:directory error:nil];
     NSString *report=GVMDiagnosticsReport();
     assert([report hasPrefix:header]);
-    assert([report containsString:@"com.google.Maps"] && [report containsString:@"vn.vietmap.live"]);
+    assert([report containsString:@"com.google.Maps"] && [report containsString:@"vn.vietmap.live"] &&
+        [report containsString:@"com.waze.iphone"] && [report containsString:@"com.lumi.GOFA"]);
 
     assert([report containsString:@"vietmap"] && [report containsString:@"googlemaps"]);
     puts("diagnostics encoding and report tests passed");

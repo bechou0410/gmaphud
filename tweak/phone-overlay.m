@@ -37,7 +37,9 @@ void GVMRefreshPhoneOverlay(void) {
     }
     double now=NSProcessInfo.processInfo.systemUptime;
     if (backgroundToken>=0 && (lastHeartbeat<0 || now-lastHeartbeat>=3)) {
+        BOOL resumed=GVMHeartbeatResumed(now,lastHeartbeat);
         notify_set_state(backgroundToken,(uint64_t)(now*1000)); lastHeartbeat=now;
+        if (resumed) notify_post(GVM_BACKGROUND_PHONE_SIGNAL);
     }
     NSDictionary *output=GVMReadSourceOutput(now);
     NSNumber *speed=output[@"speed"][@"value"], *limit=output[@"speedLimit"][@"value"];

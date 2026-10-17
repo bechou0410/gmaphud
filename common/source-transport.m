@@ -61,13 +61,15 @@ NSUInteger GVMSelectedSourceID(void) {
         return Selection(&selected) ? GVMSourceIDForSelection(selected) : 0;
     }
 }
-BOOL GVMSelectOutputSource(NSUInteger sourceID) {
+static BOOL Select(NSUInteger sourceID,BOOL save) {
     if (!GVMSourceEnabled(sourceID)) return NO;
     @synchronized(NSProcessInfo.processInfo) {
         uint64_t selected=0;
         if (!Selection(&selected) || (selected>>3)==(UINT64_MAX>>3)) return NO;
-        CFPreferencesSetAppValue(CFSTR("sourceID"),(__bridge CFNumberRef)@(sourceID),CFSTR(GVM_OUTPUT_NAMESPACE));
-        if (!CFPreferencesAppSynchronize(CFSTR(GVM_OUTPUT_NAMESPACE))) return NO;
+        if (save) {
+            CFPreferencesSetAppValue(CFSTR("sourceID"),(__bridge CFNumberRef)@(sourceID),CFSTR(GVM_OUTPUT_NAMESPACE));
+            if (!CFPreferencesAppSynchronize(CFSTR(GVM_OUTPUT_NAMESPACE))) return NO;
+        }
         // Changing selection creates an epoch: even switching back needs a new frame.
         uint64_t next=(((selected>>3)+1)<<3)|sourceID;
         if (notify_set_state(selectionToken,next)!=NOTIFY_STATUS_OK) return NO;
@@ -75,6 +77,8 @@ BOOL GVMSelectOutputSource(NSUInteger sourceID) {
         return YES;
     }
 }
+BOOL GVMSelectOutputSource(NSUInteger sourceID) { return Select(sourceID,YES); }
+BOOL GVMSelectOutputSourceForNow(NSUInteger sourceID) { return Select(sourceID,NO); }
 void GVMRestoreOutputSelection(void) {
     @synchronized(NSProcessInfo.processInfo) {
         CFPreferencesAppSynchronize(CFSTR(GVM_OUTPUT_NAMESPACE));
@@ -114,6 +118,7 @@ BOOL GVMPublishSourceOutput(NSDictionary *output,NSTimeInterval now,BOOL force) 
         if (notify_set_state(endpoint->tokens[0],((revision+1)<<8)|GVMOutputSchemaVersion)!=NOTIFY_STATUS_OK) return NO;
         endpoint->previous=words; endpoint->previousSelection=selected;
         endpoint->previousCommit=((revision+1)<<8)|GVMOutputSchemaVersion; endpoint->published=YES;
+        notify_post(GVMOutputChangedName(sourceID).UTF8String);
         return YES;
     }
 }
@@ -131,6 +136,22 @@ NSDictionary *GVMReadSourceOutput(NSTimeInterval now) {
             !GVMOutputFrameReadable(before,after,selected,afterSelection,frameSelection,sourceID)) return nil;
         return GVMDecodeSourceOutput(sourceID,words,now);
     }
+}
+NSString *GVMOutputChangedName(NSUInteger sourceID) {
+    return [Prefix() stringByAppendingFormat:@".output.v1.%lu.changed",(unsigned long)sourceID];
+}
+void GVMObserveSelection(dispatch_queue_t queue,dispatch_block_t handler) {
+    if (!queue || !handler) return;
+    int token=-1;
+    notify_register_dispatch([Prefix() stringByAppendingString:@".source.selection"].UTF8String,&token,queue,
+        ^(__unused int fired) { handler(); });
+}
+void GVMObserveSourceOutput(dispatch_queue_t queue,dispatch_block_t handler) {
+    if (!queue || !handler) return;
+    int token=-1;
+    for (NSUInteger sourceID=GVMSourceVietMap;sourceID<=GVMSourceGofa;sourceID++)
+        notify_register_dispatch(GVMOutputChangedName(sourceID).UTF8String,&token,queue,^(__unused int fired) { handler(); });
+    GVMObserveSelection(queue,handler);
 }
 NSString *GVMOutputRequestName(NSUInteger sourceID) {
     return GVMSourceEnabled(sourceID) ? [Prefix() stringByAppendingFormat:@".source.%lu.request",(unsigned long)sourceID] : nil;

@@ -35,6 +35,9 @@ int main(void) {
     for (int status=-1;status<=5;status++) {
         if (status!=4) assert(!GVMBackgroundNeedsUsageContext(status,true));
     }
+    // A heartbeat is posted when it resumes after a gap (or is the first), not on every beat.
+    assert(GVMHeartbeatResumed(10,-1) && GVMHeartbeatResumed(10,NAN));
+    assert(GVMHeartbeatResumed(16,10) && !GVMHeartbeatResumed(13,10) && !GVMHeartbeatResumed(15.9,10));
     assert(!GVMBackgroundActive(10,0));
     assert(GVMBackgroundActive(10,10000));
     assert(GVMBackgroundActive(21.999,10000));
@@ -49,15 +52,26 @@ int main(void) {
     assert(!GVMBackgroundAnyHostActive(10,0,0));
     assert(!GVMBackgroundAnyHostActive(10,11000,0));
     assert(!GVMBackgroundAnyHostActive(NAN,10000,10000));
-    assert(GVMBackgroundMayLaunch(15,15,1));
-    assert(!GVMBackgroundMayLaunch(14,15,1));
-    assert(!GVMBackgroundMayLaunch(100,15,3));
-    assert(!GVMBackgroundMayLaunch(NAN,15,0));
+    // Wake: every 3 s, five failed attempts, then another source.
+    assert(GVMWakeMayLaunch(15,15,0) && GVMWakeMayLaunch(18,15,4));
+    assert(!GVMWakeMayLaunch(14.9,15,1) && !GVMWakeMayLaunch(100,15,5) && !GVMWakeMayLaunch(NAN,15,0) && !GVMWakeMayLaunch(15,NAN,0));
+    assert(!GVMWakeExhausted(4) && GVMWakeExhausted(5) && GVMWakeInterval==3.0);
+    // The fifth attempt also gets its 3 s before the supervisor moves on.
+    assert(!GVMWakeSwitchDue(20.9,21,5) && GVMWakeSwitchDue(21,21,5) && !GVMWakeSwitchDue(30,21,4));
+    assert(!GVMWakeSwitchDue(NAN,21,5) && !GVMWakeSwitchDue(21,NAN,5));
+    // Fallback order VietMap Live, GOFA, Waze among installed sources not already given up.
+    assert(GVMWakeFallbackSource((1u<<1)|(1u<<2)|(1u<<3),1u<<2)==1);
+    assert(GVMWakeFallbackSource((1u<<1)|(1u<<2)|(1u<<3),1u<<1)==3);
+    assert(GVMWakeFallbackSource((1u<<1)|(1u<<2)|(1u<<3),(1u<<1)|(1u<<3))==2);
+    assert(GVMWakeFallbackSource(1u<<2,1u<<1)==2 && GVMWakeFallbackSource(1u<<3,1u<<3)==0 && GVMWakeFallbackSource(0,0)==0);
+    // A wake is proven by a process alive 10 s with output sampled after it started.
+    assert(GVMWakeProven(110,100,105) && !GVMWakeProven(109,100,105) && !GVMWakeProven(120,100,99.9) && !GVMWakeProven(120,0,105));
+    assert(!GVMWakeProven(NAN,100,105) && !GVMWakeProven(120,100,NAN));
+    // Only a process that appeared after GMapHUD's own launch request is GMapHUD's.
+    assert(GVMWakeOwnsProcess(100,101) && GVMWakeOwnsProcess(100,115) && !GVMWakeOwnsProcess(100,116) && !GVMWakeOwnsProcess(100,99) && !GVMWakeOwnsProcess(0,5));
+    // Google Maps closed for 10 s: its source exits.
+    assert(!GVMHostExitDue(100,0) && !GVMHostExitDue(109.9,100) && GVMHostExitDue(110,100) && !GVMHostExitDue(NAN,100));
     assert(GVMBackgroundRetryDelay(2)>GVMBackgroundRetryDelay(1));
-    assert(!GVMBackgroundNewClient(0,17));
-    assert(!GVMBackgroundNewClient(17,17));
-    assert(!GVMBackgroundNewClient(17,0));
-    assert(GVMBackgroundNewClient(17,18));
     assert(GVMBackgroundPermissionAllowed(100,GVMBackgroundPermissionState(100,true)));
     assert(!GVMBackgroundPermissionAllowed(106,GVMBackgroundPermissionState(100,true)));
     assert(!GVMBackgroundPermissionAllowed(99,GVMBackgroundPermissionState(100,true)));

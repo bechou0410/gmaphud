@@ -320,6 +320,57 @@ NSArray<NSNumber *> *GVMVietMapOverlayLaneCodes(id payload) {
     }
     return codes;
 }
+NSUInteger GVMVietMapLaneCodeForImage(id imageId) {
+    if (![imageId isKindOfClass:NSString.class] || [imageId length]>96) return 0;
+    NSString *text=[imageId uppercaseString];
+    if (![text hasPrefix:@"LANE_"]) return 0;
+    // VietMap's names (its Dart lane model), longest first so UTURN_LEFT wins over UTURN. Slight and
+    // sharp turns share the turn arrow, as in VietMap's own lane icons.
+    static NSArray<NSArray *> *names;
+    static dispatch_once_t once;
+    dispatch_once(&once,^{
+        names=@[@[@"SLIGHT_RIGHT",@4],@[@"SHARP_RIGHT",@4],@[@"SLIGHT_LEFT",@64],@[@"UTURN_RIGHT",@256],
+            @[@"SHARP_LEFT",@64],@[@"UTURN_LEFT",@16],@[@"STRAIGHT",@1],@[@"UTURN",@16],@[@"RIGHT",@4],
+            @[@"LEFT",@64],@[@"NONE",@0]];
+    });
+    NSUInteger code=0, i=5, length=text.length;
+    // Only the first group: the lane's own directions. "_" after a name starts the group to follow.
+    while (i<length) {
+        NSArray *match=nil;
+        for (NSArray *name in names)
+            if ([text compare:name[0] options:NSLiteralSearch range:NSMakeRange(i,MIN([name[0] length],length-i))]==NSOrderedSame) {
+                match=name; break;
+            }
+        if (!match) return 0;
+        code|=[match[1] unsignedIntegerValue];
+        i+=[match[0] length];
+        if (i==length || [text characterAtIndex:i]=='_') break;
+        if ([text characterAtIndex:i]!='-') return 0;
+        i++;
+    }
+    return code;
+}
+NSDictionary *GVMVietMapAdvanceLanes(id payload) {
+    id info=payload;
+    if ([payload isKindOfClass:NSString.class])
+        info=[NSJSONSerialization JSONObjectWithData:[payload dataUsingEncoding:NSUTF8StringEncoding] options:0 error:nil];
+    if (![info isKindOfClass:NSDictionary.class]) return @{};
+    id items=info[@"laneItems"], distance=info[@"distance"];
+    if (![items isKindOfClass:NSArray.class] || ![items count] || [items count]>12 || ![distance isKindOfClass:NSNumber.class] ||
+        CFGetTypeID((__bridge CFTypeRef)distance)==CFBooleanGetTypeID() || !isfinite([distance doubleValue]) ||
+        [distance doubleValue]<0 || [distance doubleValue]>10000) return @{};
+    NSMutableArray *lanes=[NSMutableArray new];
+    BOOL readable=NO;
+    for (id item in items) {
+        if (![item isKindOfClass:NSDictionary.class]) return @{};
+        id enabled=item[@"enabled"];
+        BOOL use=[enabled isKindOfClass:NSNumber.class] ? [enabled boolValue] : YES;
+        NSUInteger code=GVMVietMapLaneCodeForImage(item[@"imageId"]);
+        if (code) readable=YES;
+        [lanes addObject:@{@"code":@(code),@"enabled":@(use)}];
+    }
+    return readable ? @{@"distance":@(lround([distance doubleValue])),@"items":lanes} : @{};
+}
 NSArray<NSDictionary *> *GVMVietMapOverlayStickyAlerts(id payload) {
     if (![payload isKindOfClass:NSArray.class] || [payload count]!=2 ||
         ![payload[0] isKindOfClass:NSDictionary.class]) return nil;

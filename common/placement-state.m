@@ -65,6 +65,17 @@ GVMInterfaceStyle GVMCurrentInterfaceStyle(void) {
     if (token>=0) notify_get_state(token,&state);
     return GVMDecodeInterfaceStyle(state);
 }
+const char *GVMPresentationOptionsName="com.chou.gmaphud.presentation-options";
+uint64_t GVMEncodePresentationOptions(id dial) {
+    return (1ULL<<8) | ([dial isEqual:@"limit"] ? 1 : 0);
+}
+BOOL GVMDecodeLimitDial(uint64_t state) { return (state>>8)==1 && (state&1); }
+uint64_t GVMCurrentPresentationOptions(void) {
+    static int token=-1; uint64_t state=0;
+    if (token<0) notify_register_check(GVMPresentationOptionsName,&token);
+    if (token>=0) notify_get_state(token,&state);
+    return state;
+}
 void GVMPublishSavedSizes(void) {
     CFStringRef domain=CFSTR("com.chou.gmaphud");
     CFPreferencesAppSynchronize(domain);
@@ -77,6 +88,10 @@ void GVMPublishSavedSizes(void) {
     static int styleToken=-1;
     if (styleToken<0) notify_register_check(GVMInterfaceStyleName,&styleToken);
     if (styleToken>=0) { notify_set_state(styleToken,GVMEncodeInterfaceStyle(style)); notify_post(GVMInterfaceStyleName); }
+    id dial=CFBridgingRelease(CFPreferencesCopyAppValue(CFSTR("haloDial"),domain));
+    static int optionsToken=-1;
+    if (optionsToken<0) notify_register_check(GVMPresentationOptionsName,&optionsToken);
+    if (optionsToken>=0) { notify_set_state(optionsToken,GVMEncodePresentationOptions(dial)); notify_post(GVMPresentationOptionsName); }
     id enabled=CFBridgingRelease(CFPreferencesCopyAppValue(CFSTR("bubbleEnabled"),domain));
     id fullEnabled=CFBridgingRelease(CFPreferencesCopyAppValue(CFSTR("fullEnabled"),domain));
     id dashboardEnabled=CFBridgingRelease(CFPreferencesCopyAppValue(CFSTR("dashboardEnabled"),domain));

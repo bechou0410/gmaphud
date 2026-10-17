@@ -85,6 +85,32 @@ int main(int argc, const char **argv) { @autoreleasepool {
     assert([GVMVietMapOverlayLaneCodes(@[@{@"laneInfo":@[@257,@"85"]},@NO]) isEqual:(@[@257,@85])]);
     assert(GVMVietMapOverlayLaneCodes(@[@{@"speed":@40},@NO])==nil && GVMVietMapOverlayLaneCodes(@[@{@"speed":@40},@YES]).count==0);
     assert(GVMVietMapOverlayLaneCodes(@[@{@"laneInfo":NSNull.null},@NO]).count==0 && GVMVietMapOverlayLaneCodes(@[@{@"laneInfo":@[]},@NO]).count==0);
+    // updateLaneInfo ids as captured on 16/10, and VietMap's names that hold "_" themselves.
+    assert(GVMVietMapLaneCodeForImage(@"lane_STRAIGHT_STRAIGHT")==1 && GVMVietMapLaneCodeForImage(@"lane_RIGHT_RIGHT")==4);
+    assert(GVMVietMapLaneCodeForImage(@"lane_STRAIGHT-RIGHT_STRAIGHT-RIGHT")==5 && GVMVietMapLaneCodeForImage(@"lane_STRAIGHT-RIGHT_RIGHT")==5);
+    assert(GVMVietMapLaneCodeForImage(@"lane_UTURN_LEFT_UTURN_LEFT")==16 && GVMVietMapLaneCodeForImage(@"lane_STRAIGHT-UTURN_RIGHT_STRAIGHT")==257);
+    assert(GVMVietMapLaneCodeForImage(@"lane_SLIGHT_LEFT-STRAIGHT_STRAIGHT")==65 && GVMVietMapLaneCodeForImage(@"lane_LEFT-RIGHT-STRAIGHT_LEFT")==69);
+    assert(GVMVietMapLaneCodeForImage(@"lane_SHARP_RIGHT_NONE")==4 && GVMVietMapLaneCodeForImage(@"lane_STRAIGHT")==1);
+    assert(GVMVietMapLaneCodeForImage(@"lane_NONE_NONE")==0 && GVMVietMapLaneCodeForImage(@"lane_FOO_FOO")==0 &&
+        GVMVietMapLaneCodeForImage(@"lane_STRAIGHT+RIGHT_X")==0 && GVMVietMapLaneCodeForImage(@"maneuver_left")==0 &&
+        GVMVietMapLaneCodeForImage(nil)==0 && GVMVietMapLaneCodeForImage(@5)==0);
+    NSDictionary *advance=GVMVietMapAdvanceLanes(@"{\"distance\":166,\"laneItems\":[{\"enabled\":true,\"imageId\":\"lane_STRAIGHT_STRAIGHT\"},"
+        "{\"enabled\":true,\"imageId\":\"lane_STRAIGHT_STRAIGHT\"},{\"enabled\":true,\"imageId\":\"lane_STRAIGHT_STRAIGHT\"},"
+        "{\"enabled\":true,\"imageId\":\"lane_STRAIGHT-RIGHT_STRAIGHT-RIGHT\"},{\"enabled\":false,\"imageId\":\"lane_RIGHT_RIGHT\"}]}");
+    assert([advance[@"distance"] isEqual:@166] && [advance[@"items"] count]==5);
+    assert([[advance[@"items"] valueForKey:@"code"] isEqual:(@[@1,@1,@1,@5,@4])]);
+    assert([[advance[@"items"] valueForKey:@"enabled"] isEqual:(@[@YES,@YES,@YES,@YES,@NO])]);
+    assert([GVMVietMapAdvanceLanes(@{@"distance":@44.6,@"laneItems":@[@{@"imageId":@"lane_LEFT_LEFT"}]})[@"distance"] isEqual:@45]);
+    assert(GVMVietMapAdvanceLanes(@"{\"distance\":0,\"laneItems\":[]}").count==0 && GVMVietMapAdvanceLanes(@{@"distance":@0}).count==0);
+    // Anything that cannot be shown as a countdown leaves the panel in effect: never nil.
+    assert(GVMVietMapAdvanceLanes(@"not json").count==0 && GVMVietMapAdvanceLanes(@[]).count==0 &&
+        GVMVietMapAdvanceLanes(@{@"distance":@"x",@"laneItems":@[@{@"imageId":@"lane_LEFT_LEFT"}]}).count==0 &&
+        GVMVietMapAdvanceLanes(@{@"distance":@(-4),@"laneItems":@[@{@"imageId":@"lane_LEFT_LEFT"}]}).count==0 &&
+        GVMVietMapAdvanceLanes(@{@"laneItems":@[@{@"imageId":@"lane_LEFT_LEFT"}]}).count==0 &&
+        GVMVietMapAdvanceLanes(@{@"distance":@40,@"laneItems":@[@"x"]}).count==0);
+    // No direction recognised in any lane: a blank countdown would hide the readable panel.
+    assert(GVMVietMapAdvanceLanes(@{@"distance":@120,@"laneItems":@[@{@"imageId":@"lane_KEEP_LEFT_KEEP_LEFT"},@{@"imageId":@"lane_NONE_NONE"}]}).count==0);
+    assert([GVMVietMapAdvanceLanes(@{@"distance":@120,@"laneItems":@[@{@"imageId":@"lane_KEEP_LEFT_KEEP_LEFT"},@{@"imageId":@"lane_STRAIGHT_STRAIGHT"}]})[@"items"] count]==2);
     for (id bad in @[@[@"1",@"↑"],@[@"1",@"512"],@[@"1",@YES],@[@"-1"],@[@"1.5"],@"1"])
         assert(GVMVietMapOverlayLaneCodes(@[@{@"laneInfo":bad},@NO]).count==0);
     // updateLaneInfo (only observed) keeps its lane image ids whole in the log.

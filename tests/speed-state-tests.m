@@ -56,5 +56,17 @@ int main(void) { @autoreleasepool {
     Require(![mainSource freshSamplesAtUptime:108][@"speedLimit"], @"old main limit cannot replace newer invalidation");
     [mainSource applyMainSpeedLimit:@"50" receivedAt:109];
     Require(![mainSource freshSamplesAtUptime:109][@"speedLimit"], @"string main limit rejected");
+    // iPhone without CarPlay: VietMap's overlay never runs, the main channel carries speed and limit.
+    VMNavSource *phoneOnly=[VMNavSource new];
+    [phoneOnly applyMainSpeedLimit:@50 receivedAt:200];
+    [phoneOnly applyMainSpeed:@37.6 receivedAt:201];
+    Require([[phoneOnly freshSamplesAtUptime:202][@"speed"][@"value"] isEqual:@38] &&
+        [[phoneOnly freshSamplesAtUptime:202][@"speedLimit"][@"value"] isEqual:@50], @"main-channel speed shows without the overlay");
+    [phoneOnly applyMainSpeed:@0 receivedAt:203];
+    Require([[phoneOnly freshSamplesAtUptime:203][@"speed"][@"value"] isEqual:@0], @"stopped is a speed");
+    [phoneOnly applyMainSpeed:@"fast" receivedAt:204];
+    Require(![phoneOnly freshSamplesAtUptime:204][@"speed"], @"a non-number clears the speed");
+    [phoneOnly applyMainSpeed:@44 receivedAt:205];
+    Require(![phoneOnly freshSamplesAtUptime:211][@"speed"], @"main-channel speed expires like the overlay's");
     puts("speed-state tests passed");
 } return 0; }

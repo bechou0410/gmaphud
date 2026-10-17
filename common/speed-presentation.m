@@ -76,16 +76,20 @@ GVMModuleRect GVMHaloAlertFrame(GVMHaloArrangement arrangement,BOOL alertsFirst,
     return (GVMModuleRect){lead,centre-GVMHaloAlertSignTop-GVMHaloAlertSign/2,GVMHaloAlertWidth,GVMHaloAlertHeight};
 }
 const double GVMLaneMinimumArrow=14;
-GVMLaneStripMetrics GVMLaneStripMetricsFor(NSUInteger lanes) {
+GVMLaneStripMetrics GVMLaneStripMetricsFor(NSUInteger lanes,BOOL tagged) {
     double cell=lanes<=6 ? 30 : lanes<=8 ? 26 : 22, arrow=cell-4, plate=arrow+20;
-    return (GVMLaneStripMetrics){cell,arrow,plate,10+lanes*cell,plate};
+    // The tag is 18 high, centred on the plate's bottom edge, and at least 56 wide; its 1-point stroke
+    // reaches half a point beyond, so the strip keeps a point more on each side it touches.
+    double width=10+lanes*cell;
+    return (GVMLaneStripMetrics){cell,arrow,plate,tagged ? MAX(width,58) : width,tagged ? plate+10 : plate};
 }
+double GVMLanePlateWidth(GVMLaneStripMetrics strip,NSUInteger lanes) { return 10+lanes*strip.cell; }
 GVMLaneStripLayout GVMLaneStripLayoutFor(GVMModuleRect card,double cardScale,GVMHaloArrangement arrangement,
-    GVMModuleRect dial,BOOL right,BOOL bottom,NSUInteger lanes,GVMModuleRect area,double reachWidth,double reachHeight) {
+    GVMModuleRect dial,BOOL right,BOOL bottom,NSUInteger lanes,BOOL tagged,GVMModuleRect area,double reachWidth,double reachHeight) {
     GVMLaneStripLayout none={{0,0,0,0},0,GVMLaneStripHidden};
     if (!lanes || lanes>GVMMaximumLanes || !isfinite(cardScale) || cardScale<=0 || area.width<=0 || area.height<=0 ||
         !isfinite(reachWidth) || !isfinite(reachHeight)) return none;
-    GVMLaneStripMetrics strip=GVMLaneStripMetricsFor(lanes);
+    GVMLaneStripMetrics strip=GVMLaneStripMetricsFor(lanes,tagged);
     double floorScale=GVMLaneMinimumArrow/strip.arrow, start=MAX(cardScale,floorScale);
     // The corner region the bubble and its lanes may use.
     double regionWidth=MIN(area.width,MAX(area.width*reachWidth,card.width));
@@ -125,12 +129,12 @@ GVMLaneStripLayout GVMLaneStripLayoutFor(GVMModuleRect card,double cardScale,GVM
     }
     return none;
 }
-GVMEffectDock GVMEffectDockFor(GVMModuleRect slot,NSUInteger signs,NSUInteger lanes,double cardScale) {
+GVMEffectDock GVMEffectDockFor(GVMModuleRect slot,NSUInteger signs,NSUInteger lanes,BOOL tagged,double cardScale) {
     GVMEffectDock none;
     memset(&none,0,sizeof none);
     if (!(slot.width>0) || !(slot.height>0) || !isfinite(cardScale) || cardScale<=0 || lanes>GVMMaximumLanes) return none;
     const double gap=6, minimumSign=20;
-    GVMLaneStripMetrics strip=GVMLaneStripMetricsFor(lanes);
+    GVMLaneStripMetrics strip=GVMLaneStripMetricsFor(lanes,tagged);
     double floorScale=lanes ? GVMLaneMinimumArrow/strip.arrow : 0;
     for (int withLanes=lanes ? 1 : 0;withLanes>=0;withLanes--) {
         for (NSInteger n=MIN(signs,2);n>=0;n--) {

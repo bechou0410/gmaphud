@@ -206,7 +206,10 @@ static void CaptureStartupMetadata(void) {
     Class *classes=objc_copyClassList(&count);
     NSMutableDictionary *references=[NSMutableDictionary new];
     for (unsigned i=0;i<count;i++) {
-        references[@((uintptr_t)classes[i])]=[@"class " stringByAppendingString:NSStringFromClass(classes[i])];
+        // Any image in the process may register a class whose name does not convert (nil); those
+        // are skipped rather than ending Waze, as five launches did on 17/10.
+        NSString *className=NSStringFromClass(classes[i]);
+        if (className) references[@((uintptr_t)classes[i])]=[@"class " stringByAppendingString:className];
         const char *image=class_getImageName(classes[i]);
         if (!image || !strstr(image,"/Waze.app/")) continue;
         for (unsigned meta=0;meta<2;meta++) {
@@ -217,7 +220,8 @@ static void CaptureStartupMetadata(void) {
                 uintptr_t reference=0;
                 _Static_assert(sizeof(reference)==sizeof(selector),"selector reference width");
                 memcpy(&reference,&selector,sizeof(reference));
-                references[@(reference)]=[@"selector " stringByAppendingString:NSStringFromSelector(selector)];
+                NSString *selectorName=NSStringFromSelector(selector);
+                if (selectorName) references[@(reference)]=[@"selector " stringByAppendingString:selectorName];
             }
             free(methods);
         }
