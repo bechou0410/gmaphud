@@ -197,8 +197,7 @@ static void Install(void) {
     const char *view = "playerViewForVideo:playerConfig:mediaPlayerResources:";
     const char *reuse = "canUsePlayerView:forPlayerConfig:";
     const char *setActive = "setActivePlayer:mediaPlayerResources:";
-    if (![[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"] isEqual:@"21.41.5"] ||
-        !Signature(NSClassFromString(@"MLDefaultPlayerViewFactory"), "AVPlayerViewForPlayerConfig:", "@24@0:8@16") ||
+    if (!Signature(NSClassFromString(@"MLDefaultPlayerViewFactory"), "AVPlayerViewForPlayerConfig:", "@24@0:8@16") ||
         !Signature(pool, acquire, "@72@0:8@16@24@32@40@48@56@64") ||
         !Signature(pool, queue, "B48@0:8@16@24@32^@40") ||
         !Signature(pool, view, "@40@0:8@16@24@32") || !Signature(pool, reuse, "B32@0:8@16@24") ||

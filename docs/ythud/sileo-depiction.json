@@ -9,7 +9,7 @@
       "views": [
         {
           "class": "DepictionHeaderView",
-          "title": "YTHUD 0.1.0 · experimental"
+          "title": "YTHUD 0.1.1 · experimental"
         },
         {
           "class": "DepictionMarkdownView",
@@ -21,7 +21,7 @@
         },
         {
           "class": "DepictionMarkdownView",
-          "markdown": "Rootless jailbreak · iOS 18.6.2 · YouTube 21.41.5 · CarSurf. arm64 + arm64e. YouTube 21.41.5 only; other versions keep their native backend."
+          "markdown": "Rootless jailbreak · iOS 18.6.2 · YouTube 21.41.5 · CarSurf. arm64 + arm64e. Từ 0.1.1 không khóa phiên bản YouTube; vẫn kiểm tra class/hàm. Hiện mới kiểm trực tiếp 21.41.5."
         },
         {
           "class": "DepictionSubheaderView",
@@ -51,7 +51,7 @@
       "views": [
         {
           "class": "DepictionHeaderView",
-          "title": "YTHUD 0.1.0 · experimental"
+          "title": "YTHUD 0.1.1 · experimental"
         },
         {
           "class": "DepictionMarkdownView",
@@ -63,7 +63,7 @@
         },
         {
           "class": "DepictionMarkdownView",
-          "markdown": "Rootless jailbreak · iOS 18.6.2 · YouTube 21.41.5 · CarSurf. arm64 + arm64e. YouTube 21.41.5 only; other versions keep their native backend."
+          "markdown": "Rootless jailbreak · iOS 18.6.2 · YouTube 21.41.5 · CarSurf. arm64 + arm64e. From 0.1.1 there is no app-version lock; class/method ABI checks remain. Only 21.41.5 is verified on-device."
         },
         {
           "class": "DepictionSubheaderView",

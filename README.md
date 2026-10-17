@@ -159,4 +159,4 @@ In **Background**, enable automatic VietMap wake or optional source exit 20 seco
 
 ## Other packages
 
-**[YTHUD](ythud/README.md)** — Experimental rootless package for YouTube video in the Dashboard music tile. Requires YouTube 21.41.5 and an existing CarPlay app bridge. Livestream is unsupported; an intermittent black picture when returning to YouTube is unresolved. [Depiction](https://bechou0410.github.io/gmaphud/ythud/).
+**[YTHUD](ythud/README.md)** — Experimental rootless package for YouTube video in the Dashboard music tile. Uses method-ABI checks without an app-version lock; tested with YouTube 21.41.5 and an existing CarPlay app bridge. Livestream is unsupported; an intermittent black picture when returning to YouTube is unresolved. [Depiction](https://bechou0410.github.io/gmaphud/ythud/).

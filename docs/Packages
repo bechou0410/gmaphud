@@ -46,7 +46,7 @@ Bugs: https://github.com/bechou0410/gmaphud/issues
 
 Package: com.chou.ythud
 Name: YTHUD
-Description: YouTube video in the CarPlay Dashboard music tile. Tested with YouTube 21.41.5; livestream output is not supported.
+Description: YouTube video in the CarPlay Dashboard music tile. ABI-guarded; tested with YouTube 21.41.5; livestream output is not supported.
 Maintainer: chou
 Author: chou
 Section: Tweaks
@@ -58,11 +58,11 @@ Bugs: https://github.com/bechou0410/gmaphud/issues
 Depiction: https://bechou0410.github.io/gmaphud/ythud/
 SileoDepiction: https://bechou0410.github.io/gmaphud/ythud/sileo-depiction.json
 Architecture: iphoneos-arm64
-Version: 0.1.0
+Version: 0.1.1
 Installed-Size: 416
-Filename: pool/com.chou.ythud_0.1.0_iphoneos-arm64.deb
-Size: 34042
-MD5sum: e5c13a9e9bcba83993d3348f702d4759
-SHA1: cc11ee831251342e309f88c50198015aca5d0961
-SHA256: c9827a1110a2a2a21d7a3896922d241ee281c968bddc5fe7b712bc32295ef5a0
-SHA512: a041d0d815b470949ce22d21dbb4b8ea459ceef34fc6399ebef4100c12c71cb828cb8abe916484f7a83c5123fe0e9b00d9b2d1c18ceba5962310ea0846354a4a
+Filename: pool/com.chou.ythud_0.1.1_iphoneos-arm64.deb
+Size: 33974
+MD5sum: 60334b7edefe1522d298a58358767734
+SHA1: b183da4714427200e1c84ce4ab17266a8c03d669
+SHA256: a6ee625506638c4c97de308be6cfec70e8eb93d8731a526b286842b80188d929
+SHA512: e282d0c40f5bdaf104e0d3f86b463a4eb2ace2404665279b1b2e71d89509c0ac221382c870acebb0a1649aea22d445c0dfd2529bcb80cdb1e1af604294a74868

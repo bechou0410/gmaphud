@@ -163,4 +163,4 @@ Trong **Chạy nền**, có thể bật tự đánh thức VietMap và tùy ch�
 
 ## Gói khác trong nguồn
 
-**[YTHUD](ythud/README.md)** — Gói rootless thử nghiệm đưa video YouTube vào ô nhạc Dashboard. Cần YouTube 21.41.5 và bridge mở app trên CarPlay đang có. Livestream chưa hỗ trợ; còn lỗi đen hình không thường xuyên khi quay lại YouTube. [Depiction](https://bechou0410.github.io/gmaphud/ythud/).
+**[YTHUD](ythud/README.md)** — Gói rootless thử nghiệm đưa video YouTube vào ô nhạc Dashboard. Không khóa phiên bản YouTube, vẫn kiểm tra class/hàm nội bộ; đã kiểm YouTube 21.41.5 với bridge mở app trên CarPlay đang có. Livestream chưa hỗ trợ; còn lỗi đen hình không thường xuyên khi quay lại YouTube. [Depiction](https://bechou0410.github.io/gmaphud/ythud/).
