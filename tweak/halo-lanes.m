@@ -67,6 +67,23 @@ static void DrawLane(NSUInteger code, CGRect box, UIColor *color) {
     CGContextRestoreGState(context);
 }
 
+// A lane's speed limit sign, as VietMap draws them: a white disc with the red ring and the limit,
+// "--" when the sign has no number (0 or -1), and grey with the number for -2 or less.
+static void DrawLaneLimit(NSInteger limit, CGPoint centre, CGFloat diameter) {
+    BOOL dimmed=limit<=-2;
+    NSInteger number=limit>=1 ? limit : dimmed ? -limit : 0;
+    CGFloat ring=diameter*0.14;
+    UIBezierPath *disc=[UIBezierPath bezierPathWithOvalInRect:CGRectMake(centre.x-diameter/2+ring/2,
+        centre.y-diameter/2+ring/2,diameter-ring,diameter-ring)];
+    [(dimmed ? GVMHaloColor(0x9D9DA8,1) : UIColor.whiteColor) setFill]; [disc fill];
+    disc.lineWidth=ring; [GVMHaloColor(dimmed ? 0x434656 : GVMHaloSignRed,1) setStroke]; [disc stroke];
+    NSString *text=number ? [NSString stringWithFormat:@"%ld",(long)number] : @"--";
+    NSAttributedString *label=GVMHaloText(text,GVMHaloNumberFont(diameter*(text.length>2 ? 0.42 : 0.54)),
+        GVMHaloColor(dimmed ? 0x29292E : GVMHaloInk900,1),0);
+    CGSize size=label.size;
+    [label drawAtPoint:CGPointMake(centre.x-size.width/2,centre.y-size.height/2)];
+}
+
 // Drawn like the rectangular QCVN signs of the icon set (design/icons-halo): a blue panel (#005BAA)
 // with an inset white rim and white arrows and lane lines, the same shade on its lower right and the
 // same crisp drop shadow. Proportions follow the set's 164-unit panel: corner 16, rim 8 inset by 6,
@@ -93,6 +110,11 @@ static const uint32_t GVMLaneSignBlue=0x005BAA;
     _lanes=[lanes copy];
     [self setNeedsDisplay];
 }
+- (void)setWithoutLimits:(BOOL)withoutLimits {
+    if (_withoutLimits==withoutLimits) return;
+    _withoutLimits=withoutLimits;
+    [self setNeedsDisplay];
+}
 - (void)setScale:(double)scale {
     if (_scale==scale) return;
     _scale=scale;
@@ -105,9 +127,12 @@ static const uint32_t GVMLaneSignBlue=0x005BAA;
     NSArray<NSDictionary *> *items=self.lanes[@"items"];
     if (![items isKindOfClass:NSArray.class] || !items.count || self.scale<=0) return;
     id meters=self.lanes[@"distance"];
-    BOOL tagged=[meters isKindOfClass:NSNumber.class];
-    GVMLaneStripMetrics strip=GVMLaneStripMetricsFor(items.count,tagged);
-    CGFloat unit=strip.plate/164, radius=16*unit, rim=8*unit, inset=6*unit, shade=14*unit;
+    NSUInteger options=GVMLaneStripOptionsFor(self.lanes);
+    if (self.withoutLimits) options&=~(NSUInteger)GVMLaneStripLimits;
+    BOOL tagged=(options&GVMLaneStripTagged)!=0, arrows=!(options&GVMLaneStripLimitsOnly);
+    GVMLaneStripMetrics strip=GVMLaneStripMetricsFor(items.count,options);
+    // The panel keeps the arrow sign's proportions (corners, rim, shade) whatever its height.
+    CGFloat unit=(strip.arrow+20)/164, radius=16*unit, rim=8*unit, inset=6*unit, shade=14*unit;
     CGFloat plateWidth=GVMLanePlateWidth(strip,items.count);
     CGContextRef context=UIGraphicsGetCurrentContext();
     CGContextSaveGState(context);
@@ -143,8 +168,10 @@ static const uint32_t GVMLaneSignBlue=0x005BAA;
             CGFloat dash[]={3.5,3}; [line setLineDash:dash count:2 phase:0]; line.lineWidth=1.5;
             [[white colorWithAlphaComponent:0.75] setStroke]; [line stroke];
         }
-        DrawLane([items[i][@"code"] unsignedIntegerValue],CGRectMake(x+2,7,strip.arrow,strip.arrow),
+        if (arrows) DrawLane([items[i][@"code"] unsignedIntegerValue],CGRectMake(x+2,7,strip.arrow,strip.arrow),
             enabled ? white : [white colorWithAlphaComponent:0.45]);
+        if (strip.sign>0)
+            DrawLaneLimit([items[i][@"limit"] integerValue],CGPointMake(x+strip.cell/2,strip.signTop+strip.sign/2),strip.sign);
     }
     // The sign stickers' shade: the panel less itself moved up and left.
     UIBezierPath *band=[UIBezierPath bezierPathWithRect:plateRect];

@@ -20,8 +20,8 @@ static NSTimeInterval upcomingReceived, stickyReceived;
 // The lanes VietMap Live shows (its overlay's laneInfo): in effect on the stretch being driven, kept
 // until VietMap changes or clears them. Its advance countdown (updateLaneInfo) shows the next
 // junction's lanes earlier, with their distance, while it runs.
-static NSArray<NSNumber *> *laneCodes;
-static NSTimeInterval laneCodesReceived=-1;
+static NSArray<NSNumber *> *laneCodes, *laneLimits;
+static NSTimeInterval laneCodesReceived=-1, laneLimitsReceived=-1;
 static NSDictionary *advanceLanes;
 static NSTimeInterval advanceReceived=-1;
 #endif
@@ -66,7 +66,7 @@ static void Publish(void) {
     GVMDiagnosticsRecord(GVMDiagnosticSamples,(samples[@"speed"] ? 1 : 0) | (samples[@"speedLimit"] ? 2 : 0) | (UIApplication.sharedApplication.applicationState==UIApplicationStateActive ? 4 : 0));
     if (GVMSelectedSourceID()!=GVMSourceVietMap) return;
     BOOL counting=advanceLanes && now-advanceReceived<GVMVietMapAdvanceLaneLifetime;
-    NSDictionary *lanes=GVMVietMapLaneSample(counting ? advanceLanes : nil,laneCodes,now);
+    NSDictionary *lanes=GVMVietMapLaneSample(counting ? advanceLanes : nil,laneCodes,laneLimits,now);
     if (lanes) samples[@"lanes"]=lanes;
     NSMutableArray *entries=[NSMutableArray new];
     for (NSDictionary *alert in upcomingAlerts)
@@ -171,7 +171,7 @@ static void SetMethodCallHandler(id channel, SEL selector, VMFlutterHandler hand
         NSArray *update = nil;
 #ifdef VM_GOOGLE_MAPS_RELAY
         NSArray *overlaySticky=nil;
-        NSArray<NSNumber *> *overlayLanes=nil;
+        NSArray<NSNumber *> *overlayLanes=nil, *overlayLimits=nil;
 #endif
         id mainLimit=nil, mainSpeed=nil; BOOL hasMainLimit=NO, hasMainSpeed=NO;
         NSTimeInterval received = NSProcessInfo.processInfo.systemUptime;
@@ -251,6 +251,7 @@ static void SetMethodCallHandler(id channel, SEL selector, VMFlutterHandler hand
                 #ifdef VM_GOOGLE_MAPS_RELAY
                 overlaySticky=GVMVietMapOverlayStickyAlerts([call arguments]);
                 overlayLanes=GVMVietMapOverlayLaneCodes([call arguments]);
+                overlayLimits=GVMVietMapOverlayLaneSpeedLimits([call arguments]);
                 ObserveAlerts(@"updateMapOverlayData",[call arguments],overlaySticky.count,received);
 #endif
                 update = VMNavCopyOverlayArguments([call arguments]);
@@ -285,6 +286,7 @@ static void SetMethodCallHandler(id channel, SEL selector, VMFlutterHandler hand
                 stickyAlerts=overlaySticky; stickyReceived=received;
             }
             if (overlayLanes && received>=laneCodesReceived) { laneCodes=overlayLanes; laneCodesReceived=received; }
+            if (overlayLimits && received>=laneLimitsReceived) { laneLimits=overlayLimits; laneLimitsReceived=received; }
 #endif
             [source applyArguments:update receivedAt:received];
             static NSTimeInterval lastLog;
@@ -365,7 +367,7 @@ static void ImageLoaded(const struct mach_header *header, intptr_t slide) {
             [NSNotificationCenter.defaultCenter addObserverForName:UIApplicationWillTerminateNotification
                 object:nil queue:NSOperationQueue.mainQueue usingBlock:^(NSNotification *note) {
 #ifdef VM_GOOGLE_MAPS_RELAY
-                    upcomingAlerts=@[]; stickyAlerts=@[]; laneCodes=nil; advanceLanes=nil; forceOutput=YES;
+                    upcomingAlerts=@[]; stickyAlerts=@[]; laneCodes=nil; laneLimits=nil; advanceLanes=nil; forceOutput=YES;
 #endif
                     source = [VMNavSource new]; Publish();
                 }];

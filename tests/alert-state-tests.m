@@ -85,6 +85,16 @@ int main(int argc, const char **argv) { @autoreleasepool {
     assert([GVMVietMapOverlayLaneCodes(@[@{@"laneInfo":@[@257,@"85"]},@NO]) isEqual:(@[@257,@85])]);
     assert(GVMVietMapOverlayLaneCodes(@[@{@"speed":@40},@NO])==nil && GVMVietMapOverlayLaneCodes(@[@{@"speed":@40},@YES]).count==0);
     assert(GVMVietMapOverlayLaneCodes(@[@{@"laneInfo":NSNull.null},@NO]).count==0 && GVMVietMapOverlayLaneCodes(@[@{@"laneInfo":@[]},@NO]).count==0);
+    // laneSpeedLimits, one integer per lane (90 and 70 on the HCMC - Long Thanh expressway).
+    assert([GVMVietMapOverlayLaneSpeedLimits(@[@{@"laneSpeedLimits":@[@90,@70]},@NO]) isEqual:(@[@90,@70])]);
+    assert([GVMVietMapOverlayLaneSpeedLimits(@[@{@"laneSpeedLimits":@[@0,@-1,@-60,@120.0]},@NO]) isEqual:(@[@0,@-1,@-60,@120])]);
+    assert(GVMVietMapOverlayLaneSpeedLimits(@[@{@"speed":@40},@NO])==nil && GVMVietMapOverlayLaneSpeedLimits(@[@{@"speed":@40},@YES]).count==0);
+    assert(GVMVietMapOverlayLaneSpeedLimits(@[@{@"laneSpeedLimits":NSNull.null},@NO]).count==0 && GVMVietMapOverlayLaneSpeedLimits(@[@{@"laneSpeedLimits":@[]},@NO]).count==0);
+    for (id bad in @[@[@90,@"70"],@[@90,@YES],@[@90.5],@[NSNull.null]])
+        assert(GVMVietMapOverlayLaneSpeedLimits(@[@{@"laneSpeedLimits":bad},@NO])==nil);
+    assert(GVMVietMapOverlayLaneSpeedLimits(@[@{@"laneSpeedLimits":@[@90,@256]},@NO]).count==0 &&
+        GVMVietMapOverlayLaneSpeedLimits(@[@{@"laneSpeedLimits":@[@-256]},@NO]).count==0);
+    assert(GVMVietMapOverlayLaneSpeedLimits(@[@{@"laneSpeedLimits":@[@1,@1,@1,@1,@1,@1,@1,@1,@1,@1,@1,@1,@1]},@NO]).count==0);
     // updateLaneInfo ids as captured on 16/10, and VietMap's names that hold "_" themselves.
     assert(GVMVietMapLaneCodeForImage(@"lane_STRAIGHT_STRAIGHT")==1 && GVMVietMapLaneCodeForImage(@"lane_RIGHT_RIGHT")==4);
     assert(GVMVietMapLaneCodeForImage(@"lane_STRAIGHT-RIGHT_STRAIGHT-RIGHT")==5 && GVMVietMapLaneCodeForImage(@"lane_STRAIGHT-RIGHT_RIGHT")==5);

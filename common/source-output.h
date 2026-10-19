@@ -87,8 +87,11 @@ typedef NS_ENUM(NSUInteger, GVMRoadAlertType) {
 // alerts: {type, value: limit or null, distance: metres or null,
 //          artworkID: legacy optional decoration (renderers use type/value), receivedAt}.
 // lanes (optional): {distance: metres to the junction or null,
-//          items: 1-12 lanes left to right, each {code: GVMLaneDirection bits, enabled: BOOL},
-//          receivedAt}. Unknown direction bits are dropped; a lane may keep no known direction.
+//          items: 1-12 lanes left to right, each {code: GVMLaneDirection bits, enabled: BOOL,
+//          limit (optional): the lane's speed limit sign as VietMap gives it, an integer from -255 to
+//          255: a limit in km/h when positive, a sign without a number when 0 or -1, a sign VietMap
+//          draws grey (its meaning is not documented) when -2 or less}, receivedAt}. Unknown direction bits are
+//          dropped; a lane may keep no known direction. Every lane has a limit or none does.
 NSDictionary *GVMNormalizeSourceOutput(id output, NSTimeInterval now);
 NSDictionary *GVMSourceOutput(NSUInteger sourceID, NSDictionary *samples,
     NSArray<NSDictionary *> *alerts, NSTimeInterval now);
@@ -97,8 +100,9 @@ NSString *GVMSourceDisplayName(NSUInteger sourceID);
 NSString *GVMRoadAlertName(NSUInteger type);
 NSString *GVMRoadAlertIconName(NSUInteger type, NSNumber *value);
 
-// Speed, limit, two alerts with their values, then the lane header and two words of lanes.
-enum { GVMOutputWordCount=9 };
+// Speed, limit, two alerts with their values, the lane header, two words of lanes, then two words of
+// per-lane speed limits.
+enum { GVMOutputWordCount=11 };
 typedef struct { uint64_t words[GVMOutputWordCount]; } GVMOutputWords;
 BOOL GVMEncodeSourceOutput(NSDictionary *output, NSTimeInterval now, GVMOutputWords *words);
 NSDictionary *GVMDecodeSourceOutput(NSUInteger sourceID, GVMOutputWords words, NSTimeInterval now);

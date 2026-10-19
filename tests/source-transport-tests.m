@@ -56,6 +56,11 @@ int main(int argc,char **argv) { @autoreleasepool {
     Require(GVMPublishSourceOutput(GVMSourceOutput(1,@{@"lanes":lanes},@[],now),now,YES) &&
         [GVMReadSourceOutput(now)[@"lanes"][@"items"] isEqual:lanes[@"items"]] && [GVMReadSourceOutput(now)[@"lanes"][@"distance"] isEqual:@84],@"lanes travel in the committed frame");
     Require(GVMPublishSourceOutput(GVMSourceOutput(1,nil,@[],now),now,YES) && !GVMReadSourceOutput(now)[@"lanes"],@"a frame without lanes clears them");
+    NSDictionary *limited=@{@"distance":NSNull.null,@"items":@[@{@"code":@1,@"enabled":@YES,@"limit":@90},@{@"code":@5,@"enabled":@YES,@"limit":@-70}],@"receivedAt":@(now)};
+    Require(GVMPublishSourceOutput(GVMSourceOutput(1,@{@"lanes":limited},@[],now),now,YES) &&
+        [[GVMReadSourceOutput(now)[@"lanes"][@"items"] valueForKey:@"limit"] isEqual:(@[@90,@-70])],@"lane limits travel in the committed frame");
+    Require(GVMPublishSourceOutput(GVMSourceOutput(1,@{@"lanes":lanes},@[],now),now,YES) &&
+        ![GVMReadSourceOutput(now)[@"lanes"][@"items"][0] objectForKey:@"limit"],@"a frame without limits clears them");
 
     NSString *commit=[@GVM_OUTPUT_NAMESPACE stringByAppendingString:@".output.v1.1.commit"];
     int token=-1; uint64_t header=0;

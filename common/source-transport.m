@@ -25,7 +25,7 @@ enum { GVMOutputSlotCount=2+GVMOutputWordCount };
     if (!(self=[super init])) return nil;
     for (NSUInteger i=0;i<GVMOutputSlotCount;i++) tokens[i]=-1;
     NSArray *slots=@[@"commit",@"selection",@"speed",@"limit",@"alert.first",@"alert.first.value",@"alert.second",@"alert.second.value",
-        @"lanes",@"lanes.first",@"lanes.second"];
+        @"lanes",@"lanes.first",@"lanes.second",@"lanes.limits.first",@"lanes.limits.second"];
     for (NSUInteger i=0;i<slots.count;i++) {
         NSString *name=[Prefix() stringByAppendingFormat:@".output.v1.%lu.%@",(unsigned long)sourceID,slots[i]];
         if (notify_register_check(name.UTF8String,&tokens[i])!=NOTIFY_STATUS_OK) return nil;

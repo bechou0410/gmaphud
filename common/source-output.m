@@ -68,13 +68,24 @@ static NSDictionary *Lanes(id lanes, double now) {
     if (![items isKindOfClass:NSArray.class] || ![items count] || [items count]>GVMMaximumLanes ||
         (distance!=NSNull.null && !Integer(distance,0,10000))) return nil;
     NSMutableArray *normalized=[NSMutableArray new];
+    NSUInteger limited=0;
+    BOOL limitsValid=YES;
     for (id item in items) {
         if (![item isKindOfClass:NSDictionary.class] || !Integer(item[@"code"],0,511)) return nil;
-        id enabled=item[@"enabled"] ?: @YES;
+        id enabled=item[@"enabled"] ?: @YES, limit=item[@"limit"];
         if (!BooleanValue(enabled)) return nil;
+        if (limit && !Integer(limit,-255,255)) limitsValid=NO;
+        if (limit) limited++;
         [normalized addObject:@{@"code":@([item[@"code"] unsignedIntegerValue]&GVMLaneKnownDirections),
             @"enabled":@([enabled boolValue])}];
     }
+    // Speed limits come for every lane or for none; a partial or unreadable set is left out.
+    if (limited && limitsValid && limited==normalized.count)
+        for (NSUInteger i=0;i<normalized.count;i++) {
+            NSMutableDictionary *lane=[normalized[i] mutableCopy];
+            lane[@"limit"]=@([items[i][@"limit"] integerValue]);
+            normalized[i]=[lane copy];
+        }
     return @{@"distance":distance,@"items":[normalized copy],@"receivedAt":lanes[@"receivedAt"]};
 }
 // Five direction bits per lane on the wire, in bitmask order.
@@ -170,6 +181,15 @@ BOOL GVMEncodeSourceOutput(NSDictionary *output, NSTimeInterval now, GVMOutputWo
         for (NSUInteger i=0;i<items.count;i++)
             words->words[7+i/8]|=(LaneBits([items[i][@"code"] unsignedIntegerValue]) |
                 ([items[i][@"enabled"] boolValue] ? 32 : 0))<<(8*(i%8));
+        // Per-lane speed limits: ten bits a lane, six lanes to a word: present, dimmed, then the
+        // number shown (0 for a sign without one).
+        for (NSUInteger i=0;i<items.count;i++) {
+            id limit=items[i][@"limit"];
+            if (!limit) continue;
+            NSInteger value=[limit integerValue];
+            uint64_t number=(uint64_t)(value>=1 ? value : value<=-2 ? -value : 0);
+            words->words[9+i/6]|=(512 | (value<=-2 ? 256 : 0) | number)<<(10*(i%6));
+        }
     }
     return YES;
 }
@@ -200,6 +220,21 @@ NSDictionary *GVMDecodeSourceOutput(NSUInteger sourceID, GVMOutputWords words, N
         if (lane&192) { lanesValid=NO; continue; }
         [items addObject:@{@"code":@(LaneCode(lane&31)),@"enabled":@((BOOL)((lane&32)!=0))}];
     }
+    // Per-lane speed limits: all lanes or none, nothing past the last lane.
+    BOOL limitsValid=lanesValid && !(words.words[9]>>60) && !(words.words[10]>>60);
+    NSUInteger limited=0;
+    for (NSUInteger i=0;limitsValid && i<12;i++) {
+        uint64_t field=(words.words[9+i/6]>>(10*(i%6)))&1023;
+        if (i>=count) { if (field) limitsValid=NO; continue; }
+        if (!(field&512)) { if (field) limitsValid=NO; continue; }
+        NSInteger number=(NSInteger)(field&255);
+        NSMutableDictionary *lane=[items[i] mutableCopy];
+        lane[@"limit"]=@(field&256 ? -number : number);
+        items[i]=[lane copy];
+        limited++;
+    }
+    if (lanesValid && limited && (!limitsValid || limited!=count))
+        for (NSUInteger i=0;i<count;i++) items[i]=@{@"code":items[i][@"code"],@"enabled":items[i][@"enabled"]};
     if (lanesValid) samples[@"lanes"]=@{@"distance":meters==16383 ? NSNull.null : @(meters),@"items":items,
         @"receivedAt":@((double)(header>>24)/1000)};
     return GVMSourceOutput(sourceID,samples,alerts,now);

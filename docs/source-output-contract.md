@@ -50,7 +50,8 @@ documents the shape; IPC carries numeric states, not JSON or images.
 | lanes `distance` | Integer 0–10000 **metres** to the junction, or null when unknown. |
 | lanes (VietMap) | While VietMap counts down to a junction (`updateLaneInfo` on `vml_main_channel`, `{distance, laneItems:[{enabled, imageId}]}`, about every two seconds), its lanes with that distance; the direction comes from `imageId` (`lane_<directions>_<to follow>`, VietMap's names such as STRAIGHT, SLIGHT_RIGHT, UTURN_LEFT joined by "-"). Otherwise the lanes VietMap Live shows: its overlay `laneInfo`, in effect on the stretch being driven, with a null distance. VietMap changes or clears both itself (a patch without `laneInfo` leaves them; a countdown without lanes, or one that cannot be read because its distance is missing or no lane direction is recognised, ends it; a countdown not renewed for six seconds lapses), so the adapter keeps them as they stand and publishes them with the publication time; if VietMap Live stops publishing, they expire at five seconds. |
 | lanes (GOFA) | GOFA's lane board ahead (`notificationLaneBoards` › `pushLaneBoardsValue`, a `GOFA.DatapointModel` whose `metadata.detail_lanes` lists the lanes left to right separated by "|", each lane's OSM `turn:lanes` directions separated by ";"), posted about once a second with or without a route. Published with the distance from GOFA's latest GPS fix to the board until the board is reached (5 m), GOFA posts none, or no board arrives for three seconds. No lane to follow is given. |
-| lanes `items` | 1–12 lanes, left to right. Each is `{code, enabled}`: `code` uses VietMap's direction bitmask (1 straight, 4 right, 16 U-turn left, 64 left, 256 U-turn right; other bits are dropped), `enabled` is a boolean and defaults to true. |
+| lanes (VietMap limits) | Its overlay `laneSpeedLimits` (`[Int]`, one per lane, left to right), kept like `laneInfo` (a patch without it leaves it; a replacing patch without it clears it; an update with a non-integer element is ignored, as VietMap's CarPlay plugin ignores it; a whole number beyond -255...255 clears it). They go with the lanes in effect when both count the same lanes, or alone, on lanes without a direction, when there are no arrows; not with an advance countdown. |
+| lanes `items` | 1–12 lanes, left to right. Each is `{code, enabled, limit}`: `code` uses VietMap's direction bitmask (1 straight, 4 right, 16 U-turn left, 64 left, 256 U-turn right; other bits are dropped), `enabled` is a boolean and defaults to true, and the optional `limit` is the lane's speed limit sign as VietMap gives it (an integer from -255 to 255: a limit in km/h, 0 or -1 a sign without a number, -2 or less a sign VietMap draws grey); every lane has one or none does, else the limits are left out. The New UI strip drops the limit row before its arrows when space is short. |
 
 Missing, null, invalid or expired scalar samples are omitted. Invalid individual
 alerts are omitted; malformed envelopes/containers are rejected. Numeric strings,
@@ -96,7 +97,7 @@ The VietMap response retains its existing two-second throttle.
 
 ## Numeric IPC
 
-Each source owns eleven Darwin states at
+Each source owns thirteen Darwin states at
 `com.chou.gmaphud.output.v1.<sourceID>.<slot>`:
 
 | Slot | Content |
@@ -108,8 +109,9 @@ Each source owns eleven Darwin states at
 | `alert.first.value`, `alert.second.value` | Artwork ID plus optional numeric alert value. |
 | `lanes` | Original timestamp, lane count and distance (16383 when unknown); zero when there are no lanes. |
 | `lanes.first`, `lanes.second` | One byte per lane, eight lanes to a word: five direction bits and the enabled bit. |
+| `lanes.limits.first`, `lanes.limits.second` | Per-lane speed limit signs, ten bits per lane and six lanes to a word: present, dimmed, then the number shown (0 for a sign without one). Every lane of the set or none; zero when there are none. |
 
-The writer begins an odd revision, writes selection and all nine payload words,
+The writer begins an odd revision, writes selection and all eleven payload words,
 then finishes an even revision. The reader checks commit and selection before and
 after; partial writes, source switches, old epochs and unknown schemas are
 unavailable. Each source has **one adapter writer process**; local operations are

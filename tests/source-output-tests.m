@@ -151,17 +151,27 @@ int main(int argc,const char **argv) { @autoreleasepool {
 
     // VietMap lanes are the ones VietMap Live shows (its overlay's laneInfo): in effect where they show,
     // with no distance, kept as they stand and published with the publication time.
-    NSDictionary *vmLanes=GVMVietMapLaneSample(nil,@[@1,@1,@1,@5,@4],101);
+    NSDictionary *vmLanes=GVMVietMapLaneSample(nil,@[@1,@1,@1,@5,@4],nil,101);
     Require(vmLanes[@"distance"]==NSNull.null && [vmLanes[@"items"][3] isEqual:(@{@"code":@5,@"enabled":@YES})] && [vmLanes[@"receivedAt"] isEqual:@101],@"VietMap lanes are in effect, without a distance");
-    Require(!GVMVietMapLaneSample(nil,@[],101) && !GVMVietMapLaneSample(nil,nil,101),@"no lanes shown, no lanes");
-    Require([GVMVietMapLaneSample(nil,@[@1,@5],400)[@"receivedAt"] isEqual:@400],@"lanes VietMap still shows stay fresh while it publishes");
-    Require(!GVMSourceOutput(1,@{@"lanes":GVMVietMapLaneSample(nil,@[@1,@5],100)},@[],105)[@"lanes"],@"lanes expire when VietMap Live stops publishing");
+    Require(!GVMVietMapLaneSample(nil,@[],nil,101) && !GVMVietMapLaneSample(nil,nil,nil,101),@"no lanes shown, no lanes");
+    Require([GVMVietMapLaneSample(nil,@[@1,@5],nil,400)[@"receivedAt"] isEqual:@400],@"lanes VietMap still shows stay fresh while it publishes");
+    Require(!GVMSourceOutput(1,@{@"lanes":GVMVietMapLaneSample(nil,@[@1,@5],nil,100)},@[],105)[@"lanes"],@"lanes expire when VietMap Live stops publishing");
     // Its advance countdown shows the next junction's lanes early, with their distance, over the panel in effect.
     NSDictionary *countdown=@{@"distance":@166,@"items":@[@{@"code":@1,@"enabled":@YES},@{@"code":@4,@"enabled":@NO}]};
-    NSDictionary *early=GVMVietMapLaneSample(countdown,@[@1,@1,@5],120);
+    NSDictionary *early=GVMVietMapLaneSample(countdown,@[@1,@1,@5],@[@90,@70,@60],120);
     Require([early[@"distance"] isEqual:@166] && [early[@"items"] isEqual:countdown[@"items"]] && [early[@"receivedAt"] isEqual:@120],@"advance lanes show with their distance");
-    Require(GVMVietMapLaneSample(@{@"distance":@40,@"items":@[]},@[@1,@5],120)[@"distance"]==NSNull.null,@"an empty countdown falls back to the panel in effect");
+    Require(GVMVietMapLaneSample(@{@"distance":@40,@"items":@[]},@[@1,@5],nil,120)[@"distance"]==NSNull.null,@"an empty countdown falls back to the panel in effect");
     Require([GVMSourceOutput(1,@{@"lanes":early},@[],121)[@"lanes"][@"distance"] isEqual:@166],@"advance lanes pass the output contract");
+    // Its per-lane speed limits go under the lanes in effect when they count the same lanes, or alone.
+    NSDictionary *withLimits=GVMVietMapLaneSample(nil,@[@1,@1],@[@90,@70],101);
+    Require([[withLimits[@"items"] valueForKey:@"limit"] isEqual:@[@90,@70]] && [withLimits[@"items"][1][@"code"] isEqual:@1],@"limits go under the arrows");
+    Require(!GVMVietMapLaneSample(nil,@[@1,@1,@5],@[@90,@70],101)[@"items"][0][@"limit"],@"limits for another lane count are left out");
+    NSDictionary *alone=GVMVietMapLaneSample(nil,@[],@[@90,@70],101);
+    Require([alone[@"items"] isEqual:(@[@{@"code":@0,@"enabled":@YES,@"limit":@90},@{@"code":@0,@"enabled":@YES,@"limit":@70}])] &&
+        alone[@"distance"]==NSNull.null,@"limits stand alone when there are no arrows");
+    Require([GVMVietMapLaneSample(nil,nil,@[@-60],101)[@"items"][0][@"limit"] isEqual:@-60] && !GVMVietMapLaneSample(nil,nil,@[],101),@"dimmed limits pass; no limits and no arrows, no lanes");
+    Require(GVMEncodeSourceOutput(GVMVietMapOutput(@{@"lanes":withLimits},@[],101),101,&words) &&
+        [[GVMDecodeSourceOutput(1,words,101)[@"lanes"][@"items"] valueForKey:@"limit"] isEqual:@[@90,@70]],@"VietMap lane limits reach the wire");
     NSDictionary *vmOutput=GVMVietMapOutput(@{@"lanes":vmLanes},@[],101);
     Require([vmOutput[@"lanes"][@"items"] count]==5 && GVMEncodeSourceOutput(vmOutput,101,&words) && [GVMDecodeSourceOutput(1,words,101)[@"lanes"] isEqual:vmOutput[@"lanes"]],@"VietMap lanes reach the wire");
 
@@ -194,5 +204,32 @@ int main(int argc,const char **argv) { @autoreleasepool {
     tampered=words; tampered.words[6]&=~(1023ULL<<14);
     Require(!GVMDecodeSourceOutput(1,tampered,101)[@"lanes"],@"a zero lane count is no lanes");
     Require([GVMDecodeSourceOutput(1,tampered,101)[@"speed"][@"value"] isEqual:@42],@"bad lanes leave the other fields alone");
+
+    // Per-lane speed limits, as VietMap sent them on the HCMC - Long Thanh expressway: 90 and 70.
+    NSDictionary *(^Limited)(id,id)=^NSDictionary *(id code,id limit) { return @{@"code":code,@"enabled":@YES,@"limit":limit}; };
+    NSDictionary *limited=GVMSourceOutput(1,@{@"lanes":@{@"items":@[Limited(@1,@90),Limited(@1,@70)],@"receivedAt":@100}},@[],100);
+    Require([limited[@"lanes"][@"items"] isEqual:@[Limited(@1,@90),Limited(@1,@70)]],@"lane limits are kept");
+    Require(GVMEncodeSourceOutput(limited,100,&words) &&
+        [GVMDecodeSourceOutput(1,words,100)[@"lanes"][@"items"] isEqual:@[Limited(@1,@90),Limited(@1,@70)]],@"lane limits survive the wire");
+    NSArray *kinds=@[Limited(@0,@120),Limited(@0,@0),Limited(@0,@-1),Limited(@0,@-60),Limited(@64,@255),Limited(@4,@-255)];
+    Require(GVMEncodeSourceOutput(GVMSourceOutput(1,@{@"lanes":@{@"items":kinds,@"receivedAt":@100}},@[],100),100,&words),@"encode every kind of lane limit");
+    NSArray *decodedKinds=[GVMDecodeSourceOutput(1,words,100)[@"lanes"][@"items"] valueForKey:@"limit"];
+    Require([decodedKinds isEqual:@[@120,@0,@0,@-60,@255,@-255]],@"limits, dimmed limits and signs without a number survive; -1 reads as 0");
+    NSMutableArray *twelveLimited=[NSMutableArray new];
+    for (NSInteger i=0;i<12;i++) [twelveLimited addObject:Limited(@1,@(40+10*i))];
+    Require(GVMEncodeSourceOutput(GVMSourceOutput(1,@{@"lanes":@{@"items":twelveLimited,@"receivedAt":@100}},@[],100),100,&words) &&
+        [GVMDecodeSourceOutput(1,words,100)[@"lanes"][@"items"] isEqual:twelveLimited],@"twelve lanes carry their limits");
+    NSArray *partialSets=@[@[Limited(@1,@90),Lane(@1,@YES)],@[Limited(@1,@90),Limited(@1,@256)],@[Limited(@1,@90),Limited(@1,@"70")],
+        @[Limited(@1,@90),Limited(@1,@YES)],@[Limited(@1,@90),Limited(@1,@70.5)]];
+    for (NSArray *set in partialSets)
+        Require([GVMSourceOutput(1,@{@"lanes":@{@"items":set,@"receivedAt":@100}},@[],100)[@"lanes"][@"items"] isEqual:@[Lane(@1,@YES),Lane(@1,@YES)]],
+            @"partial or unreadable limits are left out, the lanes stay");
+    Require(GVMEncodeSourceOutput(limited,100,&words),@"re-encode lane limits");
+    tampered=words; tampered.words[9]|=512ULL<<20;
+    Require([GVMDecodeSourceOutput(1,tampered,100)[@"lanes"][@"items"] isEqual:@[Lane(@1,@YES),Lane(@1,@YES)]],@"a limit past the last lane drops the limits, not the lanes");
+    tampered=words; tampered.words[9]&=~(1023ULL<<10);
+    Require([GVMDecodeSourceOutput(1,tampered,100)[@"lanes"][@"items"] isEqual:@[Lane(@1,@YES),Lane(@1,@YES)]],@"a lane without a limit drops the limits");
+    tampered=words; tampered.words[10]=1ULL<<63;
+    Require([GVMDecodeSourceOutput(1,tampered,100)[@"lanes"][@"items"] isEqual:@[Lane(@1,@YES),Lane(@1,@YES)]],@"reserved limit bits drop the limits");
     puts("source-output tests passed");
 } return 0; }

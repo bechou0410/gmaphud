@@ -22,6 +22,11 @@ NSArray<NSDictionary *> *GVMVietMapOverlayStickyAlerts(id payload);
 // bitmask string per lane, left to right. nil when a partial patch has no laneInfo (they stay as they
 // are); empty when there are none or they cannot be read.
 NSArray<NSNumber *> *GVMVietMapOverlayLaneCodes(id payload);
+// The overlay's laneSpeedLimits: one integer per lane, left to right, as VietMap's CarPlay plugin
+// decodes them (a limit in km/h; 0 or -1 a sign without a number; -2 or less a limit shown dimmed).
+// nil when a partial patch has none (they stay as they are) or when one is not an integer (VietMap
+// ignores such an update); empty when there are none or one lies beyond -255...255.
+NSArray<NSNumber *> *GVMVietMapOverlayLaneSpeedLimits(id payload);
 // One lane's direction bitmask from its updateLaneInfo imageId, `lane_<directions>_<to follow>`:
 // VietMap's direction names joined by "-" in each group. Some names hold "_" themselves
 // (UTURN_LEFT, SLIGHT_RIGHT), so the id is read name by name. 0 when it cannot be read.

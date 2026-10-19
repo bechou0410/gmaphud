@@ -303,6 +303,33 @@ static void LaneLayoutTests(void) {
     GVMLaneStripLayout below=GVMLaneStripLayoutFor(card,1,GVMHaloRow,dial,NO,NO,5,NO,area,0.5,0.5);
     assert(below.place==GVMLaneStripBelow && below.scale==1 && below.frame.x==dial.x &&
         below.frame.y==card.y+card.height && below.frame.width==160 && below.frame.height==46);
+    // Per-lane speed limits: a row of signs 8 narrower than the cell, 3 under the arrows, or alone.
+    GVMLaneStripMetrics limited=GVMLaneStripMetricsFor(2,GVMLaneStripLimits), alone=GVMLaneStripMetricsFor(2,GVMLaneStripLimitsOnly);
+    assert(limited.sign==22 && limited.signTop==36 && limited.plate==71 && limited.height==71 && limited.width==70);
+    assert(alone.sign==22 && alone.signTop==10 && alone.plate==42 && alone.height==42 && alone.width==70);
+    assert(GVMLaneStripMetricsFor(2,GVMLaneStripLimits|GVMLaneStripTagged).height==81 && five.sign==0 && five.signTop==0);
+    assert(GVMLaneStripMetricsFor(12,GVMLaneStripLimits).sign==14);
+    GVMLaneStripLayout limitedBelow=GVMLaneStripLayoutFor(card,1,GVMHaloRow,dial,NO,NO,5,GVMLaneStripLimits,area,0.5,0.5);
+    assert(limitedBelow.place==GVMLaneStripBelow && limitedBelow.frame.height==26+22+23 && limitedBelow.frame.width==160 &&
+        limitedBelow.options==GVMLaneStripLimits && below.options==0);
+    // With room for the arrows but not the row under them (30 points over a bottom bubble), the row
+    // goes and the arrows stay; a row on its own is shorter and still fits there.
+    GVMModuleRect tight={90,470-row.height,row.width,row.height};
+    GVMModuleRect tightDial=Scaled(GVMHaloDialFrame(GVMHaloRow,NO,NO,2),90,tight.y,1);
+    double reach=(row.height+30)/460;
+    GVMLaneStripLayout arrowsOnly=GVMLaneStripLayoutFor(tight,1,GVMHaloRow,tightDial,NO,YES,5,GVMLaneStripLimits,area,0.5,reach);
+    assert(arrowsOnly.place==GVMLaneStripAbove && arrowsOnly.options==0 && Close(arrowsOnly.frame.height,30));
+    GVMLaneStripLayout aloneAbove=GVMLaneStripLayoutFor(tight,1,GVMHaloRow,tightDial,NO,YES,5,GVMLaneStripLimitsOnly,area,0.5,reach);
+    assert(aloneAbove.place==GVMLaneStripAbove && aloneAbove.options==GVMLaneStripLimitsOnly && Close(aloneAbove.frame.height,30));
+    GVMEffectDock limitedDock=GVMEffectDockFor((GVMModuleRect){53,100,142,30},0,5,GVMLaneStripLimits,0.556);
+    assert(limitedDock.lanes && limitedDock.stripOptions==0 && limitedDock.strip.height<=30+1e-9);
+    GVMEffectDock roomyDock=GVMEffectDockFor((GVMModuleRect){53,100,142,60},0,2,GVMLaneStripLimits,0.556);
+    assert(roomyDock.lanes && roomyDock.stripOptions==GVMLaneStripLimits);
+    assert(GVMLaneStripOptionsFor(@{@"distance":NSNull.null,@"items":@[@{@"code":@1,@"limit":@90},@{@"code":@1,@"limit":@70}]})==GVMLaneStripLimits);
+    assert(GVMLaneStripOptionsFor(@{@"distance":NSNull.null,@"items":@[@{@"code":@0,@"limit":@90},@{@"code":@0,@"limit":@-70}]})==GVMLaneStripLimitsOnly);
+    assert(GVMLaneStripOptionsFor(@{@"distance":@120,@"items":@[@{@"code":@1},@{@"code":@1,@"limit":@70}]})==GVMLaneStripTagged);
+    assert(GVMLaneStripOptionsFor(@{@"distance":@120,@"items":@[@{@"code":@5,@"limit":@80}]})==(GVMLaneStripTagged|GVMLaneStripLimits));
+    assert(GVMLaneStripOptionsFor(nil)==0 && GVMLaneStripOptionsFor(@{@"items":@[]})==0 && GVMLaneStripOptionsFor(@{@"items":@[@{@"code":@0}]})==0);
     // Bottom corners put it over the group instead, so nothing moves off screen and the dial stays.
     GVMModuleRect low={90,470-row.height,row.width,row.height};
     GVMLaneStripLayout above=GVMLaneStripLayoutFor(low,1,GVMHaloRow,Scaled(GVMHaloDialFrame(GVMHaloRow,NO,NO,2),90,low.y,1),NO,YES,5,NO,area,0.5,0.5);

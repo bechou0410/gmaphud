@@ -19,7 +19,7 @@
 static NSHashTable *views;
 static NSMapTable *models, *statuses, *nativeInputs, *nativeChildren;
 static id applyingNativeModel;
-static int testToken = -1, testFirstAlertToken = -1, testSecondAlertToken = -1, testLaneToken = -1;
+static int testToken = -1, testFirstAlertToken = -1, testSecondAlertToken = -1, testLaneToken = -1, testLaneLimitToken = -1;
 static int placementToken = -1;
 static BOOL installed;
 static int backgroundToken=-1;
@@ -94,9 +94,20 @@ static NSArray<NSDictionary *> *TestAlerts(NSTimeInterval now) {
 static NSDictionary *TestSamples(NSDictionary *test, NSTimeInterval now) {
     NSMutableDictionary *samples=[@{@"speed":@{@"value":test[@"speed"],@"receivedAt":@(now)},
         @"speedLimit":@{@"value":test[@"limit"],@"receivedAt":@(now)}} mutableCopy];
-    uint64_t state=0;
+    uint64_t state=0, limitState=0;
     NSDictionary *lanes=testLaneToken>=0 && notify_get_state(testLaneToken,&state)==NOTIFY_STATUS_OK ? GVMDecodeTestLanes(state) : nil;
-    if (lanes) samples[@"lanes"]=@{@"distance":lanes[@"distance"],@"items":lanes[@"items"],@"receivedAt":@(now)};
+    NSArray *items=lanes[@"items"];
+    NSArray<NSNumber *> *limits=items && testLaneLimitToken>=0 && notify_get_state(testLaneLimitToken,&limitState)==NOTIFY_STATUS_OK ?
+        GVMDecodeTestLaneLimits(limitState,items.count) : nil;
+    if (limits) {
+        NSMutableArray *limited=[NSMutableArray new];
+        for (NSUInteger i=0;i<items.count;i++) {
+            NSMutableDictionary *item=[items[i] mutableCopy]; item[@"limit"]=limits[i];
+            [limited addObject:[item copy]];
+        }
+        items=limited;
+    }
+    if (lanes) samples[@"lanes"]=@{@"distance":lanes[@"distance"],@"items":items,@"receivedAt":@(now)};
     return samples;
 }
 static id ModelFor(NSNumber *speed, NSNumber *limit, NSUInteger style, NSInteger unit) {
@@ -242,6 +253,7 @@ static void Install(void) {
     notify_register_check(GVMTestFirstAlertStateName, &testFirstAlertToken);
     notify_register_check(GVMTestSecondAlertStateName, &testSecondAlertToken);
     notify_register_check(GVMTestLaneStateName, &testLaneToken);
+    notify_register_check(GVMTestLaneLimitStateName, &testLaneLimitToken);
     views = [NSHashTable weakObjectsHashTable]; models = [NSMapTable weakToStrongObjectsMapTable];
     statuses = [NSMapTable weakToStrongObjectsMapTable];
     nativeInputs=[NSMapTable weakToStrongObjectsMapTable];

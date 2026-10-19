@@ -76,20 +76,39 @@ GVMModuleRect GVMHaloAlertFrame(GVMHaloArrangement arrangement,BOOL alertsFirst,
     return (GVMModuleRect){lead,centre-GVMHaloAlertSignTop-GVMHaloAlertSign/2,GVMHaloAlertWidth,GVMHaloAlertHeight};
 }
 const double GVMLaneMinimumArrow=14;
-GVMLaneStripMetrics GVMLaneStripMetricsFor(NSUInteger lanes,BOOL tagged) {
-    double cell=lanes<=6 ? 30 : lanes<=8 ? 26 : 22, arrow=cell-4, plate=arrow+20;
+GVMLaneStripMetrics GVMLaneStripMetricsFor(NSUInteger lanes,NSUInteger options) {
+    double cell=lanes<=6 ? 30 : lanes<=8 ? 26 : 22, arrow=cell-4, sign=cell-8;
+    BOOL tagged=(options&GVMLaneStripTagged)!=0, only=(options&GVMLaneStripLimitsOnly)!=0;
+    BOOL limits=only || (options&GVMLaneStripLimits)!=0;
+    // Arrows run from 7 down and the limit row starts 3 under them, 13 more closing the plate; a row on
+    // its own sits in the middle of its plate.
+    double signTop=only ? 10 : 7+arrow+3;
+    double plate=only ? sign+20 : limits ? arrow+sign+23 : arrow+20;
     // The tag is 18 high, centred on the plate's bottom edge, and at least 56 wide; its 1-point stroke
     // reaches half a point beyond, so the strip keeps a point more on each side it touches.
     double width=10+lanes*cell;
-    return (GVMLaneStripMetrics){cell,arrow,plate,tagged ? MAX(width,58) : width,tagged ? plate+10 : plate};
+    return (GVMLaneStripMetrics){cell,arrow,plate,tagged ? MAX(width,58) : width,tagged ? plate+10 : plate,
+        limits ? sign : 0,limits ? signTop : 0};
+}
+NSUInteger GVMLaneStripOptionsFor(NSDictionary *lanes) {
+    NSArray *items=[lanes isKindOfClass:NSDictionary.class] ? lanes[@"items"] : nil;
+    if (![items isKindOfClass:NSArray.class] || !items.count) return 0;
+    NSUInteger options=[lanes[@"distance"] isKindOfClass:NSNumber.class] ? GVMLaneStripTagged : 0;
+    BOOL limits=YES, arrows=NO;
+    for (NSDictionary *item in items) {
+        if (![item isKindOfClass:NSDictionary.class]) return options;
+        if (![item[@"limit"] isKindOfClass:NSNumber.class]) limits=NO;
+        if ([item[@"code"] unsignedIntegerValue]&GVMLaneKnownDirections) arrows=YES;
+    }
+    return limits ? options|(arrows ? GVMLaneStripLimits : GVMLaneStripLimitsOnly) : options;
 }
 double GVMLanePlateWidth(GVMLaneStripMetrics strip,NSUInteger lanes) { return 10+lanes*strip.cell; }
-GVMLaneStripLayout GVMLaneStripLayoutFor(GVMModuleRect card,double cardScale,GVMHaloArrangement arrangement,
-    GVMModuleRect dial,BOOL right,BOOL bottom,NSUInteger lanes,BOOL tagged,GVMModuleRect area,double reachWidth,double reachHeight) {
-    GVMLaneStripLayout none={{0,0,0,0},0,GVMLaneStripHidden};
+static GVMLaneStripLayout StripLayout(GVMModuleRect card,double cardScale,GVMHaloArrangement arrangement,
+    GVMModuleRect dial,BOOL right,BOOL bottom,NSUInteger lanes,NSUInteger options,GVMModuleRect area,double reachWidth,double reachHeight) {
+    GVMLaneStripLayout none={{0,0,0,0},0,GVMLaneStripHidden,0};
     if (!lanes || lanes>GVMMaximumLanes || !isfinite(cardScale) || cardScale<=0 || area.width<=0 || area.height<=0 ||
         !isfinite(reachWidth) || !isfinite(reachHeight)) return none;
-    GVMLaneStripMetrics strip=GVMLaneStripMetricsFor(lanes,tagged);
+    GVMLaneStripMetrics strip=GVMLaneStripMetricsFor(lanes,options);
     double floorScale=GVMLaneMinimumArrow/strip.arrow, start=MAX(cardScale,floorScale);
     // The corner region the bubble and its lanes may use.
     double regionWidth=MIN(area.width,MAX(area.width*reachWidth,card.width));
@@ -115,7 +134,7 @@ GVMLaneStripLayout GVMLaneStripLayoutFor(GVMModuleRect card,double cardScale,GVM
             if (scale<floorScale-1e-9) continue;
             double width=strip.width*scale, height=strip.height*scale;
             double y=right ? circleMiddle-height/2 : MAX(circleMiddle-height/2,badgeBottom);
-            return (GVMLaneStripLayout){{right ? edge-width : edge,y,width,height},scale,place};
+            return (GVMLaneStripLayout){{right ? edge-width : edge,y,width,height},scale,place,options};
         }
         scale=MIN(scale,regionWidth/strip.width);
         scale=MIN(scale,(place==GVMLaneStripBelow ? regionBottom-(card.y+card.height) : card.y-regionTop)/strip.height);
@@ -125,16 +144,24 @@ GVMLaneStripLayout GVMLaneStripLayoutFor(GVMModuleRect card,double cardScale,GVM
         double x=dialRight ? dial.x+dial.width-width : dial.x;
         x=MAX(regionLeft,MIN(regionRight-width,x));
         double y=place==GVMLaneStripBelow ? card.y+card.height : card.y-height;
-        return (GVMLaneStripLayout){{x,y,width,height},scale,place};
+        return (GVMLaneStripLayout){{x,y,width,height},scale,place,options};
     }
     return none;
 }
-GVMEffectDock GVMEffectDockFor(GVMModuleRect slot,NSUInteger signs,NSUInteger lanes,BOOL tagged,double cardScale) {
+GVMLaneStripLayout GVMLaneStripLayoutFor(GVMModuleRect card,double cardScale,GVMHaloArrangement arrangement,
+    GVMModuleRect dial,BOOL right,BOOL bottom,NSUInteger lanes,NSUInteger options,GVMModuleRect area,double reachWidth,double reachHeight) {
+    GVMLaneStripLayout layout=StripLayout(card,cardScale,arrangement,dial,right,bottom,lanes,options,area,reachWidth,reachHeight);
+    // The arrows matter more than the limits under them: without room for both, the row goes.
+    if (layout.place==GVMLaneStripHidden && (options&GVMLaneStripLimits))
+        layout=StripLayout(card,cardScale,arrangement,dial,right,bottom,lanes,options&~GVMLaneStripLimits,area,reachWidth,reachHeight);
+    return layout;
+}
+static GVMEffectDock Dock(GVMModuleRect slot,NSUInteger signs,NSUInteger lanes,NSUInteger options,double cardScale) {
     GVMEffectDock none;
     memset(&none,0,sizeof none);
     if (!(slot.width>0) || !(slot.height>0) || !isfinite(cardScale) || cardScale<=0 || lanes>GVMMaximumLanes) return none;
     const double gap=6, minimumSign=20;
-    GVMLaneStripMetrics strip=GVMLaneStripMetricsFor(lanes,tagged);
+    GVMLaneStripMetrics strip=GVMLaneStripMetricsFor(lanes,options);
     double floorScale=lanes ? GVMLaneMinimumArrow/strip.arrow : 0;
     for (int withLanes=lanes ? 1 : 0;withLanes>=0;withLanes--) {
         for (NSInteger n=MIN(signs,2);n>=0;n--) {
@@ -159,11 +186,23 @@ GVMEffectDock GVMEffectDockFor(GVMModuleRect slot,NSUInteger signs,NSUInteger la
             dock.signs=(NSUInteger)n; dock.lanes=withLanes; dock.diameter=n ? d : 0;
             double x=slot.x, middle=slot.y+slot.height/2;
             for (NSInteger i=0;i<n;i++) { dock.signFrames[i]=(GVMModuleRect){x,middle-d/2,d,d}; x+=d+gap; }
-            if (withLanes) { dock.strip=(GVMModuleRect){x,middle-strip.height*s/2,laneWidth,strip.height*s}; dock.stripScale=s; }
+            if (withLanes) {
+                dock.strip=(GVMModuleRect){x,middle-strip.height*s/2,laneWidth,strip.height*s};
+                dock.stripScale=s; dock.stripOptions=options;
+            }
             return dock;
         }
     }
     return none;
+}
+GVMEffectDock GVMEffectDockFor(GVMModuleRect slot,NSUInteger signs,NSUInteger lanes,NSUInteger options,double cardScale) {
+    GVMEffectDock dock=Dock(slot,signs,lanes,options,cardScale);
+    // The limit row gives way first: it stays only if the lanes and as many signs fit with it.
+    if (lanes && (options&GVMLaneStripLimits)) {
+        GVMEffectDock plain=Dock(slot,signs,lanes,options&~GVMLaneStripLimits,cardScale);
+        if ((plain.lanes && !dock.lanes) || plain.signs>dock.signs) dock=plain;
+    }
+    return dock;
 }
 BOOL GVMAlertsFirst(NSArray<NSString *> *order) {
     return [order isKindOfClass:NSArray.class] && [order.firstObject isEqual:@"alerts"];

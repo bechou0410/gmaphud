@@ -320,6 +320,24 @@ NSArray<NSNumber *> *GVMVietMapOverlayLaneCodes(id payload) {
     }
     return codes;
 }
+NSArray<NSNumber *> *GVMVietMapOverlayLaneSpeedLimits(id payload) {
+    NSDictionary *patch=GVMVietMapOverlayPatch(payload);
+    id value=patch[@"laneSpeedLimits"];
+    // A patch that replaces the whole overlay and has no limits means there are none.
+    BOOL replace=[payload isKindOfClass:NSArray.class] && [payload count]==2 && [payload[1] isEqual:@YES];
+    if (!patch || (!value && !replace)) return nil;
+    if (![value isKindOfClass:NSArray.class] || [value count]>12) return @[];
+    NSMutableArray *limits=[NSMutableArray new];
+    for (id item in value) {
+        // VietMap ignores an update that is not all integers; one it would draw but GMapHUD cannot
+        // carry clears the row rather than leave the previous limits up.
+        if (![item isKindOfClass:NSNumber.class] || CFGetTypeID((__bridge CFTypeRef)item)==CFBooleanGetTypeID() ||
+            !isfinite([item doubleValue]) || [item doubleValue]!=floor([item doubleValue])) return nil;
+        if ([item doubleValue]<-255 || [item doubleValue]>255) return @[];
+        [limits addObject:@([item integerValue])];
+    }
+    return limits;
+}
 NSUInteger GVMVietMapLaneCodeForImage(id imageId) {
     if (![imageId isKindOfClass:NSString.class] || [imageId length]>96) return 0;
     NSString *text=[imageId uppercaseString];

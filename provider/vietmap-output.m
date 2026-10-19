@@ -53,15 +53,23 @@ NSDictionary *GVMVietMapOutputAlert(NSDictionary *alert,NSTimeInterval receivedA
         @"receivedAt":@(receivedAt)};
 }
 const NSTimeInterval GVMVietMapAdvanceLaneLifetime=6;
-NSDictionary *GVMVietMapLaneSample(NSDictionary *advance,NSArray<NSNumber *> *codes,NSTimeInterval now) {
+NSDictionary *GVMVietMapLaneSample(NSDictionary *advance,NSArray<NSNumber *> *codes,NSArray<NSNumber *> *limits,NSTimeInterval now) {
     if (!isfinite(now)) return nil;
     NSArray *ahead=[advance isKindOfClass:NSDictionary.class] ? advance[@"items"] : nil;
     if ([ahead isKindOfClass:NSArray.class] && ahead.count && ahead.count<=GVMMaximumLanes &&
         [advance[@"distance"] isKindOfClass:NSNumber.class])
         return @{@"distance":advance[@"distance"],@"items":ahead,@"receivedAt":@(now)};
-    if (![codes isKindOfClass:NSArray.class] || !codes.count || codes.count>GVMMaximumLanes) return nil;
+    BOOL arrows=[codes isKindOfClass:NSArray.class] && codes.count && codes.count<=GVMMaximumLanes;
+    BOOL signs=[limits isKindOfClass:NSArray.class] && limits.count && limits.count<=GVMMaximumLanes &&
+        (!arrows || limits.count==codes.count);
+    if (!arrows && !signs) return nil;
+    NSUInteger count=arrows ? codes.count : limits.count;
     NSMutableArray *items=[NSMutableArray new];
-    for (NSNumber *code in codes) [items addObject:@{@"code":code,@"enabled":@YES}];
+    for (NSUInteger i=0;i<count;i++) {
+        NSMutableDictionary *item=[@{@"code":arrows ? codes[i] : @0,@"enabled":@YES} mutableCopy];
+        if (signs) item[@"limit"]=limits[i];
+        [items addObject:[item copy]];
+    }
     return @{@"distance":NSNull.null,@"items":items,@"receivedAt":@(now)};
 }
 NSDictionary *GVMVietMapOutput(NSDictionary *samples,NSArray<NSDictionary *> *alertEntries,NSTimeInterval now) {

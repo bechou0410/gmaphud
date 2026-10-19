@@ -112,7 +112,7 @@ CGRect GVMLayoutSpeedCard(UIView *map) {
     // Navigation on the full map, New UI: signs in effect and lanes move under CarPlay's maneuver
     // card, and the bubble keeps the dial and the signs ahead. What does not fit stays in the bubble.
     NSUInteger laneCount=[strip.lanes[@"items"] count];
-    BOOL laneTag=[strip.lanes[@"distance"] isKindOfClass:NSNumber.class];
+    NSUInteger laneOptions=GVMLaneStripOptionsFor(strip.lanes);
     GVMEffectDock dock;
     memset(&dock,0,sizeof dock);
     NSMutableArray<NSDictionary *> *inEffect=[NSMutableArray new], *ahead=[NSMutableArray new];
@@ -125,7 +125,7 @@ CGRect GVMLayoutSpeedCard(UIView *map) {
         GVMCardSize probeCanvas=GVMHaloCanvasSize(GVMHaloArrangementFor(probe),MIN(ahead.count,2));
         double scale=probeCanvas.width>0 ? probe.width/probeCanvas.width : 0;
         dock=GVMEffectDockFor((GVMModuleRect){slot.origin.x,slot.origin.y,slot.size.width,slot.size.height},
-            inEffect.count,laneCount,laneTag,scale);
+            inEffect.count,laneCount,laneOptions,scale);
     }
     NSArray<NSDictionary *> *docked=[inEffect subarrayWithRange:NSMakeRange(0,dock.signs)];
     NSMutableArray<NSDictionary *> *remaining=[NSMutableArray new];
@@ -188,8 +188,8 @@ CGRect GVMLayoutSpeedCard(UIView *map) {
     // New UI lanes go on the free side of the bubble without moving it. On the full map the bubble
     // with its lanes may reach half the map; Dashboard has the whole tile; iPhone keeps its room.
     // During navigation they sit under the maneuver card instead, when they fit there.
-    GVMLaneStripLayout lanes={{0,0,0,0},0,GVMLaneStripHidden};
-    if (dock.lanes) lanes=(GVMLaneStripLayout){dock.strip,dock.stripScale,GVMLaneStripBelow};
+    GVMLaneStripLayout lanes={{0,0,0,0},0,GVMLaneStripHidden,0};
+    if (dock.lanes) lanes=(GVMLaneStripLayout){dock.strip,dock.stripScale,GVMLaneStripBelow,dock.stripOptions};
     else if (strip && laneCount && [card isKindOfClass:GVMHaloSpeedCard.class]) {
         NSUInteger shown=MIN(card.alerts.count,2);
         GVMHaloArrangement arrangement=GVMHaloArrangementFor(size);
@@ -202,13 +202,14 @@ CGRect GVMLayoutSpeedCard(UIView *map) {
         GVMModuleRect cardRect={frame.origin.x,frame.origin.y,frame.size.width,frame.size.height};
         GVMModuleRect area={left,top,MAX(0,right-left),MAX(0,bottom-top)};
         double reachWidth=phone ? 0.6 : dashboard ? 1 : 0.5, reachHeight=phone ? 0.65 : dashboard ? 1 : 0.5;
-        lanes=GVMLaneStripLayoutFor(cardRect,scale,arrangement,dial,atRight,atBottom,laneCount,laneTag,area,reachWidth,reachHeight);
+        lanes=GVMLaneStripLayoutFor(cardRect,scale,arrangement,dial,atRight,atBottom,laneCount,laneOptions,area,reachWidth,reachHeight);
     }
     strip.hidden=lanes.place==GVMLaneStripHidden;
     if (!strip.hidden) {
         CGRect laneFrame=CGRectMake(lanes.frame.x,lanes.frame.y,lanes.frame.width,lanes.frame.height);
         if (!CGRectEqualToRect(strip.frame,laneFrame)) strip.frame=laneFrame;
         strip.scale=lanes.scale;
+        strip.withoutLimits=(laneOptions&GVMLaneStripLimits) && !(lanes.options&GVMLaneStripLimits);
     }
     return frame;
 }
