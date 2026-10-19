@@ -9,7 +9,7 @@
       "views": [
         {
           "class": "DepictionHeaderView",
-          "title": "CarPlay Scale 0.1.7 · experimental"
+          "title": "CarPlay Scale 0.1.8 · experimental"
         },
         {
           "class": "DepictionMarkdownView",
@@ -21,7 +21,7 @@
         },
         {
           "class": "DepictionMarkdownView",
-          "markdown": "Rootless jailbreak · iOS 18.6.2 · arm64 + arm64e. Đã kiểm trên iPhone 11 với CarPlay Simulator (800x480 và 748x456); chưa kiểm trên đầu xe thật. Tweak tự tắt nếu FrontBoard thiếu hàm cần dùng."
+          "markdown": "Rootless jailbreak · iOS 18.6.2 · arm64 + arm64e. Đã kiểm trên iPhone 11 với đầu xe thật và CarPlay Simulator (800x480 và 748x456). Bản 0.1.8 sửa lỗi 0.1.7 không có tác dụng trên đầu xe thật. Tweak tự tắt nếu FrontBoard thiếu hàm cần dùng."
         },
         {
           "class": "DepictionSubheaderView",
@@ -51,7 +51,7 @@
       "views": [
         {
           "class": "DepictionHeaderView",
-          "title": "CarPlay Scale 0.1.7 · experimental"
+          "title": "CarPlay Scale 0.1.8 · experimental"
         },
         {
           "class": "DepictionMarkdownView",
@@ -63,7 +63,7 @@
         },
         {
           "class": "DepictionMarkdownView",
-          "markdown": "Rootless jailbreak · iOS 18.6.2 · arm64 + arm64e. Tested on iPhone 11 with CarPlay Simulator (800x480 and 748x456); not yet tested on a real head unit. The tweak stays inactive if FrontBoard lacks a required method."
+          "markdown": "Rootless jailbreak · iOS 18.6.2 · arm64 + arm64e. Tested on iPhone 11 with a real head unit and CarPlay Simulator (800x480 and 748x456). Version 0.1.8 fixes 0.1.7 having no effect on real head units. The tweak stays inactive if FrontBoard lacks a required method."
         },
         {
           "class": "DepictionSubheaderView",

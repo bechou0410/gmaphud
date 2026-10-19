@@ -9,9 +9,8 @@
 #include <unistd.h>
 #import "scale-math.h"
 
-static NSString *const CarPlayMainScreen = @"VideoStream.Main";
 static const int64_t TrustedAfterSeconds = 10;
-static SEL copyWithModeSelector, copyModeSelector, pointScaleSelector, pixelSizeSelector;
+static SEL copyWithModeSelector, copyModeSelector, pointScaleSelector, pixelSizeSelector, carSelector, carInstrumentsSelector;
 static id (*originalInit)(id, SEL, id, id, BOOL);
 static CGFloat appliedRatio;
 static BOOL scalingBlocked;
@@ -65,14 +64,27 @@ static id CopyScaledConfiguration(id configuration) {
     return copy;
 }
 
+// FrontBoard's own classification: the CarPlay screen, not an instrument cluster. Head units name their screens
+// differently (CarPlay Simulator uses "VideoStream.Main"), so the screen identifier cannot be relied on.
+static BOOL IsCarMainScreen(id configuration) {
+    return ((BOOL (*)(id, SEL))objc_msgSend)(configuration, carSelector) && !((BOOL (*)(id, SEL))objc_msgSend)(configuration, carInstrumentsSelector);
+}
+
+static void RecordCarScreen(id configuration, id applied) {
+    NSString *record = [NSString stringWithFormat:@"%@ %@ -> %@", Value(Value(configuration, @"CADisplay"), @"uniqueId"),
+        Value(configuration, @"currentMode"), applied ? Value(applied, @"currentMode") : @"unchanged"];
+    CFPreferencesSetAppValue(CFSTR(CPS_LAST_CAR_SCREEN_KEY), (CFStringRef)record, CFSTR(CPS_PREFERENCES_DOMAIN));
+    CFPreferencesAppSynchronize(CFSTR(CPS_PREFERENCES_DOMAIN));
+}
+
 static id HookedInit(id self, SEL command, id immutableDisplay, id originalDisplay, BOOL assertIfInvalid) {
     id configuration = originalInit(self, command, immutableDisplay, originalDisplay, assertIfInvalid);
-    if (!configuration || ![Value(immutableDisplay, @"uniqueId") isEqual:CarPlayMainScreen]) return configuration;
+    if (!configuration || !IsCarMainScreen(configuration)) return configuration;
     // CarPlay.app outlives CarPlay sessions; reading again here lets a choice saved without Apply take effect
     // when the screen is rebuilt for the next connection.
     if (!scalingBlocked) appliedRatio = SavedRatio();
-    if (appliedRatio <= 0) return configuration;
-    id copy = CopyScaledConfiguration(configuration);
+    id copy = appliedRatio > 0 ? CopyScaledConfiguration(configuration) : nil;
+    RecordCarScreen(configuration, copy);
     if (!copy) return configuration;
     NSLog(@"[CarPlayScale] %@ -> %@", Value(configuration, @"currentMode"), Value(copy, @"currentMode"));
     [configuration release];
@@ -96,7 +108,10 @@ __attribute__((constructor)) static void Install(void) {
         copyModeSelector = NSSelectorFromString(@"_copyWithOverrideSize:scale:");
         pointScaleSelector = NSSelectorFromString(@"pointScale");
         pixelSizeSelector = NSSelectorFromString(@"pixelSize");
+        carSelector = NSSelectorFromString(@"isCarDisplay");
+        carInstrumentsSelector = NSSelectorFromString(@"isCarInstrumentsDisplay");
         if (![configuration instancesRespondToSelector:initSelector] || ![configuration instancesRespondToSelector:copyWithModeSelector] ||
+            ![configuration instancesRespondToSelector:carSelector] || ![configuration instancesRespondToSelector:carInstrumentsSelector] ||
             ![mode instancesRespondToSelector:copyModeSelector] || ![mode instancesRespondToSelector:pointScaleSelector] || ![mode instancesRespondToSelector:pixelSizeSelector]) {
             NSLog(@"[CarPlayScale] FrontBoard interface not found; scaling disabled");
             return;

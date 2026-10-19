@@ -6,6 +6,8 @@
 #define CPS_CHANGED_NOTIFICATION "com.chou.carplayscale/changed"
 // Count of CarPlay launches that scaled the screen but did not run long enough to be trusted; Settings clears it.
 #define CPS_UNCONFIRMED_LAUNCHES_KEY "unconfirmedLaunches"
+// Last CarPlay screen CarPlay.app configured, for diagnosis: its identifier and the mode before and after.
+#define CPS_LAST_CAR_SCREEN_KEY "lastCarScreen"
 
 // Interface sizes offered in Settings, in percent of the native CarPlay size.
 extern const NSInteger CPSPercentChoices[];
