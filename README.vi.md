@@ -51,7 +51,7 @@ Trong Cài đặt iPhone → GMapHUD, chọn một trong bốn góc cho bản đ
 | Thiết bị / hệ điều hành | iPhone 11, iOS 18.6.2, jailbreak rootless |
 | Google Maps | 26.40.3 |
 | VietMap Live | 3.4.3 |
-| Gói | `com.chou.googlemaps.vietmap` 0.2.5, arm64/arm64e |
+| Gói | `com.chou.googlemaps.vietmap` 0.2.6, arm64/arm64e |
 
 Từ 0.1.13, Google Maps không còn bị giới hạn theo phiên bản hoặc UUID executable. Tweak vẫn kiểm tra các lớp và chữ ký phương thức cần thiết; vượt qua kiểm tra không bảo đảm mọi bản đều tương thích. Mã gói giữ nguyên. Từ 0.1.20, tweak dùng kênh thông báo dữ liệu thật có phiên bản mới; kênh thử hiển thị có thời hạn vẫn giữ tên cũ.
 

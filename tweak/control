@@ -1,6 +1,6 @@
 Package: com.chou.googlemaps.vietmap
 Name: GMapHUD
-Version: 0.2.5
+Version: 0.2.6
 Architecture: iphoneos-arm
 Description: Selected-source speed and road alerts in Google Maps on CarPlay and iPhone.
 Icon: https://bechou0410.github.io/gmaphud/gmaphud-icon.png
