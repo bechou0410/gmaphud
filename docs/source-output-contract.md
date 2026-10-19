@@ -1,4 +1,4 @@
-> Release 0.2.1 enables Waze alongside VietMap (one selected source only). Waze 5.25.0 ABI/UUID guards remain; GOFA4.2.1 build3 re-enabled experimentally; cold/locked GPS measured, current native limits held while stationary GPS is silent; red-light/no-right replay observed, long-idle/full alert coverage pending. Designed artwork replaces temporary Waze images. Cold mobile-only initialization supplied fresh native 0/60 to Full Map and Dashboard in device tests. Real-road speed, long-idle reliability and active alert coverage remain unverified. Published as 0.2.6.
+> Release 0.2.1 enables Waze alongside VietMap (one selected source only). Waze 5.25.0 ABI/UUID guards remain; GOFA4.2.1 build3 re-enabled experimentally; cold/locked GPS measured, current native limits held while stationary GPS is silent; red-light/no-right replay observed, long-idle/full alert coverage pending. Designed artwork replaces temporary Waze images. Cold mobile-only initialization supplied fresh native 0/60 to Full Map and Dashboard in device tests. Real-road speed, long-idle reliability and active alert coverage remain unverified. Published as 0.2.7.
 
 # Common source output · v1
 

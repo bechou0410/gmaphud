@@ -48,7 +48,7 @@ Choose the bubble style in Settings → GMapHUD → Giao diện. **Classic** (de
 | Device / OS | iPhone 11, iOS 18.6.2, rootless jailbreak |
 | Google Maps | 26.40.3 |
 | VietMap Live | 3.4.3 |
-| Package | `com.chou.googlemaps.vietmap` 0.2.6, arm64/arm64e |
+| Package | `com.chou.googlemaps.vietmap` 0.2.7, arm64/arm64e |
 
 From 0.1.13, Google Maps is not restricted by version or executable UUID. Required private classes and method signatures are still checked; passing these checks does not guarantee compatibility with every release. The package identifier remains unchanged. Release 0.1.20 introduces a versioned production notification namespace; bounded display-test channels retain their original names.
 

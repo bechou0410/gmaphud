@@ -159,6 +159,14 @@
         },
         {
           "class": "DepictionSubheaderView",
+          "title": "0.2.7"
+        },
+        {
+          "class": "DepictionMarkdownView",
+          "markdown": "**Tiếng Việt:** Waze: giữ tốc độ hiện tại khi xe đứng yên và Waze chạy nền. iOS chỉ gửi GPS cho app chạy nền vài giây đến vài phút một lần khi điện thoại đứng yên, nên ở 0.2.6 tốc độ của Waze thường biến mất. Tốc độ 0–2 km/h nay được giữ tới mẫu GPS kế tiếp, tối đa 10 phút; tốc độ khi đang chạy vẫn không được giữ, mất GPS (ví dụ trong hầm) thì không hiện tốc độ cũ. Mở lại Waze sau khi cập nhật.\n\n**English:** Waze: keeps the current speed while the car is stationary and Waze runs in the background. iOS gives a stationary background app GPS only every few seconds to minutes, so in 0.2.6 Waze's speed was often missing. A speed of 0-2 km/h is now held until the next GPS sample, for at most 10 minutes; a moving speed is still never held, so a lost signal (in a tunnel, for example) shows no old speed. Reopen Waze after updating."
+        },
+        {
+          "class": "DepictionSubheaderView",
           "title": "0.2.6"
         },
         {
