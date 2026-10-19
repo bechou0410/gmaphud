@@ -1,0 +1,14 @@
+Package: com.chou.carplayscale
+Name: CarPlay Scale
+Version: 0.1.7
+Architecture: iphoneos-arm64
+Description: Draws the CarPlay interface smaller so more content fits, without changing the video sent to the car.
+Maintainer: chou
+Author: chou
+Section: Tweaks
+Depends: mobilesubstrate, preferenceloader, firmware (>= 15.0)
+Conflicts: com.chou.carplayscale.spike
+Homepage: https://github.com/bechou0410/gmaphud/tree/main/carplay-scale
+Bugs: https://github.com/bechou0410/gmaphud/issues
+Depiction: https://bechou0410.github.io/gmaphud/carplay-scale/
+SileoDepiction: https://bechou0410.github.io/gmaphud/carplay-scale/sileo-depiction.json

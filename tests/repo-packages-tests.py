@@ -12,15 +12,19 @@ import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
 GMAPHUD = 'com.chou.googlemaps.vietmap'
-YTHUD = 'com.chou.ythud'
+COMPANIONS = {'com.chou.ythud': ('YTHUD', 'ythud'), 'com.chou.carplayscale': ('CarPlay Scale', 'carplay-scale')}
 HASHES = [('MD5sum', 'md5'), ('SHA1', 'sha1'), ('SHA256', 'sha256'), ('SHA512', 'sha512')]
 INDEX_FIELDS = {'Filename', 'Size', *(field for field, _ in HASHES)}
-YTHUD_LINKS = {
-    'Homepage': 'https://github.com/bechou0410/gmaphud/tree/main/ythud',
-    'Bugs': 'https://github.com/bechou0410/gmaphud/issues',
-    'Depiction': 'https://bechou0410.github.io/gmaphud/ythud/',
-    'SileoDepiction': 'https://bechou0410.github.io/gmaphud/ythud/sileo-depiction.json',
-}
+
+
+def companion_links(package_id):
+    directory = COMPANIONS[package_id][1]
+    return {
+        'Homepage': f'https://github.com/bechou0410/gmaphud/tree/main/{directory}',
+        'Bugs': 'https://github.com/bechou0410/gmaphud/issues',
+        'Depiction': f'https://bechou0410.github.io/gmaphud/{directory}/',
+        'SileoDepiction': f'https://bechou0410.github.io/gmaphud/{directory}/sileo-depiction.json',
+    }
 
 
 def fields(block):
@@ -44,10 +48,12 @@ def validate_repository(repo):
     raw = (repo / 'docs/Packages').read_bytes()
     records = [fields(block) for block in stanzas(repo)]
     gmaphud = [record for record in records if record['Package'] == GMAPHUD]
-    ythud = [record for record in records if record['Package'] == YTHUD]
+    companions = [record['Package'] for record in records if record['Package'] != GMAPHUD]
     assert {record['Architecture'] for record in gmaphud} == {'iphoneos-arm', 'iphoneos-arm64'}
     assert len(gmaphud) == 2 and len({record['Version'] for record in gmaphud}) == 1
-    assert len(ythud) <= 1 and len(records) == 2 + len(ythud)
+    assert len(records) == 2 + len(companions) and [record['Package'] for record in records[:2]] == [GMAPHUD, GMAPHUD]
+    assert companions == [package_id for package_id in COMPANIONS if package_id in companions], 'Unknown, repeated or reordered companion'
+
     for record in records:
         assert record['Filename'] == f"pool/{record['Package']}_{record['Version']}_{record['Architecture']}.deb"
         package = repo / 'docs' / record['Filename']
@@ -59,10 +65,10 @@ def validate_repository(repo):
         control = fields(subprocess.check_output(['dpkg-deb', '-f', str(package)], text=True).strip())
         for field in ('Package', 'Version', 'Architecture'):
             assert control[field] == record[field]
-        if record['Package'] == YTHUD:
+        if record['Package'] in COMPANIONS:
             assert record['Architecture'] == 'iphoneos-arm64'
             assert {key: value for key, value in record.items() if key not in INDEX_FIELDS} == control
-            for key, value in YTHUD_LINKS.items():
+            for key, value in companion_links(record['Package']).items():
                 assert record[key] == value
     indexes = {'Packages': raw}
     for suffix, decode in [('gz', gzip.decompress), ('bz2', bz2.decompress), ('xz', lzma.decompress)]:
@@ -133,20 +139,22 @@ with tempfile.TemporaryDirectory(prefix='gmaphud-repo-') as temp:
     run_builder(repo, packages)
     validate_repository(repo)
 
-    ythud = [record for record in records if record['Package'] == YTHUD]
-    if ythud:
-        artifact = repo / 'docs' / ythud[0]['Filename']
+    published = [record for record in records if record['Package'] in COMPANIONS]
+    if published:
+        later_packages = [repack_package(package, repo / f'later-{index}.deb', 'Version', record['Version'] + '+repo-test')
+                          for index, (package, record) in enumerate(zip(packages, gmaphud))]
+    for companion in published:
+        package_id, name = companion['Package'], COMPANIONS[companion['Package']][0]
+        artifact = repo / 'docs' / companion['Filename']
         artifact_bytes = artifact.read_bytes()
-        # Add YTHUD to an existing GMapHUD source, then retain it on a later GMapHUD release.
+        # Add the companion to a GMapHUD-only source, then retain it on a later GMapHUD release.
         (repo / 'docs/Packages').write_text('\n\n'.join(block for block in stanzas(repo) if fields(block)['Package'] == GMAPHUD) + '\n')
         run_builder(repo, [*packages, artifact])
         validate_repository(repo)
-        retained = next(block for block in stanzas(repo) if fields(block)['Package'] == YTHUD)
-        later_packages = [repack_package(package, repo / f'later-{index}.deb', 'Version', record['Version'] + '+repo-test')
-                          for index, (package, record) in enumerate(zip(packages, gmaphud))]
+        retained = next(block for block in stanzas(repo) if fields(block)['Package'] == package_id)
         run_builder(repo, later_packages)
         validate_repository(repo)
-        assert next(block for block in stanzas(repo) if fields(block)['Package'] == YTHUD) == retained
+        assert next(block for block in stanzas(repo) if fields(block)['Package'] == package_id) == retained
         assert artifact.read_bytes() == artifact_bytes
 
         original_index = (repo / 'docs/Packages').read_text()
@@ -156,21 +164,27 @@ with tempfile.TemporaryDirectory(prefix='gmaphud-repo-') as temp:
             (repo / 'docs/Packages').write_text(original_index.replace(retained, altered))
             run_builder(repo, later_packages, success=False)
             (repo / 'docs/Packages').write_text(original_index)
-        (repo / 'docs/Packages').write_text(original_index.replace(retained, retained + '\nDepiction: ' + YTHUD_LINKS['Depiction']))
+        (repo / 'docs/Packages').write_text(original_index.replace(retained, retained + '\nDepiction: ' + companion_links(package_id)['Depiction']))
         run_builder(repo, later_packages, success=False)
         (repo / 'docs/Packages').write_text(original_index)
         artifact.write_bytes(artifact_bytes + b'changed')
         run_builder(repo, later_packages, success=False)
         artifact.write_bytes(artifact_bytes)
-        altered = repack_package(artifact, repo / 'changed-ythud.deb', 'Description', ythud[0]['Description'] + ' changed')
+        altered = repack_package(artifact, repo / f'changed-{package_id}.deb', 'Description', companion['Description'] + ' changed')
         run_builder(repo, [*later_packages, altered], success=False)
-        wrong_links = repack_package(artifact, repo / 'wrong-depiction.deb', 'Depiction', 'https://bechou0410.github.io/gmaphud/')
+        wrong_links = repack_package(artifact, repo / f'wrong-depiction-{package_id}.deb', 'Depiction', 'https://bechou0410.github.io/gmaphud/')
         run_builder(repo, [*later_packages, wrong_links], success=False)
+        run_builder(repo, [*later_packages, artifact, artifact], success=False)
         artifact.unlink()
         run_builder(repo, later_packages, success=False)
         artifact.write_bytes(artifact_bytes)
         validate_repository(repo)
+        print(f'{name} publication, retention, metadata validation and immutable artifacts passed')
+    if len(published) > 1:
+        # Every companion in one publication keeps the index order of COMPANIONS.
+        (repo / 'docs/Packages').write_text('\n\n'.join(block for block in stanzas(repo) if fields(block)['Package'] == GMAPHUD) + '\n')
+        run_builder(repo, [*later_packages, *(repo / 'docs' / record['Filename'] for record in reversed(published))])
+        assert [fields(block)['Package'] for block in stanzas(repo)] == [GMAPHUD, GMAPHUD, *(record['Package'] for record in published)]
+        validate_repository(repo)
 
 print('GMapHUD package pairs, immutable artifacts, compressed indexes and Release checksums passed')
-if any(record['Package'] == YTHUD for record in records):
-    print('YTHUD publication, retention, metadata validation and immutable artifacts passed')

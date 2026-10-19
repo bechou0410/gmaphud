@@ -165,3 +165,5 @@ Trong **Chạy nền**, có thể bật tự đánh thức nguồn đã chọn v
 ## Gói khác trong nguồn
 
 **[YTHUD](ythud/README.md)** — Gói rootless thử nghiệm đưa video YouTube vào ô nhạc Dashboard. Không khóa phiên bản YouTube, vẫn kiểm tra class/hàm nội bộ; đã kiểm YouTube 21.41.5 với bridge mở app trên CarPlay đang có. Livestream chưa hỗ trợ; còn lỗi đen hình không thường xuyên khi quay lại YouTube. [Depiction](https://bechou0410.github.io/gmaphud/ythud/).
+
+**[CarPlay Scale](carplay-scale/README.md)** — Gói rootless thử nghiệm vẽ giao diện CarPlay nhỏ lại để thấy được nhiều nội dung hơn, hình gửi sang xe giữ nguyên độ phân giải. Cài đặt có các cỡ 90%–70% và nút Áp dụng. Đã kiểm trên iOS 18.6.2 với CarPlay Simulator, chưa kiểm trên đầu xe thật. [Depiction](https://bechou0410.github.io/gmaphud/carplay-scale/).

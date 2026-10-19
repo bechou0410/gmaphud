@@ -66,3 +66,25 @@ MD5sum: 434235c7126a6fe7e6e2a36057f7c795
 SHA1: aba6288a1c7a76c36b22a4171d9856dd876ec48b
 SHA256: f4a869fd025b8e9e0b47ca5b868df1f6ccd75fd6e2d909d86eb133da4b34ac1e
 SHA512: 339b85e26bd3e38aba466b2bc756d0e83e21d15a79ba29861f181ef6bf5e7922c17e1ff79a0512b88384101ee5da801fc36e87aaa075722f661a7c63bd3e778b
+
+Package: com.chou.carplayscale
+Name: CarPlay Scale
+Description: Draws the CarPlay interface smaller so more content fits, without changing the video sent to the car.
+Maintainer: chou
+Author: chou
+Section: Tweaks
+Depends: mobilesubstrate, preferenceloader, firmware (>= 15.0)
+Conflicts: com.chou.carplayscale.spike
+Homepage: https://github.com/bechou0410/gmaphud/tree/main/carplay-scale
+Bugs: https://github.com/bechou0410/gmaphud/issues
+Depiction: https://bechou0410.github.io/gmaphud/carplay-scale/
+SileoDepiction: https://bechou0410.github.io/gmaphud/carplay-scale/sileo-depiction.json
+Architecture: iphoneos-arm64
+Version: 0.1.7
+Installed-Size: 364
+Filename: pool/com.chou.carplayscale_0.1.7_iphoneos-arm64.deb
+Size: 22416
+MD5sum: debcba4dbefbcd74e138f48cae2ad3df
+SHA1: 7b15042fbd3f5d5259ef79e74ad6d6641f0f099c
+SHA256: 1b2c008b877d0b45e47d6b62978e55f931e35efe0441d4ec9457e26d5157cc27
+SHA512: 153651f4980e4b695cdbbb245b7207b9a6e9893b7d5abbd6f5cbb08554632b907fd9e956d050ae5aaaca04aeeea1aa60ea15d698c72ebf6752d72a8834863151

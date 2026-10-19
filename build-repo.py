@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Publish audited GMapHUD packages and optional YTHUD into the static source."""
+"""Publish audited GMapHUD packages and optional companion packages into the static source."""
 import bz2
 from datetime import datetime, timezone
 from email.utils import format_datetime
@@ -18,13 +18,24 @@ ROOT = Path(__file__).resolve().parent
 URL = "https://bechou0410.github.io/gmaphud/"
 SOURCE_URL = "https://gmaphud.caidat.app/"
 SILEO_DEPICTION_URL = URL + "sileo-depiction.json"
-YTHUD_PACKAGE = "com.chou.ythud"
-YTHUD_LINKS = {
-    "Homepage": "https://github.com/bechou0410/gmaphud/tree/main/ythud",
-    "Bugs": "https://github.com/bechou0410/gmaphud/issues",
-    "Depiction": URL + "ythud/",
-    "SileoDepiction": URL + "ythud/sileo-depiction.json",
+# Companion packages published next to GMapHUD: package identifier -> (display name, repository directory).
+# Each is rootless only, appears at most once and keeps this order in the index.
+COMPANIONS = {
+    "com.chou.ythud": ("YTHUD", "ythud"),
+    "com.chou.carplayscale": ("CarPlay Scale", "carplay-scale"),
 }
+
+
+def companion_links(package_id):
+    directory = COMPANIONS[package_id][1]
+    return {
+        "Homepage": f"https://github.com/bechou0410/gmaphud/tree/main/{directory}",
+        "Bugs": "https://github.com/bechou0410/gmaphud/issues",
+        "Depiction": URL + directory + "/",
+        "SileoDepiction": URL + directory + "/sileo-depiction.json",
+    }
+
+
 HASHES = (("MD5sum", "md5"), ("SHA1", "sha1"), ("SHA256", "sha256"), ("SHA512", "sha512"))
 INDEX_FIELDS = {"Filename", "Size", *(field for field, _ in HASHES)}
 SCREENSHOTS = (
@@ -229,43 +240,46 @@ def read_package(package, package_id, architectures):
         raise SystemExit("Invalid package version.")
     if INDEX_FIELDS & fields.keys():
         raise SystemExit("Package control must not contain repository index fields.")
-    if package_id == YTHUD_PACKAGE and any(fields.get(key) != value for key, value in YTHUD_LINKS.items()):
-        raise SystemExit("YTHUD must declare its dedicated publication links.")
+    if package_id in COMPANIONS and any(fields.get(key) != value for key, value in companion_links(package_id).items()):
+        raise SystemExit(f"{COMPANIONS[package_id][0]} must declare its dedicated publication links.")
     name = f"{package_id}_{version}_{arch}.deb"
     return arch, (version, name, data, control)
 
 
-def published_ythud(site):
+def published_companions(site):
+    """Returns the validated index stanzas of companion packages already published, by package identifier."""
     index = site / "Packages"
+    retained = {}
     if not index.exists():
-        return None
-    retained = None
+        return retained
     for stanza in index.read_text(encoding="utf-8").strip().split("\n\n"):
         if not stanza:
             continue
         fields = control_fields(stanza)
-        if fields.get("Package") == "com.chou.googlemaps.vietmap":
+        package_id = fields.get("Package")
+        if package_id == "com.chou.googlemaps.vietmap":
             continue
-        if fields.get("Package") != YTHUD_PACKAGE or retained is not None:
-            raise SystemExit("Expected at most one published YTHUD package alongside GMapHUD.")
+        if package_id not in COMPANIONS or package_id in retained:
+            raise SystemExit("Expected at most one published package of each companion alongside GMapHUD.")
+        name = COMPANIONS[package_id][0]
         version = fields.get("Version", "")
         if not re.fullmatch(r"[A-Za-z0-9.+:~\-]+", version):
-            raise SystemExit("Invalid published YTHUD version.")
-        filename = f"pool/{YTHUD_PACKAGE}_{version}_iphoneos-arm64.deb"
+            raise SystemExit(f"Invalid published {name} version.")
+        filename = f"pool/{package_id}_{version}_iphoneos-arm64.deb"
         if fields.get("Filename") != filename:
-            raise SystemExit("Published YTHUD must reference its canonical pool filename.")
+            raise SystemExit(f"Published {name} must reference its canonical pool filename.")
         package = site / filename
         if package.is_symlink() or not package.is_file():
-            raise SystemExit("Published YTHUD artifact is missing or is not a regular file.")
-        _, record = read_package(package, YTHUD_PACKAGE, ("iphoneos-arm64",))
+            raise SystemExit(f"Published {name} artifact is missing or is not a regular file.")
+        _, record = read_package(package, package_id, ("iphoneos-arm64",))
         data = record[2]
         if fields.get("Size") != str(len(data)) or any(
             fields.get(field) != hashlib.new(algorithm, data).hexdigest() for field, algorithm in HASHES
         ):
-            raise SystemExit("Published YTHUD artifact does not match its size or checksums.")
+            raise SystemExit(f"Published {name} artifact does not match its size or checksums.")
         if {key: value for key, value in fields.items() if key not in INDEX_FIELDS} != control_fields(record[3]):
-            raise SystemExit("Published YTHUD metadata does not match its package control.")
-        retained = stanza + "\n"
+            raise SystemExit(f"Published {name} metadata does not match its package control.")
+        retained[package_id] = stanza + "\n"
     return retained
 
 
@@ -281,8 +295,8 @@ def package_stanza(record, gmaphud=False):
 
 
 def main():
-    if len(sys.argv) not in (3, 4):
-        raise SystemExit("Usage: python3 build-repo.py rootless.deb rootful.deb [ythud.deb]")
+    if len(sys.argv) < 3:
+        raise SystemExit("Usage: python3 build-repo.py rootless.deb rootful.deb [companion.deb ...]")
     site = ROOT / "docs"
     pool = site / "pool"
     records = {}
@@ -293,12 +307,16 @@ def main():
         records[arch] = record
     if len({record[0] for record in records.values()}) != 1:
         raise SystemExit("Both packages must have the same version.")
-    ythud_stanza = published_ythud(site)
-    ythud = None
-    if len(sys.argv) == 4:
-        _, ythud = read_package(Path(sys.argv[3]).resolve(strict=True), YTHUD_PACKAGE, ("iphoneos-arm64",))
-        ythud_stanza = package_stanza(ythud)
-    incoming = list(records.values()) + ([ythud] if ythud else [])
+    companion_stanzas = published_companions(site)
+    companions = {}
+    for argument in sys.argv[3:]:
+        package = Path(argument).resolve(strict=True)
+        package_id = subprocess.check_output(["dpkg-deb", "--field", str(package), "Package"], text=True).strip()
+        if package_id not in COMPANIONS or package_id in companions:
+            raise SystemExit("Expected each companion package at most once.")
+        _, companions[package_id] = read_package(package, package_id, ("iphoneos-arm64",))
+        companion_stanzas[package_id] = package_stanza(companions[package_id])
+    incoming = list(records.values()) + list(companions.values())
     for _, name, data, _ in incoming:
         target = pool / name
         if target.is_symlink() or (target.exists() and target.read_bytes() != data):
@@ -307,8 +325,7 @@ def main():
     for _, name, data, _ in incoming:
         (pool / name).write_bytes(data)
     stanzas = [package_stanza(record, gmaphud=True) for _, record in sorted(records.items())]
-    if ythud_stanza:
-        stanzas.append(ythud_stanza)
+    stanzas += [companion_stanzas[package_id] for package_id in COMPANIONS if package_id in companion_stanzas]
     stanza = "\n".join(stanzas)
     version, name, data, _ = records["iphoneos-arm64"]
     indexes = {"Packages": stanza.encode()}

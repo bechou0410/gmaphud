@@ -1,0 +1,91 @@
+{
+  "minVersion": "0.4",
+  "class": "DepictionTabView",
+  "tintColor": "#27704d",
+  "tabs": [
+    {
+      "class": "DepictionStackView",
+      "tabname": "Tiếng Việt",
+      "views": [
+        {
+          "class": "DepictionHeaderView",
+          "title": "CarPlay Scale 0.1.7 · experimental"
+        },
+        {
+          "class": "DepictionMarkdownView",
+          "markdown": "Vẽ giao diện CarPlay nhỏ lại để thấy được nhiều nội dung hơn: bản đồ rộng hơn, dock và widget gọn hơn. Hình gửi sang xe vẫn giữ nguyên độ phân giải; chỉ iPhone vẽ theo nhiều điểm hơn."
+        },
+        {
+          "class": "DepictionSubheaderView",
+          "title": "Compatibility / Tương thích"
+        },
+        {
+          "class": "DepictionMarkdownView",
+          "markdown": "Rootless jailbreak · iOS 18.6.2 · arm64 + arm64e. Đã kiểm trên iPhone 11 với CarPlay Simulator (800x480 và 748x456); chưa kiểm trên đầu xe thật. Tweak tự tắt nếu FrontBoard thiếu hàm cần dùng."
+        },
+        {
+          "class": "DepictionSubheaderView",
+          "title": "Install / Cài đặt"
+        },
+        {
+          "class": "DepictionMarkdownView",
+          "markdown": "Thêm https://gmaphud.caidat.app/ vào Sileo/Zebra, làm mới nguồn và tìm CarPlay Scale. Cài xong, CarPlay tự khởi động lại và dùng cỡ mặc định 80%. Vào Cài đặt → CarPlay Scale: gạt Thu nhỏ giao diện hoặc chọn Cỡ giao diện (90%–70%), rồi bấm Áp dụng; giao diện CarPlay khởi động lại trong khoảng một giây. Không bấm Áp dụng thì lựa chọn mới được dùng từ lần kết nối CarPlay sau."
+        },
+        {
+          "class": "DepictionSubheaderView",
+          "title": "Known limitations / Giới hạn"
+        },
+        {
+          "class": "DepictionMarkdownView",
+          "markdown": "Banner, Siri và cảnh báo do hệ thống vẽ vẫn giữ cỡ gốc; màn phụ (cụm đồng hồ) không đổi. Đổi nhiều lần liên tiếp có thể phải chờ tới khoảng 5 giây. Nếu CarPlay khởi động lỗi hai lần liền sau khi thu nhỏ, tweak tự tắt thu nhỏ cho tới khi bấm Áp dụng lại. Gỡ gói đưa CarPlay về cỡ gốc ngay."
+        },
+        {
+          "class": "DepictionMarkdownView",
+          "markdown": "Author: chou · AI-assisted with Claude. [Source](https://github.com/bechou0410/gmaphud/tree/main/carplay-scale) · [Issues](https://github.com/bechou0410/gmaphud/issues)"
+        }
+      ]
+    },
+    {
+      "class": "DepictionStackView",
+      "tabname": "English",
+      "views": [
+        {
+          "class": "DepictionHeaderView",
+          "title": "CarPlay Scale 0.1.7 · experimental"
+        },
+        {
+          "class": "DepictionMarkdownView",
+          "markdown": "Draws the CarPlay interface smaller so more content fits: a wider map, a slimmer dock and widgets. The video sent to the car keeps its resolution; only the iPhone lays out more points."
+        },
+        {
+          "class": "DepictionSubheaderView",
+          "title": "Compatibility / Tương thích"
+        },
+        {
+          "class": "DepictionMarkdownView",
+          "markdown": "Rootless jailbreak · iOS 18.6.2 · arm64 + arm64e. Tested on iPhone 11 with CarPlay Simulator (800x480 and 748x456); not yet tested on a real head unit. The tweak stays inactive if FrontBoard lacks a required method."
+        },
+        {
+          "class": "DepictionSubheaderView",
+          "title": "Install / Cài đặt"
+        },
+        {
+          "class": "DepictionMarkdownView",
+          "markdown": "Add https://gmaphud.caidat.app/ to Sileo/Zebra, refresh and search for CarPlay Scale. After installation CarPlay restarts and uses the default 80% size. In Settings → CarPlay Scale, toggle Thu nhỏ giao diện (shrink interface) or choose Cỡ giao diện (interface size, 90%–70%), then tap Áp dụng (Apply); the CarPlay interface restarts in about a second. Without Apply, the new choice is used from the next CarPlay connection."
+        },
+        {
+          "class": "DepictionSubheaderView",
+          "title": "Known limitations / Giới hạn"
+        },
+        {
+          "class": "DepictionMarkdownView",
+          "markdown": "Banners, Siri and alerts drawn by the system keep the original size; secondary screens (instrument clusters) are unchanged. Several changes in a row can take up to about 5 seconds. If CarPlay fails to start twice in a row after scaling, the tweak turns scaling off until Apply is tapped again. Uninstalling restores the original size immediately."
+        },
+        {
+          "class": "DepictionMarkdownView",
+          "markdown": "Author: chou · AI-assisted with Claude. [Source](https://github.com/bechou0410/gmaphud/tree/main/carplay-scale) · [Issues](https://github.com/bechou0410/gmaphud/issues)"
+        }
+      ]
+    }
+  ]
+}

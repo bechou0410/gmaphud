@@ -1,0 +1,1 @@
+{ entry = { bundle = CarPlayScalePrefs; cell = PSLinkCell; detail = CPSPreferencesController; icon = "icon.png"; isController = 1; label = "CarPlay Scale"; }; }

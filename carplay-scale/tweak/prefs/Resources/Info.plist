@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<key>CFBundleIdentifier</key><string>com.chou.carplayscale.preferences</string>
+<key>CFBundleExecutable</key><string>CarPlayScalePrefs</string>
+<key>CFBundleName</key><string>CarPlay Scale</string>
+<key>CFBundleIconFile</key><string>icon.png</string>
+<key>CFBundlePackageType</key><string>BNDL</string>
+<key>NSPrincipalClass</key><string>CPSPreferencesController</string>
+</dict></plist>

@@ -1,0 +1,4 @@
+#!/bin/sh
+# CarPlay.app keeps running across CarPlay sessions and ignores SIGTERM; restarting it loads or unloads the hook.
+/var/jb/usr/bin/killall -9 CarPlay 2>/dev/null || true
+exit 0
