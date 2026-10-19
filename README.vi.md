@@ -40,7 +40,7 @@ Trong Cài đặt iPhone → GMapHUD, chọn một trong bốn góc cho bản đ
 - Tốc độ hiện tại luôn có vị trí hiển thị, hiện `--` khi không có dữ liệu. Giới hạn chưa có dữ liệu được biểu diễn bằng biển nét đứt.
 - Màu vàng từ mức thấp hơn giới hạn 5 km/h đến bằng giới hạn; màu đỏ khi vượt giới hạn. Chỉ có cảnh báo bằng hình ảnh, không có hệ thống cảnh báo âm thanh.
 - Vị trí bảng theo vùng an toàn của thanh công cụ bản đồ. Nút hướng/la bàn của Google Maps CarPlay được ẩn.
-- Tốc độ và giới hạn hết hiệu lực độc lập sau 5 giây. Tín hiệu duy trì kết nối không làm dữ liệu cũ trở nên mới; Waze và GOFA chỉ xác nhận lại giới hạn hiện tại do chính ứng dụng đang giữ khi điện thoại đứng yên.
+- Tốc độ và giới hạn hết hiệu lực độc lập sau 5 giây. Tín hiệu duy trì kết nối không làm dữ liệu cũ trở nên mới; Waze và GOFA xác nhận lại giới hạn hiện tại do chính ứng dụng đang giữ khi điện thoại đứng yên; Waze còn giữ tốc độ lúc đứng yên (0–2 km/h) tối đa mười phút cho tới mẫu GPS kế tiếp, còn tốc độ lúc đang chạy thì không bao giờ được giữ.
 - Có chế độ kiểm thử hiển thị khi đứng yên, kèm nhãn TEST và tự hết hạn.
 
 

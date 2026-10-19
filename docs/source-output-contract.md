@@ -60,7 +60,9 @@ coerced. Adapters convert native units and rounding before this boundary. Unknow
 fields are stripped; coordinates, routes and raw app payloads do not leave it.
 
 Each field expires at **five seconds**, independently, and future timestamps are
-rejected. Publication, polling and refresh requests never renew receive times.
+rejected. Publication, polling and refresh requests never renew receive times. The Waze adapter
+is the one exception, described below: its live limit is a new reading each second, and it
+renews the receive time of a stationary speed.
 IPC floors times to milliseconds, so expiry may be up to 1 ms earlier. No valid
 limit means no near-limit/overspeed comparison; existing placeholders remain.
 
@@ -182,9 +184,19 @@ limit getter is guarded by the measured executable UUID and entry bytes. After W
 has processed its first GPS position, the adapter also re-reads that live native limit
 every second, because iOS may deliver no GPS while the phone is stationary and Waze
 still holds its current limit (VietMap's engine likewise re-sends its limit). A read
-without a limit clears it; speed still requires fresh GPS. Missing
-limit support does not disable camera or speed data. Its build-specific semantics
-and nonzero speed still require wider device validation.
+without a limit clears it. Speed follows the same reasoning for a stationary phone only: while
+the latest GPS sample shows below 3 km/h (0–2 after rounding), that speed is re-published each
+second with a renewed receive time until the next sample, for at most ten minutes after it by
+both the uptime and the wall clock (uptime stops while the phone sleeps). The hold ends when
+Waze's navigation GPS stops or restarts, and when a newer sample arrives too late to publish. In the background iOS delivered Waze a stationary
+phone's GPS every 6 s to more than four minutes (2026-10-19, indoors), so a speed that expires
+after five seconds was missing most of the time, while VietMap's engine re-sends its own; a
+moving phone gets about one sample a second. A moving speed is never held and still lapses five
+seconds after its sample, so a lost signal while driving shows no speed rather than an old one.
+Missing limit support does not disable camera or speed data. Its build-specific semantics
+still require wider device validation; nonzero speed was checked in the background on a
+simulated drive whose positions carried a speed (60 km/h each second, then lapsing five seconds
+after the drive ended).
 
 The adapter publishes complete source-2 frames and answers only its request name
 without renewing timestamps. Opt-in Waze wake now initializes the measured mobile
@@ -194,8 +206,8 @@ are guarded by executable UUID and instruction bytes. Lease-owned GPS is stopped
 through Waze's matching native stop path; genuine Waze foreground use takes ownership.
 Only the navigation manager is forced to run, not the significant-change monitor.
 The activity session precedes cold GPS start. A cached-only cold start can retry
-its lease-owned GPS twice, after30s then60s; a fresh post-start speed sample
-ends retries. The next lease receives a fresh retry budget. No sample timestamp
+its lease-owned GPS twice, after30s then60s; a GPS sample received after the
+start ends retries; a held stationary speed does not. The next lease receives a fresh retry budget. No sample timestamp
 is renewed by recovery. A locked-device real-GPS run delivered fresh data for
 more than one minute; long-idle/driving coverage remains experimental.
 Version/ABI mismatch leaves affected data unavailable.

@@ -32,6 +32,7 @@ extern BOOL GVMWazeNavigationInitializing(void);
 extern BOOL GVMWazeOwnsNavigation(CLLocationManager *manager);
 extern BOOL GVMStopWazeNavigation(CLLocationManager *manager);
 extern void GVMWazeTransferNavigation(void);
+extern void GVMWazeEndStationaryHold(void);
 static void (*originalHeadingStart)(id,SEL);
 static void HeadingStart(id manager,SEL selector) {
     // The lease only needs navigation GPS; do not acquire an untracked compass stream.
@@ -214,6 +215,7 @@ void GVMRefreshLocationSession(void) {
             session.forcedRunning=NO;
             if (!session.running) {
 #if GVM_WAZE_SOURCE
+                GVMWazeEndStationaryHold();
                 if (!GVMStopWazeNavigation(manager))
 #endif
                 originalStop(manager,@selector(stopUpdatingLocation));
@@ -312,6 +314,11 @@ static void Start(CLLocationManager *manager,SEL selector) {
     GVMRefreshLocationSession();
 }
 static void Stop(CLLocationManager *manager,SEL selector) {
+#if GVM_WAZE_SOURCE
+    // A held stationary speed belongs to the GPS run that measured it (also Waze's own stops).
+    GVMLocationSession *existing=objc_getAssociatedObject(manager,sessionKey);
+    if (existing.sourceGPS) GVMWazeEndStationaryHold();
+#endif
     if (NSThread.isMainThread) {
         GVMLocationSession *session=Session(manager); session.running=NO; session.forcedRunning=NO;
         Apply(session,NO); Record(@"app requested standard GPS stop; forwarded");

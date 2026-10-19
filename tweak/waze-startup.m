@@ -13,6 +13,7 @@
 #import "background-policy.h"
 
 // Trial startup diagnostics and a guarded, lease-owned navigation GPS initializer.
+extern double GVMWazeLastGPSSample(void);
 static void RecordStartup(NSString *event);
 static BOOL navigationInitializing, navigationInitialized, navigationConfirmed;
 static unsigned navigationAttempts;
@@ -36,10 +37,8 @@ BOOL GVMInitializeWazeNavigation(CLLocationManager *authorizedManager) {
     double now=NSProcessInfo.processInfo.systemUptime;
     if (navigationInitialized) {
         if (!navigationOwnedManager) return NO;
-        NSDictionary *output=GVMReadSourceOutput(now);
-        NSNumber *received=output[@"speed"][@"receivedAt"];
-        if ([output[@"sourceID"] unsignedIntegerValue]==GVMSourceWaze &&
-            [received isKindOfClass:NSNumber.class] && received.doubleValue>=navigationStarted) navigationConfirmed=YES;
+        // A GPS sample received after the start confirms it; a held stationary speed does not.
+        if (GVMWazeLastGPSSample()>=navigationStarted) navigationConfirmed=YES;
         if (!GVMBackgroundGPSRetryDue(now,navigationNextRetry,navigationAttempts,navigationConfirmed)) return NO;
         // Restart only the GPS acquired by this lease; never close the app or grant rights.
         navigationInitializing=YES;

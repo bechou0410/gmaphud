@@ -65,7 +65,7 @@ static id GPS(id self __attribute__((ns_consumed)),SEL cmd,double longitude,doub
     dispatch_async(dispatch_get_main_queue(), ^{
         // A delayed queue must not make the original GPS sample fresh again.
         double current=NSProcessInfo.processInfo.systemUptime;
-        if (current-uptime>=5) return;
+        if (current-uptime>=5) { [store endStationaryHold]; return; }
         // The getter runs only for the selected source, so a Waze kept for other uses is left alone.
         uint64_t limit=ReadNativeLimit && GVMSelectedSourceID()==GVMSourceWaze ? ReadNativeLimit() : 0;
         nativeLimitReady=ReadNativeLimit!=NULL;
@@ -141,6 +141,13 @@ static void ConfigureNativeLimit(void) {
         });
     });
 }
+// The cold GPS retry needs the time of a real sample; a held speed is not one.
+double GVMWazeLastGPSSample(void) { return store ? store.lastSampleUptime : -1; }
+// A held stationary speed belongs to the GPS run that measured it.
+void GVMWazeEndStationaryHold(void) {
+    if (NSThread.isMainThread) [store endStationaryHold];
+    else dispatch_async(dispatch_get_main_queue(), ^{ [store endStationaryHold]; });
+}
 static void Status(NSString *message) {
     [message writeToFile:[NSTemporaryDirectory() stringByAppendingPathComponent:@"gmaphud-waze-source.status"]
              atomically:YES encoding:NSUTF8StringEncoding error:nil];
@@ -204,9 +211,13 @@ __attribute__((constructor)) static void Start(void) {
     dispatch_async(dispatch_get_main_queue(), ^{
         [NSTimer scheduledTimerWithTimeInterval:1 repeats:YES block:^(__unused NSTimer *timer) {
             // iOS may deliver no GPS while stationary; Waze still holds its current limit, so
-            // re-read that live native state each second as VietMap's engine re-sends it.
-            if (nativeLimitReady && GVMSelectedSourceID()==GVMSourceWaze)
-                [store updateLimit:ReadNativeLimit() uptime:NSProcessInfo.processInfo.systemUptime];
+            // re-read that live native state each second as VietMap's engine re-sends it, and
+            // keep a stationary speed until the next sample.
+            if (GVMSelectedSourceID()==GVMSourceWaze) {
+                double uptime=NSProcessInfo.processInfo.systemUptime;
+                if (nativeLimitReady) [store updateLimit:ReadNativeLimit() uptime:uptime];
+                [store holdStationarySpeedAtUptime:uptime now:NSDate.date.timeIntervalSince1970];
+            }
             Publish(NO);
         }];
     });

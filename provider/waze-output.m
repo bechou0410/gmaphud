@@ -64,9 +64,13 @@ static NSDictionary *LimitSample(uint64_t limit,double receivedAt) {
     NSMutableDictionary<NSString *, NSDictionary *> *_alerts;
     NSDictionary *_samples;
     double _lastGPS;
+    double _stationarySample, _stationaryTime;
 }
 - (instancetype)init {
-    if ((self=[super init])) { _alerts=[NSMutableDictionary new]; _samples=@{}; _lastGPS=-1; }
+    if ((self=[super init])) {
+        _alerts=[NSMutableDictionary new]; _samples=@{}; _lastGPS=-1;
+        _lastSampleUptime=-1; _stationarySample=-1; _stationaryTime=-1;
+    }
     return self;
 }
 - (void)updateIdentifier:(NSString *)identifier icon:(NSString *)icon type:(NSInteger)type
@@ -94,13 +98,19 @@ static NSDictionary *LimitSample(uint64_t limit,double receivedAt) {
 - (void)updateSpeed:(double)speed timestamp:(double)timestamp now:(double)now
             uptime:(double)uptime optionalLimit:(uint64_t)limit {
     double age=now-timestamp;
+    // A newer fix that came too late may show movement the store cannot publish.
+    if (isfinite(timestamp) && isfinite(now) && timestamp>_lastGPS && age>=5) _stationarySample=-1;
     if (!isfinite(timestamp) || !isfinite(now) || !isfinite(uptime) ||
         timestamp<=_lastGPS || age<0 || age>=5 || uptime<age) return;
     _lastGPS=timestamp;
+    _lastSampleUptime=uptime-age;
     NSMutableDictionary *samples=[NSMutableDictionary new];
     double kmh=speed*0.0036;
     if (isfinite(kmh) && kmh>=0 && kmh<=400)
         samples[@"speed"]=@{@"value":@(lround(kmh)),@"receivedAt":@(uptime-age)};
+    BOOL stationary=isfinite(kmh) && kmh>=0 && lround(kmh)<GVMWazeStationaryKmh;
+    _stationarySample=stationary ? uptime-age : -1;
+    _stationaryTime=stationary ? timestamp : -1;
     samples[@"speedLimit"]=LimitSample(limit,uptime-age);
     _samples=[samples copy];
 }
@@ -110,6 +120,17 @@ static NSDictionary *LimitSample(uint64_t limit,double receivedAt) {
     samples[@"speedLimit"]=LimitSample(limit,uptime);
     _samples=[samples copy];
 }
+- (void)holdStationarySpeedAtUptime:(double)uptime now:(double)now {
+    NSDictionary *speed=_samples[@"speed"];
+    // Uptime stops while the phone sleeps, so the wall clock bounds the hold as well.
+    double held=uptime-_stationarySample, elapsed=now-_stationaryTime;
+    if (!speed || _stationarySample<0 || !isfinite(held) || !isfinite(elapsed) || held<0 || elapsed<0 ||
+        held>=GVMWazeStationaryHoldSeconds || elapsed>=GVMWazeStationaryHoldSeconds) return;
+    NSMutableDictionary *samples=[_samples mutableCopy];
+    samples[@"speed"]=@{@"value":speed[@"value"],@"receivedAt":@(uptime)};
+    _samples=[samples copy];
+}
+- (void)endStationaryHold { _stationarySample=-1; }
 - (NSDictionary *)outputAtUptime:(double)uptime {
     if (!isfinite(uptime) || uptime<0) return nil;
     for (NSString *key in _alerts.allKeys) {

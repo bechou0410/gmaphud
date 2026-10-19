@@ -37,7 +37,7 @@ Choose the bubble style in Settings → GMapHUD → Giao diện. **Classic** (de
 - Current speed remains visible, with `--` when unavailable. Missing limits show a dashed sign.
 - Amber from 5 km/h below the limit through the limit; red above it. Visual cues only, no audible alert system.
 - Card placement follows the map toolbar's safe area. The Google CarPlay heading/compass control is hidden.
-- Speed and limit expire independently after five seconds. A heartbeat does not make old data fresh; Waze and GOFA re-assert only their app's current native limit while the phone is stationary.
+- Speed and limit expire independently after five seconds. A heartbeat does not make old data fresh; Waze and GOFA re-assert their app's current native limit while the phone is stationary, and Waze keeps a stationary speed (0–2 km/h) for up to ten minutes until its next GPS sample; a moving speed is never held.
 - Optional stationary display test with a TEST badge and automatic expiry.
 
 
